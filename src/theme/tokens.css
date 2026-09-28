@@ -1,0 +1,92 @@
+/* ============================================================
+   SICAK KARŞILAMA — açık tema token seti
+   Krem zemin, pastel vurgular, yuvarlak hatlar. (PLAN Bölüm 1 kararı;
+   Golden Hour / Desert Rose temalarının sıcaklığı temel alındı.)
+   Kurallar (brief §10):
+   - Yeşil YALNIZ "şu an birlikte" demektir (--birlikte).
+   - Kişi renkleri kimliği tek başına taşımaz; yanında ad + rol şekli olur.
+   - Kişi paleti brief'in koyu paletinin açık zeminde doğrulanmış
+     uyarlamasıdır; #199e70 çıkarıldı (yeşil "birlikte"ye ayrıldı).
+   - Tüm değerler kontrast testiyle denetlenir: kontrast.test.js
+   ============================================================ */
+
+:root {
+  /* --- Yüzeyler (krem katmanları) --- */
+  --zemin: #f7f2e9;        /* sayfa zemini */
+  --yuzey: #fffdf8;        /* kart / panel */
+  --yuzey-2: #efe7d8;      /* girinti, ikincil dolgu */
+  --cizgi: #e2d8c4;        /* ince ayırıcı */
+  --cizgi-koyu: #cfc2a9;   /* belirgin kenarlık */
+
+  /* --- Metin (sıcak kahve tonları) --- */
+  --metin: #3b332c;        /* ana metin  (≥7:1) */
+  --metin-2: #6b6156;      /* ikincil    (≥4.5:1) */
+  --metin-soluk: #92897c;  /* ipucu; yalnız büyük punto */
+  --metin-ters: #fffdf8;   /* koyu dolgu üstü metin */
+
+  /* --- Vurgu (etkileşim: düğme, bağlantı, seçim) --- */
+  --vurgu: #9a6512;
+  --vurgu-zemin: #f5e8cf;
+
+  /* --- Durumlar: her zaman ikon + yazı ile birlikte kullanılır --- */
+  --birlikte: #1b7a4e;         /* YEŞİL = yalnız "şu an birlikte" */
+  --birlikte-zemin: #e0f2e4;
+  --olumlu: #856000;           /* anlaşma/olumlu: altın (yeşil DEĞİL) */
+  --olumlu-zemin: #f6ead0;
+  --uyari: #b4470e;            /* yalnız kaldı vb. */
+  --uyari-zemin: #fbe6d9;
+  --ciddi: #b02a25;            /* kart kayboldu, alıcı yok */
+  --ciddi-zemin: #f9e2e0;
+  --pasif: #6d675e;            /* görünmüyor/boşta gri */
+  --pasif-zemin: #eeeae1;
+
+  /* --- Kişi paleti (açık zeminde ≥3:1; sıra sunucu paletiyle eş) --- */
+  --kisi-mavi: #2f6fc0;
+  --kisi-turuncu: #c25022;
+  --kisi-hardal: #9a6b00;
+  --kisi-pembe: #bb3b68;
+  --kisi-mor: #6a5cd0;
+  --kisi-mercan: #bf4545;
+  --kisi-gri: #6d675e;
+
+  /* --- Yazı (çevrimdışı kural: yalnız sistem fontları) --- */
+  --yazi: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --punto-kucuk: 13px;
+  --punto: 15px;
+  --punto-orta: 17px;
+  --punto-buyuk: 22px;
+  --punto-dev: 30px;      /* 2–3 metreden okunacak değerler */
+
+  /* --- Boşluk ve biçim (yuvarlak hatlar) --- */
+  --aralik-1: 4px;
+  --aralik-2: 8px;
+  --aralik-3: 12px;
+  --aralik-4: 16px;
+  --aralik-5: 24px;
+  --aralik-6: 32px;
+  --kose-kucuk: 8px;
+  --kose: 12px;
+  --kose-buyuk: 20px;
+  --kose-tam: 999px;
+  --golge: 0 1px 3px rgba(59, 51, 44, 0.08), 0 4px 16px rgba(59, 51, 44, 0.06);
+
+  /* --- Sakin hareket (brief: zıplama yok, yumuşak geçiş) --- */
+  --gecis: 300ms ease;
+  --gecis-yavas: 600ms ease;
+}
+
+/* --- Temel --- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--zemin);
+  color: var(--metin);
+  font-family: var(--yazi);
+  font-size: var(--punto);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sayı sütunları titremesin (saat, süre) */
+.sayi { font-variant-numeric: tabular-nums; }
