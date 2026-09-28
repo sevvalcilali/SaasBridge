@@ -98,12 +98,19 @@ let bitenGorusme = 0
 let esik = -72
 let yalnizSn = new Map()            // yatırımcı id → kesintisiz yalnız sn
 let atanmamisGeldi = false
+let aliciKopuk = false              // alıcı şu an kopuk mu (tik kararı; durum bunu okur)
+let sonAliciSn = 0                  // alıcıdan son satırın geldiği benzetim saniyesi
 
 // senaryo zamanları (benzetim sn)
 const ATANMAMIS_SN = 45
 const KAYIP_ARALIK = [180, 300]     // bu aralıkta bir kart susar
 let kayipKisi = null
-const kopmaPenceresi = (t) => KOPMA && ((t >= 120 && t < 140) || (t >= 480 && (t - 480) % 360 < 20))
+// Kopma 20 benzetim sn sürer; hızlandırılmış zamanda bir tik 20 sn'den uzun
+// olabileceği için pencere en az 4 tik olacak şekilde ölçeklenir (yoksa
+// pencere tek tikte atlanır ve hiç gözlenemez).
+const KOPMA_SURESI = Math.max(20, DT * 4)
+const kopmaPenceresi = (t) => KOPMA &&
+  ((t >= 120 && t < 120 + KOPMA_SURESI) || (t >= 480 && (t - 480) % 360 < KOPMA_SURESI))
 
 const anahtar = (a, b) => (Number(a) < Number(b) ? `${a}-${b}` : `${b}-${a}`)
 const kisiBul = (id) => kisiler.find((k) => k.id === id)
@@ -131,8 +138,9 @@ function bildir(kind, severity, title, detail, ids) {
 
 // ---------- benzetim adımı ----------
 function tik() {
-  const kopma = kopmaPenceresi(simSn)
+  aliciKopuk = kopmaPenceresi(simSn)
   simSn += DT
+  if (!aliciKopuk) sonAliciSn = simSn   // alıcıdan taze satır geldi
 
   // atanmamış kart sahneye girer (sunucu ikizinin kendiliğinden eklemesi)
   if (!atanmamisGeldi && simSn >= ATANMAMIS_SN) {
@@ -151,7 +159,7 @@ function tik() {
   }
   const kayipSessiz = kayipKisi && simSn >= KAYIP_ARALIK[0] && simSn < KAYIP_ARALIK[1]
 
-  if (kopma) {
+  if (aliciKopuk) {
     // alıcı yok: hiç paket gelmez, herkesin seenAgo'su büyür, benzetim donar
     for (const k of kisiler) k.seenAgo += DT
     return
@@ -277,7 +285,6 @@ function fizikselAyril(aId, bId) {
 // ---------- durum nesnesi (brief §5.1 birebir) ----------
 function durumUret() {
   const simdi = new Date()
-  const kopma = kopmaPenceresi(simSn)
 
   const canli = []
   const sinyaller = []
@@ -382,8 +389,9 @@ function durumUret() {
       reached: ulasan.size,
       founders: girisimciler.length,
     },
-    receiverAge: kopma
-      ? Math.round((simSn - kopmaBaslangici(simSn)) * 10) / 10
+    // brief §5.1: alıcıdan son satır kaç SANİYE önce geldi. >5 ise sorun var.
+    receiverAge: aliciKopuk
+      ? Math.round((simSn - sonAliciSn) * 10) / 10
       : Math.round(rndAralik(0.1, 0.6) * 10) / 10,
     elapsed: Math.round(simSn * 10) / 10,
     event: {
@@ -401,13 +409,10 @@ function durumUret() {
   }
 }
 
-function kopmaBaslangici(t) {
-  if (t >= 120 && t < 140) return 120
-  return 480 + Math.floor((t - 480) / 360) * 360
-}
-
 function sifirla() {
   simSn = 0
+  sonAliciSn = 0
+  aliciKopuk = false
   ciftler = new Map()
   kenarlar = new Map()
   bildirimler = []
