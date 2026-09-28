@@ -52,7 +52,7 @@ function deltaE(a, b) {
   return Math.hypot(l1 - l2, a1 - a2, b1 - b2)
 }
 
-const KISI_PALETI = ['kisi-mavi', 'kisi-turuncu', 'kisi-hardal', 'kisi-pembe', 'kisi-mor', 'kisi-mercan', 'kisi-gri']
+const KISI_PALETI = ['kisi-mavi', 'kisi-turuncu', 'kisi-hardal', 'kisi-pembe', 'kisi-mor', 'kisi-mercan', 'kisi-petrol', 'kisi-gri']
 
 test('temel token seti tanımlı', () => {
   const t = tokenlariOku()
