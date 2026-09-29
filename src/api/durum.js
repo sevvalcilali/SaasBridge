@@ -29,6 +29,17 @@ export function atanmamisKartMi(kisi) {
   return kisi.role === 'guest' && /^Kart \d+$/.test(kisi.name)
 }
 
+// Kararlı sıralama: durum önceliği, eşitlikte sunucu sırası. Süre gibi her
+// tik değişen değerlere göre sıralama YAPILMAZ — liste ancak durum değişince
+// yeniden dizilir, saniyede 2 güncellemeyle zıplamaz (brief §10 sakin hareket).
+const DURUM_ONCELIK = { talking: 0, idle: 1, away: 2 }
+export function siralaKisiler(people) {
+  return people
+    .map((k, i) => ({ k, i }))
+    .sort((a, b) => (DURUM_ONCELIK[a.k.status] - DURUM_ONCELIK[b.k.status]) || (a.i - b.i))
+    .map((x) => x.k)
+}
+
 const ROL_SIRA = [
   { rol: 'investor', baslik: 'Yatırımcılar' },
   { rol: 'founder', baslik: 'Girişimciler' },

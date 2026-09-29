@@ -13,6 +13,7 @@ export default function KisiSatiri({ kisi, onKisiAta }) {
   return (
     <li
       className="kisi-satiri"
+      data-id={kisi.id}
       data-durum={kisi.status}
       data-atanmamis={atanmamis || undefined}
       data-test="kisi-satiri"

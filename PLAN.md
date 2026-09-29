@@ -145,7 +145,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** "Hiç görüşmemiş" filtresi yalnız invPeers=0 girişimcileri gösterir;
   sayfa yenilenince filtre korunur.
 
-#### 1.6 ⬜ Kişi listesi — sakin sıralama
+#### 1.6 ✅ Kişi listesi — sakin sıralama
 - Liste sırası saniyede 2 güncellemeyle DEĞİŞMEZ; yalnız `status` değişince
   (talking↔idle↔away) satır konumu güncellenir — CSS `transition` ile.
 - **Doğrulama:** Mock çalışırken liste sürekli zıplamaz; durum değişen satır

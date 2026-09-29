@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -77,4 +77,29 @@ test('atanmamisKartMi: gerçek kişi atanmamış sayılmaz', () => {
   assert.equal(atanmamisKartMi({ name: 'Kartal Yılmaz', role: 'guest' }), false)
   // "Kart N" adı ama misafir değilse (elle adlandırılmış) atanmamış sayma
   assert.equal(atanmamisKartMi({ name: 'Kart 14', role: 'investor' }), false)
+})
+
+test('siralaKisiler: durum önceliği (birlikte→boşta→görünmüyor)', () => {
+  const p = [
+    { id: '1', status: 'away' },
+    { id: '2', status: 'talking' },
+    { id: '3', status: 'idle' },
+    { id: '4', status: 'talking' },
+  ]
+  assert.deepEqual(siralaKisiler(p).map((k) => k.id), ['2', '4', '3', '1'])
+})
+
+test('siralaKisiler: aynı durumda sunucu sırası korunur (kararlı — zıplamaz)', () => {
+  const p = [
+    { id: '9', status: 'idle' },
+    { id: '3', status: 'idle' },
+    { id: '7', status: 'idle' },
+  ]
+  assert.deepEqual(siralaKisiler(p).map((k) => k.id), ['9', '3', '7'])
+})
+
+test('siralaKisiler: girdiyi değiştirmez', () => {
+  const p = [{ id: '1', status: 'away' }, { id: '2', status: 'talking' }]
+  siralaKisiler(p)
+  assert.deepEqual(p.map((k) => k.id), ['1', '2'])
 })
