@@ -1,13 +1,25 @@
 // Organizatör canlı panosu — üst düzey ekran (PLAN Faz 1).
 // Bölge iskeleti: üst şerit (1.2 hazır), gövde (sol · orta · sağ), alt şerit.
 // Orta bölgeler adım adım doldurulur (1.3–1.16).
+import { useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
+import BildirimAkisi from './BildirimAkisi.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
+  // Bir bildirime tıklayınca ilgili kişiler; vurgu efekti 1.8'de listede/ağda.
+  const [vurgulanan, setVurgulanan] = useState([])
+
+  function bildirimTikla(bildirim) {
+    setVurgulanan((onceki) =>
+      onceki.length === bildirim.people.length && onceki.every((x, i) => x === bildirim.people[i])
+        ? [] // aynı bildirime tekrar tıkla → vurguyu kaldır
+        : bildirim.people,
+    )
+  }
 
   if (!durum) {
     return (
@@ -39,7 +51,7 @@ export default function PanoEkrani() {
           <span className="iskele-etiket">Ağ görünümü</span>
         </section>
         <aside className="pano-sag" data-bolge="sag" aria-label="Bildirimler">
-          <span className="iskele-etiket">Bildirimler</span>
+          <BildirimAkisi alerts={durum.alerts} vurgulanan={vurgulanan} onBildirimTikla={bildirimTikla} />
         </aside>
       </div>
 

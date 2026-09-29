@@ -151,7 +151,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Mock çalışırken liste sürekli zıplamaz; durum değişen satır
   yumuşak geçişle yer değiştirir.
 
-#### 1.7 ⬜ Bildirim akışı paneli
+#### 1.7 ✅ Bildirim akışı paneli
 - En yeni üstte; `kind`'a göre ikon (SVG, `/better-icons`):
   `deal` → altın yıldız, `repeat` → yineleme, `idle_investor` → saat,
   `lost` → sinyal kesik, `no_investor` → uyarı üçgeni.
