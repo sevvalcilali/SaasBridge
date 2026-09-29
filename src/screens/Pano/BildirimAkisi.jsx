@@ -34,6 +34,7 @@ export default function BildirimAkisi({ alerts, vurgulanan = [], onBildirimTikla
                   onClick={() => onBildirimTikla?.(b)}
                   data-test="bildirim"
                   data-kind={b.kind}
+                  data-people={b.people.join(',')}
                 >
                   <span className="bildirim-ikon" aria-hidden="true"><BildirimIkon kind={b.kind} /></span>
                   <span className="bildirim-govde">

@@ -90,6 +90,21 @@
   transition: background var(--gecis), border-color var(--gecis);
 }
 
+/* Bildirimden gelen vurgu: parıltı, 3 kez, sonra normale döner (brief §7).
+   Hareketi azalt tercihinde animasyon yerine sabit halka. */
+@keyframes kisi-parilti {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(154, 101, 18, 0); }
+  30% { box-shadow: 0 0 0 3px var(--vurgu); }
+}
+.kisi-satiri--vurgulu {
+  animation: kisi-parilti 0.8s ease 3;
+  position: relative;
+  z-index: 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kisi-satiri--vurgulu { animation: none; box-shadow: 0 0 0 2px var(--vurgu); }
+}
+
 /* Durum renkleri — her biri renk + ikon + yazı ile (renk körlüğü kuralı).
    Kontrastlar tokens kontrast testiyle doğrulanmıştır. */
 .kisi-satiri[data-durum='talking'] {

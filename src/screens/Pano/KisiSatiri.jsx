@@ -7,15 +7,16 @@ import { sureYazisi } from '../../api/format.js'
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
 const DURUM_IKON = { talking: '●', idle: '○', away: '◌' }
 
-export default function KisiSatiri({ kisi, onKisiAta }) {
+export default function KisiSatiri({ kisi, vurgulu, onKisiAta }) {
   const atanmamis = atanmamisKartMi(kisi)
 
   return (
     <li
-      className="kisi-satiri"
+      className={`kisi-satiri ${vurgulu ? 'kisi-satiri--vurgulu' : ''}`}
       data-id={kisi.id}
       data-durum={kisi.status}
       data-atanmamis={atanmamis || undefined}
+      data-vurgulu={vurgulu || undefined}
       data-test="kisi-satiri"
     >
       <span className="kisi-renk" style={{ background: kisi.color }} aria-hidden="true" />

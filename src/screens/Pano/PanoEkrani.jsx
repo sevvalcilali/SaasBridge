@@ -1,7 +1,7 @@
 // Organizatör canlı panosu — üst düzey ekran (PLAN Faz 1).
 // Bölge iskeleti: üst şerit (1.2 hazır), gövde (sol · orta · sağ), alt şerit.
 // Orta bölgeler adım adım doldurulur (1.3–1.16).
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
@@ -10,8 +10,15 @@ import './PanoEkrani.css'
 
 export default function PanoEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
-  // Bir bildirime tıklayınca ilgili kişiler; vurgu efekti 1.8'de listede/ağda.
+  // Bir bildirime tıklayınca ilgili kişiler vurgulanır (liste satırları; ağ 1.13).
   const [vurgulanan, setVurgulanan] = useState([])
+
+  // Parıltı 3 sn sonra kendiliğinden söner (brief §7 tıkla-vurgula, sakin).
+  useEffect(() => {
+    if (vurgulanan.length === 0) return
+    const zaman = setTimeout(() => setVurgulanan([]), 3000)
+    return () => clearTimeout(zaman)
+  }, [vurgulanan])
 
   function bildirimTikla(bildirim) {
     setVurgulanan((onceki) =>
@@ -45,7 +52,7 @@ export default function PanoEkrani() {
 
       <div className="pano-govde">
         <section className="pano-sol" data-bolge="sol" aria-label="Kişiler">
-          <KisiListesi people={durum.people} />
+          <KisiListesi people={durum.people} vurgulanan={vurgulanan} onKisiAta={() => {}} />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
           <span className="iskele-etiket">Ağ görünümü</span>

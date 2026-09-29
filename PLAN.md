@@ -162,7 +162,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Mock hızlandırılmış modda (--hizlandir=60) anlaşma ve kayıp kart
   bildirimleri görünür; ikon ve renk kurallarına uygun.
 
-#### 1.8 ⬜ Bildirim → kişi vurgulama bağlantısı
+#### 1.8 ✅ Bildirim → kişi vurgulama bağlantısı
 - Bildirime tıklayınca `vurgulananKisiler` set edilir; kişi satırları ve ağ
   düğümleri parıldama efekti alır (box-shadow pulse, 3 sn sonra söner).
 - **Doğrulama:** Bir bildirime tıklanınca ilgili kişi satırı/satırları vurgulanır.

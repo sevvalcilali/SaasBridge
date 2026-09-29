@@ -1,6 +1,6 @@
 // Kişi listesi: arama + filtre + rol grupları + kararlı (sakin) sıralama.
 // Süzme api/filtre.js, sıralama api/durum.js, yumuşak dizilme useSakinSiralama.
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { gruplaRol, siralaKisiler } from '../../api/durum.js'
 import { filtreleKisiler } from '../../api/filtre.js'
 import { useKalici } from '../../api/useKalici.js'
@@ -9,10 +9,11 @@ import KisiSatiri from './KisiSatiri.jsx'
 import { useSakinSiralama } from './useSakinSiralama.js'
 import './KisiListesi.css'
 
-export default function KisiListesi({ people, onKisiAta }) {
+export default function KisiListesi({ people, vurgulanan = [], onKisiAta }) {
   const [filtre, setFiltre] = useKalici('pano.filtre', 'tumu')
   const [arama, setArama] = useState('')
   const kapRef = useRef(null)
+  const vurguSeti = useMemo(() => new Set(vurgulanan), [vurgulanan])
 
   const gruplar = useMemo(() => {
     const suzulmus = filtreleKisiler(people, { arama, filtre })
@@ -25,6 +26,12 @@ export default function KisiListesi({ people, onKisiAta }) {
   // grubun sıralı id dizisi — yalnız gerçekten sıra değişince yeniden çalışır.
   const siraImzasi = gruplar.map((g) => g.kisiler.map((k) => k.id).join(',')).join('|')
   useSakinSiralama(kapRef, siraImzasi)
+
+  // Vurgulanan kişilerin ilki görünür alana kaydırılır (parıltı görünsün).
+  useEffect(() => {
+    if (vurgulanan.length === 0) return
+    kapRef.current?.querySelector('[data-vurgulu]')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [vurgulanan])
 
   return (
     <div className="kisi-listesi" ref={kapRef}>
@@ -41,7 +48,7 @@ export default function KisiListesi({ people, onKisiAta }) {
             </h2>
             <ul className="kisi-grup-liste">
               {grup.kisiler.map((kisi) => (
-                <KisiSatiri key={kisi.id} kisi={kisi} onKisiAta={onKisiAta} />
+                <KisiSatiri key={kisi.id} kisi={kisi} vurgulu={vurguSeti.has(kisi.id)} onKisiAta={onKisiAta} />
               ))}
             </ul>
           </section>
