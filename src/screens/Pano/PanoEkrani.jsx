@@ -7,6 +7,7 @@ import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
 import AltSerit from './AltSerit.jsx'
+import HataBantlari from './HataBantlari.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
@@ -49,6 +50,7 @@ export default function PanoEkrani() {
 
   return (
     <div className={`pano ${baglandi ? '' : 'pano--soluk'}`}>
+      <HataBantlari durum={durum} baglandi={baglandi} />
       <UstSerit durum={durum} onSifirla={sifirlaIste} />
 
       <div className="pano-govde">

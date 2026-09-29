@@ -174,7 +174,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Sayılar canlı değişir; ilerleme çubuğu mock'ta 3 saat
   etkinlikle yavaş ilerler.
 
-#### 1.10 ⬜ Hata bantları
+#### 1.10 ✅ Hata bantları
 - "Sunucuya bağlanılamıyor" bantı: `baglandi === false` ise sayfanın üstünde
   ciddi renkli bant + son veri soluk opacity. Bağlantı gelince kalkar.
 - "ALICI BAĞLI DEĞİL" bantı: `receiverAge > 5` ise ayrı ciddi bant.

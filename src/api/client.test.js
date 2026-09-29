@@ -160,6 +160,20 @@ test('yeniden deneme bekleme süresi geri çekmeli artar ve üst sınırda durur
   assert.equal(sureler.at(-1), 10000, 'üst sınır 10 sn')
 })
 
+test('sessiz akış: belirli süre mesaj gelmezse kopma algılanır (gözcü)', async () => {
+  // Sunucu ilk durumu yollar ama sonra susar (soketi kapatmadan) — sessizce
+  // ölen bağlantı. Gözcü olmadan client bunu asla fark etmez.
+  const s = testSunucusu() // yayinla çağrılmaz → ilk durumdan sonra sessiz
+  const adres = await s.baslat()
+  const baglanti = new PanoBaglantisi({ adres, bekleme: () => 50, sessizlikEsigiMs: 200 })
+  baglanti.basla()
+  await durumBekle(baglanti, (a) => a.durum !== null) // ilk durum geldi
+  const kopuk = await durumBekle(baglanti, (a) => a.baglandi === false, 3000)
+  assert.equal(kopuk.hata, 'baglanti')
+  assert.ok(kopuk.durum !== null, 'sessizlikte de son veri korunur')
+  baglanti.kapat(); s.kapat()
+})
+
 test('/state hatası akışı durdurmaz, SSE ilk durumu getirir', async () => {
   const s = testSunucusu({ stateHatasi: true })
   const adres = await s.baslat()

@@ -26,9 +26,12 @@ export function durumIsle(ham) {
 }
 
 export class PanoBaglantisi {
-  constructor({ adres = '', bekleme = null } = {}) {
+  constructor({ adres = '', bekleme = null, sessizlikEsigiMs = 6000 } = {}) {
     this.adres = adres.replace(/\/$/, '')
     this.beklemeGecersizKil = bekleme
+    // Sunucu ~2 Hz yayınlar; bu kadar süre HİÇ mesaj gelmezse bağlantı sessizce
+    // ölmüş sayılır (soket asılı kaldıysa hata/kapanış gelmez) → yeniden bağlan.
+    this.sessizlikEsigiMs = sessizlikEsigiMs
     this.durum = null
     this.baglandi = false
     this.hata = null
@@ -98,26 +101,39 @@ export class PanoBaglantisi {
     const okuyucu = yanit.body.getReader()
     const cozucu = new TextDecoder()
     let tampon = ''
-    for (;;) {
-      const { value, done } = await okuyucu.read()
-      if (done) throw new Error('akış kapandı')
-      tampon += cozucu.decode(value, { stream: true })
-      let sinir
-      while ((sinir = tampon.indexOf('\n\n')) >= 0) {
-        const blok = tampon.slice(0, sinir)
-        tampon = tampon.slice(sinir + 2)
-        const veri = blok
-          .split('\n')
-          .filter((satir) => satir.startsWith('data:'))
-          .map((satir) => satir.slice(5).trimStart())
-          .join('')
-        if (!veri) continue
-        try {
-          this.durumAyarla(JSON.parse(veri))
-        } catch {
-          /* bozuk tek mesaj akışı düşürmez */
+
+    // Sessizlik gözcüsü: son mesajdan bu yana eşiği aşan süre geçerse akışı
+    // iptal et; dış döngü bunu kopma sayıp yeniden bağlanır.
+    let sonMesaj = Date.now()
+    const gozcu = setInterval(() => {
+      if (Date.now() - sonMesaj > this.sessizlikEsigiMs) kontrol.abort()
+    }, Math.max(50, Math.min(1000, this.sessizlikEsigiMs / 2)))
+
+    try {
+      for (;;) {
+        const { value, done } = await okuyucu.read()
+        if (done) throw new Error('akış kapandı')
+        tampon += cozucu.decode(value, { stream: true })
+        let sinir
+        while ((sinir = tampon.indexOf('\n\n')) >= 0) {
+          const blok = tampon.slice(0, sinir)
+          tampon = tampon.slice(sinir + 2)
+          const veri = blok
+            .split('\n')
+            .filter((satir) => satir.startsWith('data:'))
+            .map((satir) => satir.slice(5).trimStart())
+            .join('')
+          if (!veri) continue
+          sonMesaj = Date.now()
+          try {
+            this.durumAyarla(JSON.parse(veri))
+          } catch {
+            /* bozuk tek mesaj akışı düşürmez */
+          }
         }
       }
+    } finally {
+      clearInterval(gozcu)
     }
   }
 
