@@ -252,7 +252,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - people/assign/unassign/cards için ince sarmalayıcı (client.js felsefesi: tek I/O noktası).
 - **Doğrulama:** gerçek HTTP mock'a karşı uçtan uca (ekle/ata/iade/cards) birim testleri.
 
-#### 2.4 ⬜ Ekran yönlendirme + "Kart Ver" iskeleti
+#### 2.4 ✅ Ekran yönlendirme + "Kart Ver" iskeleti
 - Hafif yönlendirme (hash/yol): `/` = Pano, `/kart-ver` = Karşılama masası. Üstte geçiş.
 - Dokunmatik-ayakta düzen iskeleti (büyük hedefler, az yazı).
 - **Doğrulama:** iki ekran arası geçiş; iskelet tabette okunur.

@@ -1,0 +1,22 @@
+/* Uygulama kabuğu + ekran geçiş çubuğu. Yalnız token. */
+
+.uyg-nav {
+  display: flex;
+  gap: var(--aralik-1);
+  padding: var(--aralik-2) var(--aralik-4) 0;
+}
+.uyg-nav-bag {
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--metin-2);
+  padding: var(--aralik-2) var(--aralik-4);
+  border-radius: var(--kose) var(--kose) 0 0;
+  border: 1px solid transparent;
+}
+.uyg-nav-bag:hover { background: var(--yuzey-2); }
+.uyg-nav-bag--secili {
+  color: var(--metin);
+  background: var(--yuzey);
+  border-color: var(--cizgi);
+  border-bottom-color: var(--yuzey);
+}

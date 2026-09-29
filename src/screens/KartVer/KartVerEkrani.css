@@ -1,0 +1,50 @@
+/* Karşılama masası — dokunmatik-ayakta: büyük hedefler, geniş boşluk. Token. */
+
+.kartver {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--aralik-5) var(--aralik-4);
+}
+
+.kartver-bas { text-align: center; margin-bottom: var(--aralik-5); }
+.kartver-bas h1 { margin: 0; font-size: var(--punto-dev); }
+.kartver-alt { margin: var(--aralik-1) 0 0; color: var(--metin-2); font-size: var(--punto-orta); }
+
+.kartver-adimlar {
+  list-style: none;
+  margin: 0 0 var(--aralik-5);
+  padding: 0;
+  display: flex;
+  gap: var(--aralik-2);
+  justify-content: center;
+}
+.kartver-adim {
+  display: flex;
+  align-items: center;
+  gap: var(--aralik-2);
+  padding: var(--aralik-2) var(--aralik-4);
+  border-radius: var(--kose-tam);
+  background: var(--yuzey-2);
+  color: var(--metin-2);
+  font-weight: 700;
+}
+.kartver-adim--etkin { background: var(--vurgu); color: var(--metin-ters); }
+.kartver-adim-no {
+  display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: var(--kose-tam);
+  background: rgba(255, 255, 255, 0.35);
+  font-size: var(--punto-kucuk);
+}
+.kartver-adim:not(.kartver-adim--etkin) .kartver-adim-no { background: var(--yuzey); }
+
+.kartver-govde {
+  min-height: 320px;
+  background: var(--yuzey);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--kose-buyuk);
+  box-shadow: var(--golge);
+  padding: var(--aralik-5);
+  display: grid;
+  place-items: center;
+}
+.kartver-iskele { color: var(--metin-soluk); font-size: var(--punto-orta); }
