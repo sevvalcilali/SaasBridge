@@ -237,7 +237,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - `/state` çıktısı Faz 1 ile uyumlu kalır (pano bozulmaz): atanmış+duyulan kartlar
   kişi olarak, atanmamış duyulan kartlar "Kart N" olarak görünür.
 
-#### 2.1 ⬜ Mock: kişi/kart/atama modeli + katılımcı ve atama uçları
+#### 2.1 ✅ Mock: kişi/kart/atama modeli + katılımcı ve atama uçları
 - Mock'u kişi≠kart modeline taşı; `/state` çıktısı alan-alan aynı kalsın (Faz 1 testleri geçmeli).
 - `GET/POST /api/people`, `PATCH/DELETE /api/people/{id}`; `POST /api/assign {kisiId,kart}`,
   `POST /api/unassign {kart}`. Atama zaman damgalı geçmişe yazılır.
