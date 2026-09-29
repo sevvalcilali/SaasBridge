@@ -195,6 +195,40 @@ function iade(kart) {
   return true
 }
 
+// "Yaklaştır ve tanı": alıcıya yaklaştırılmış kartlar → kartNo → bitiş simSn.
+let yakinKartlar = new Map()
+
+// Deterministik jitter (istek işleyicide rnd() kullanmayız; tohum bozulmasın).
+const jitter = (kart) => ((Number(kart) * 13 + Math.floor(simSn)) % 7) - 3
+
+// Alıcının bir kartı duyduğu güç: yaklaştırılmışsa çok güçlü, normalde zayıf.
+function rssiAlici(kart) {
+  const bitis = yakinKartlar.get(kart)
+  if (bitis != null && bitis >= simSn) return Math.round((-42 + jitter(kart)) * 10) / 10
+  return Math.round((-72 - (Number(kart) % 15) + jitter(kart)) * 10) / 10
+}
+// Pil (mock): deterministik, kart numarasına ve geçen süreye göre yavaş düşer.
+const pilSeviyesi = (kart) => Math.max(5, Math.round(100 - ((Number(kart) * 7) % 40) - simSn / 180))
+
+const kartDto = (kart, e) => ({
+  kart,
+  rssiAlici: rssiAlici(kart),
+  seenAgo: e ? Math.round(e.seenAgo * 10) / 10 : 0.1,
+  atanan: kartKat(kart)?.kisiId ?? null,
+  pil: pilSeviyesi(kart),
+})
+
+// Alıcının duyduğu kartlar: aktif simülasyon kartları + yaklaştırılmış yeni kartlar.
+function kartlariListele() {
+  const harita = new Map()
+  for (const k of kisiler) harita.set(k.id, kartDto(k.id, k))
+  for (const [kart, bitis] of yakinKartlar) {
+    if (bitis < simSn) { yakinKartlar.delete(kart); continue }
+    if (!harita.has(kart)) harita.set(kart, kartDto(kart, null))
+  }
+  return [...harita.values()]
+}
+
 const karsiRol = (a, b) =>
   (a.role === 'investor' && b.role === 'founder') || (a.role === 'founder' && b.role === 'investor')
 
@@ -531,6 +565,16 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'GET' && yol === '/api/people') { json(yanit, 200, katilimcilar.map(katDto)); return true }
 
+  if (istek.method === 'GET' && yol === '/api/cards') { json(yanit, 200, kartlariListele()); return true }
+
+  if (istek.method === 'POST' && yol === '/api/yaklastir') {
+    const g = await govdeOku(istek) || {}
+    const sure = 8 // benzetim sn: yaklaştırma penceresi
+    if (g.kart != null) yakinKartlar.set(String(g.kart), simSn + sure)
+    if (g.kart2 != null) yakinKartlar.set(String(g.kart2), simSn + sure)
+    json(yanit, 200, { ok: true }); return true
+  }
+
   if (istek.method === 'POST' && yol === '/api/people') {
     const g = await govdeOku(istek)
     if (!g || !g.ad) { json(yanit, 400, { ok: false, hata: 'ad gerekli' }); return true }
@@ -574,7 +618,12 @@ async function apiYonlendir(istek, yanit) {
 }
 
 const sunucu = http.createServer((istek, yanit) => {
-  if (istek.url.startsWith('/api/')) { apiYonlendir(istek, yanit); return }
+  if (istek.url.startsWith('/api/')) {
+    apiYonlendir(istek, yanit).then((esles) => {
+      if (!esles) json(yanit, 404, { ok: false, hata: 'bilinmeyen uç' })
+    })
+    return
+  }
   if (istek.method === 'GET' && istek.url === '/state') {
     yanit.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' })
     yanit.end(JSON.stringify(durumUret()))

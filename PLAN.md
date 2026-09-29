@@ -243,7 +243,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   `POST /api/unassign {kart}`. Atama zaman damgalı geçmişe yazılır.
 - **Doğrulama:** kişi ekle→ata→`/state`'te görünür; iade et→kart boşta; süreler silinmez. Mock testleri + Faz 1 şema testi yeşil.
 
-#### 2.2 ⬜ Mock: `GET /api/cards` + "yaklaştır ve tanı" + boştaki kartlar
+#### 2.2 ✅ Mock: GET /api/cards + yaklaştır ve tanı + boştaki kartlar
 - `GET /api/cards` → `[{kart, rssiAlici, seenAgo, atanan, pil}]`.
 - Alıcıya yaklaştırılan kartın simülasyonu (tek kart çok güçlü); iki kart yakınsa ikisi de güçlü.
 - **Doğrulama:** `/api/cards` şeması; "yaklaştır" senaryosunda bir kart belirgin öne çıkar; çift-kart durumu ayırt edilir. Mock testleri.
