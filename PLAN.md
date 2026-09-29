@@ -106,7 +106,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 **Amaç:** Brief'in 1 numaralı önceliği; gerçek API ile de hemen çalışır.
 **Yöntem:** Her adım kendi commit'ini alır; test veya ekran görüntüsüyle doğrulanır.
 
-#### 1.1 ⬜ Sayfa düzeni iskeleti
+#### 1.1 ✅ Sayfa düzeni iskeleti
 - Yönlendirme yok (tek sayfa); `App.jsx` → `<PanoEkrani>` bileşeni.
 - CSS Grid ile 3 bölgeli düzen: üst şerit, gövde (sol kişi + orta ağ + sağ bildirim),
   alt şerit. Tablet için 1 sütuna düşen breakpoint (≤900px).
