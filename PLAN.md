@@ -122,7 +122,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Bant, saat ve rozet canlı veriyle görünür; mock'ta `--kopma=1` ile
   "BAĞLI DEĞİL" rozeti belirir.
 
-#### 1.3 ⬜ Kişi listesi — temel satır
+#### 1.3 ✅ Kişi listesi — temel satır
 - `KisiSatiri` bileşeni: renk dairesi, rol şekli (brief §6.4: ○ yatırımcı, □ girişimci,
   ◇ misafir), ad (girişimcide kurum + ad), yıldız, durum cümlesi, toplam süre.
 - Liste `people` dizisini rol gruplarıyla gösterir (Yatırımcılar / Girişimciler başlığı).

@@ -1,9 +1,37 @@
 // Durum nesnesinden türetilen küçük kararlar. Ekran bileşenleri bu
-// yardımcıları çağırır, JSX içinde eşik/karşılaştırma yapmaz.
+// yardımcıları çağırır, JSX içinde eşik/karşılaştırma/metin kurgusu yapmaz.
+import { sureYazisi, onceYazisi } from './format.js'
 
 // brief §5.1: receiverAge alıcıdan son satırın kaç SANİYE önce geldiği;
 // >5 ise sorun var, null ise hiç veri gelmemiş.
 export function aliciBagli(durum) {
   const yas = durum?.receiverAge
   return yas != null && yas <= 5
+}
+
+// Girişimcide kurum adı kişi adından önce gösterilir (brief §3).
+export function gorunenAd(kisi) {
+  if (kisi.role === 'founder' && kisi.org) return `${kisi.org} · ${kisi.name}`
+  return kisi.name
+}
+
+// Satırdaki durum cümlesi (brief §7): "X ile · süre" / "boşta" / "görünmüyor · …".
+export function durumCumlesi(kisi) {
+  if (kisi.status === 'talking') return `${kisi.withName} ile · ${sureYazisi(kisi.live)}`
+  if (kisi.status === 'away') return `görünmüyor · ${onceYazisi(kisi.seenAgo)}`
+  return 'boşta'
+}
+
+const ROL_SIRA = [
+  { rol: 'investor', baslik: 'Yatırımcılar' },
+  { rol: 'founder', baslik: 'Girişimciler' },
+  { rol: 'guest', baslik: 'Misafirler' },
+]
+
+// Kişileri rol gruplarına ayırır. Sıra sabittir (yatırımcı→girişimci→misafir),
+// grup içi sıra sunucudan geldiği gibi korunur (sakin sıralama). Boş grup atlanır.
+export function gruplaRol(people) {
+  return ROL_SIRA
+    .map(({ rol, baslik }) => ({ rol, baslik, kisiler: people.filter((k) => k.role === rol) }))
+    .filter((g) => g.kisiler.length > 0)
 }

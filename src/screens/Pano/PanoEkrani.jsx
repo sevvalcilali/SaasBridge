@@ -3,6 +3,7 @@
 // Orta bölgeler adım adım doldurulur (1.3–1.16).
 import { usePano } from '../../api/usePano.js'
 import UstSerit from './UstSerit.jsx'
+import KisiListesi from './KisiListesi.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
@@ -32,7 +33,7 @@ export default function PanoEkrani() {
 
       <div className="pano-govde">
         <section className="pano-sol" data-bolge="sol" aria-label="Kişiler">
-          <span className="iskele-etiket">Kişi listesi</span>
+          <KisiListesi people={durum.people} />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
           <span className="iskele-etiket">Ağ görünümü</span>
