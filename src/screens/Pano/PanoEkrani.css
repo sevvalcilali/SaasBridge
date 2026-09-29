@@ -90,7 +90,22 @@
   letter-spacing: 0.04em;
 }
 
-/* Tablet: orta (ağ) alta iner → sol + sağ üstte yan yana, ağ altta tam genişlik */
+/* Sekme çubuğu — yalnız telefonda (≤600px) görünür */
+.pano-sekmeler { display: none; gap: var(--aralik-1); }
+.pano-sekme {
+  flex: 1;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: var(--aralik-2);
+  border: 1px solid var(--cizgi-koyu);
+  border-radius: var(--kose);
+  background: var(--yuzey);
+  color: var(--metin-2);
+}
+.pano-sekme--secili { background: var(--vurgu); border-color: var(--vurgu); color: var(--metin-ters); }
+
+/* Geniş tablet (901–1100): ağ alta, sol+sağ üstte yan yana */
 @media (max-width: 1100px) {
   .pano-govde {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -101,10 +116,19 @@
   .pano-orta { grid-area: orta; }
 }
 
-/* Dar tablet / telefon: tek sütun, bölgeler alt alta */
+/* Tablet (≤900): tek sütun yığın — bildirimler üstte (yatay), liste, ağ altta */
 @media (max-width: 900px) {
   .pano-govde {
     grid-template-columns: 1fr;
-    grid-template-areas: 'sol' 'orta' 'sag';
+    grid-template-areas: 'sag' 'sol' 'orta';
   }
+  .pano-orta { align-self: stretch; }
+}
+
+/* Telefon (≤600): sekmeler görünür, aynı anda tek bölge */
+@media (max-width: 600px) {
+  .pano-sekmeler { display: flex; }
+  .pano-govde[data-sekme='kisiler'] > :not(.pano-sol),
+  .pano-govde[data-sekme='ag'] > :not(.pano-orta),
+  .pano-govde[data-sekme='bildirimler'] > :not(.pano-sag) { display: none; }
 }

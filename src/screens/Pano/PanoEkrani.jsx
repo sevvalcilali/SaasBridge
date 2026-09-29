@@ -3,6 +3,7 @@
 // Orta bölgeler adım adım doldurulur (1.3–1.16).
 import { useEffect, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
+import { useKalici } from '../../api/useKalici.js'
 import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
@@ -18,6 +19,8 @@ export default function PanoEkrani() {
   const [vurgulanan, setVurgulanan] = useState([])
   // Satıra/düğüme tıklayınca açılan detay paneli (tek panel).
   const [seciliId, setSeciliId] = useState(null)
+  // Telefonda (≤600px) tek bölge gösterilir; son sekme korunur (brief §11).
+  const [sekme, setSekme] = useKalici('pano.sekme', 'kisiler')
 
   // Parıltı 3 sn sonra kendiliğinden söner (brief §7 tıkla-vurgula, sakin).
   useEffect(() => {
@@ -63,7 +66,22 @@ export default function PanoEkrani() {
       <HataBantlari durum={durum} baglandi={baglandi} />
       <UstSerit durum={durum} onSifirla={sifirlaIste} />
 
-      <div className="pano-govde">
+      <nav className="pano-sekmeler" role="tablist" aria-label="Bölüm">
+        {[['kisiler', 'Kişiler'], ['ag', 'Ağ'], ['bildirimler', 'Bildirimler']].map(([deger, etiket]) => (
+          <button
+            key={deger}
+            type="button"
+            role="tab"
+            aria-selected={sekme === deger}
+            className={`pano-sekme ${sekme === deger ? 'pano-sekme--secili' : ''}`}
+            onClick={() => setSekme(deger)}
+          >
+            {etiket}
+          </button>
+        ))}
+      </nav>
+
+      <div className="pano-govde" data-sekme={sekme}>
         <section className="pano-sol" data-bolge="sol" aria-label="Kişiler">
           <KisiListesi
             people={durum.people}

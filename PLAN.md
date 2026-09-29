@@ -210,7 +210,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Bir kişiye tıklayınca panel doğru verilerle açılır; ikinci
   kişiye tıklayınca ilki kapanır.
 
-#### 1.15 ⬜ Tablet düzeni (responsive)
+#### 1.15 ✅ Tablet düzeni (responsive)
 - ≤900px: ağ görünümü gövdenin altına iner; bildirimler üstte yatay kaydırma.
 - ≤600px: tek sütun; ağ varsayılan gizli, "Ağı göster" düğmesiyle açılır.
 - `localStorage`'da son açık sekme (liste / ağ / bildirimler) korunur.

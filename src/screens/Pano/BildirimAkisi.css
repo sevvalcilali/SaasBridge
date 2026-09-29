@@ -58,3 +58,9 @@
 .bildirim-detay { color: var(--metin-2); font-size: var(--punto-kucuk); }
 
 .bildirim-kalan { color: var(--metin-soluk); font-size: var(--punto-kucuk); margin: 0; }
+
+/* Tablet (601–900): bildirimler yatay kaydırma şeridi */
+@media (min-width: 601px) and (max-width: 900px) {
+  .bildirim-liste { flex-direction: row; overflow-x: auto; padding-bottom: var(--aralik-2); }
+  .bildirim-liste > li { flex: 0 0 auto; width: 280px; }
+}
