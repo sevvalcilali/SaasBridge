@@ -196,7 +196,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Birlikte olan çiftlerin yeşil çizgisi, geçmiş görüşmelerin
   gri çizgisi görünür; kalınlık farkı ayırt edilebilir.
 
-#### 1.13 ⬜ Ağ + vurgulama entegrasyonu
+#### 1.13 ✅ Ağ + vurgulama entegrasyonu
 - Bildirim tıklamasından gelen `vurgulananKisiler`, ağ düğümlerini de vurgular
   (parlak halka + diğerleri soluk).
 - **Doğrulama:** Bildirime tıklayınca hem listede hem ağda aynı kişiler parlar.

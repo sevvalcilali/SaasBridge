@@ -37,6 +37,25 @@
   font-family: var(--yazi);
 }
 
+/* Vurgulama (bildirimden): ilgili düğümlerde parlak halka, diğerleri solar.
+   Liste vurgusuyla eş zamanlı; 3 sn sonra söner (PanoEkrani). */
+.ag-dugum, .ag-cizgi { transition: opacity var(--gecis); }
+.ag-svg[data-vurgu] .ag-dugum:not(.ag-dugum--vurgulu) { opacity: 0.2; }
+.ag-svg[data-vurgu] .ag-cizgi { opacity: 0.12; }
+
+.ag-halka {
+  stroke: var(--vurgu);
+  stroke-width: 3;
+  animation: ag-halka-parilti 0.8s ease 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-halka { animation: none; }
+}
+@keyframes ag-halka-parilti {
+  0%, 100% { stroke-opacity: 0.4; }
+  40% { stroke-opacity: 1; }
+}
+
 .ag-not {
   margin: 0;
   color: var(--metin-soluk);

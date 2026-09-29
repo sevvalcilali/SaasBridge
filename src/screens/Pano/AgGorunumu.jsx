@@ -15,14 +15,16 @@ function etiket(n) {
   return s.length > 16 ? s.slice(0, 15) + '…' : s
 }
 
-function Dugum({ n }) {
+function Dugum({ n, vurgulu }) {
   const ortak = {
     fill: n.color,
     stroke: 'var(--yuzey)',
     strokeWidth: 2,
   }
   return (
-    <g className="ag-dugum" data-test="ag-dugum" data-role={n.role} data-id={n.id}>
+    <g className={`ag-dugum ${vurgulu ? 'ag-dugum--vurgulu' : ''}`}
+      data-test="ag-dugum" data-role={n.role} data-id={n.id} data-vurgulu={vurgulu || undefined}>
+      {vurgulu && <circle className="ag-halka" cx={n.x} cy={n.y} r={R + 7} fill="none" />}
       {n.role === 'investor' && <circle cx={n.x} cy={n.y} r={R} {...ortak} />}
       {n.role === 'founder' && <rect x={n.x - R} y={n.y - R} width={R * 2} height={R * 2} rx={5} {...ortak} />}
       {n.role === 'guest' && (
@@ -34,14 +36,17 @@ function Dugum({ n }) {
   )
 }
 
-export default function AgGorunumu({ people, edges = [], live = [] }) {
+export default function AgGorunumu({ people, edges = [], live = [], vurgulanan = [] }) {
   const dugumler = useMemo(() => agYerlesimi(people, { w: VB_W, h: VB_H }), [people])
   const cizgiler = useMemo(() => agCizgileri(edges, live, dugumler), [edges, live, dugumler])
+  const vurguSet = useMemo(() => new Set(vurgulanan), [vurgulanan])
+  const vurguAktif = vurgulanan.length > 0
 
   return (
     <div className="ag-gorunumu">
       <svg
         className="ag-svg"
+        data-vurgu={vurguAktif || undefined}
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         preserveAspectRatio="xMidYMid meet"
         role="img"
@@ -59,7 +64,7 @@ export default function AgGorunumu({ people, edges = [], live = [] }) {
             />
           ))}
         </g>
-        {dugumler.map((n) => <Dugum key={n.id} n={n} />)}
+        {dugumler.map((n) => <Dugum key={n.id} n={n} vurgulu={vurguSet.has(n.id)} />)}
       </svg>
       <p className="ag-not">Düğümlerin konumu fiziksel konum değildir; yalnız rol gruplarını gösterir.</p>
     </div>
