@@ -88,7 +88,23 @@ function kisileriUret(adet) {
 }
 
 // ---------- benzetim durumu ----------
+// kisiler = simülasyondaki FİZİKSEL KARTLAR (her biri o an atanmış kişinin
+// kimliğini taşır). Kimlik/atama katmanı katilimcilar + atama uçlarındadır.
 let kisiler = kisileriUret(KISI_SAYISI)
+let katilimcilar = []               // kayıtlı kişiler (kartsız olabilir)
+let kisiIdSayaci = 0
+let renkSayaci = KISI_SAYISI
+// Başlangıç kadrosu: her kart = bir kayıtlı kişi, o karta atanmış.
+kisiler.forEach((k) => {
+  const kat = {
+    kisiId: 'k' + (++kisiIdSayaci),
+    ad: k.name, rol: k.role, kurum: k.org, yildiz: k.tier,
+    not: '', renk: k.color, atananKart: k.id, min: 0, invMin: 0,
+  }
+  k.kisiId = kat.kisiId
+  katilimcilar.push(kat)
+})
+
 let simSn = 0                       // benzetim saniyesi (elapsed)
 let ciftler = new Map()             // "a-b" → çift kaydı
 let kenarlar = new Map()            // "a-b" → toplam dakika
@@ -115,6 +131,70 @@ const kopmaPenceresi = (t) => KOPMA &&
 const anahtar = (a, b) => (Number(a) < Number(b) ? `${a}-${b}` : `${b}-${a}`)
 const kisiBul = (id) => kisiler.find((k) => k.id === id)
 const gorunenAd = (k) => (k.role === 'founder' && k.org ? k.org : k.name)
+
+// ---------- kayıt defteri + atama (§9) ----------
+const katBul = (id) => katilimcilar.find((k) => k.kisiId === id)
+const kartKat = (kart) => katilimcilar.find((k) => k.atananKart === kart)
+const yeniRenk = () => PALET[(renkSayaci++) % PALET.length]
+const katDto = (k) => ({
+  kisiId: k.kisiId, ad: k.ad, rol: k.rol, kurum: k.kurum,
+  yildiz: k.yildiz, not: k.not, renk: k.renk, atananKart: k.atananKart,
+})
+
+function kisiEkle({ ad, rol, kurum, yildiz, not }) {
+  const kat = {
+    kisiId: 'k' + (++kisiIdSayaci),
+    ad: (ad || 'İsimsiz').trim(),
+    rol: ['investor', 'founder', 'guest'].includes(rol) ? rol : 'guest',
+    kurum: kurum || '',
+    yildiz: rol === 'investor' ? Math.max(0, Math.min(5, yildiz | 0)) : 0,
+    not: not || '', renk: yeniRenk(), atananKart: null, min: 0, invMin: 0,
+  }
+  katilimcilar.push(kat)
+  return kat
+}
+
+// Kartı simülasyondan çıkar, biriktirdiği süreyi kişiye taşı (rapor için silinmez).
+function iadeKat(kat, kart) {
+  const e = kisiBul(kart)
+  if (e) { kat.min += e.min || 0; kat.invMin += e.invMin || 0 }
+  kat.atananKart = null
+  kisiler = kisiler.filter((k) => k.id !== kart)
+}
+
+// Kart entry'nin kimlik alanlarını atanan kişiden doldur (/state bunu okur).
+function kimlikYaz(e, kat) {
+  e.kisiId = kat.kisiId
+  e.name = kat.ad; e.role = kat.rol; e.org = kat.kurum
+  e.tier = kat.yildiz; e.color = kat.renk
+}
+
+function ata(kisiId, kart) {
+  const kat = katBul(kisiId)
+  if (!kat) return false
+  kart = String(kart)
+  const eski = kartKat(kart)
+  if (eski && eski !== kat) iadeKat(eski, kart)      // kart başkasındaysa geri al
+  if (kat.atananKart && kat.atananKart !== kart) iadeKat(kat, kat.atananKart) // kişinin eski kartını bırak
+  kat.atananKart = kart
+  let e = kisiBul(kart)
+  if (!e) {
+    e = { id: kart, esler: new Set(), seenAgo: 0, min: 0, invMin: 0, bias: rndAralik(-3, 3) }
+    kisiler.push(e)
+  }
+  kimlikYaz(e, kat)
+  e.seenAgo = Math.min(e.seenAgo, 1)
+  return true
+}
+
+function iade(kart) {
+  kart = String(kart)
+  const kat = kartKat(kart)
+  if (kat) iadeKat(kat, kart)
+  else kisiler = kisiler.filter((k) => k.id !== kart)
+  return true
+}
+
 const karsiRol = (a, b) =>
   (a.role === 'investor' && b.role === 'founder') || (a.role === 'founder' && b.role === 'investor')
 
@@ -433,7 +513,68 @@ function sifirla() {
 // ---------- HTTP + SSE ----------
 const sseIstemciler = new Set()
 
+function govdeOku(istek) {
+  return new Promise((coz) => {
+    let g = ''
+    istek.on('data', (p) => { g += p })
+    istek.on('end', () => { try { coz(JSON.parse(g || '{}')) } catch { coz(null) } })
+  })
+}
+const json = (yanit, kod, veri) => {
+  yanit.writeHead(kod, { 'Content-Type': 'application/json; charset=utf-8' })
+  yanit.end(JSON.stringify(veri))
+}
+
+async function apiYonlendir(istek, yanit) {
+  const url = istek.url
+  const yol = url.split('?')[0]
+
+  if (istek.method === 'GET' && yol === '/api/people') { json(yanit, 200, katilimcilar.map(katDto)); return true }
+
+  if (istek.method === 'POST' && yol === '/api/people') {
+    const g = await govdeOku(istek)
+    if (!g || !g.ad) { json(yanit, 400, { ok: false, hata: 'ad gerekli' }); return true }
+    json(yanit, 200, katDto(kisiEkle(g))); return true
+  }
+
+  const eslesme = yol.match(/^\/api\/people\/([^/]+)$/)
+  if (eslesme) {
+    const kat = katBul(eslesme[1])
+    if (!kat) { json(yanit, 404, { ok: false }); return true }
+    if (istek.method === 'PATCH') {
+      const g = await govdeOku(istek) || {}
+      for (const alan of ['ad', 'rol', 'kurum', 'yildiz', 'not']) {
+        if (g[alan] !== undefined) kat[alan] = g[alan] // renk/kisiId değişmez
+      }
+      if (kat.rol !== 'investor') kat.yildiz = 0
+      const e = kat.atananKart && kisiBul(kat.atananKart)
+      if (e) kimlikYaz(e, kat)
+      json(yanit, 200, katDto(kat)); return true
+    }
+    if (istek.method === 'DELETE') {
+      if (kat.atananKart) iade(kat.atananKart)
+      katilimcilar = katilimcilar.filter((k) => k.kisiId !== kat.kisiId)
+      json(yanit, 200, { ok: true }); return true
+    }
+  }
+
+  if (istek.method === 'POST' && yol === '/api/assign') {
+    const g = await govdeOku(istek)
+    if (!g || !g.kisiId || g.kart == null) { json(yanit, 400, { ok: false }); return true }
+    json(yanit, ata(g.kisiId, g.kart) ? 200 : 404, { ok: true }); return true
+  }
+
+  if (istek.method === 'POST' && yol === '/api/unassign') {
+    const g = await govdeOku(istek)
+    if (!g || g.kart == null) { json(yanit, 400, { ok: false }); return true }
+    iade(g.kart); json(yanit, 200, { ok: true }); return true
+  }
+
+  return false
+}
+
 const sunucu = http.createServer((istek, yanit) => {
+  if (istek.url.startsWith('/api/')) { apiYonlendir(istek, yanit); return }
   if (istek.method === 'GET' && istek.url === '/state') {
     yanit.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' })
     yanit.end(JSON.stringify(durumUret()))
