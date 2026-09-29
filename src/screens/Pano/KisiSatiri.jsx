@@ -7,17 +7,25 @@ import { sureYazisi } from '../../api/format.js'
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
 const DURUM_IKON = { talking: '●', idle: '○', away: '◌' }
 
-export default function KisiSatiri({ kisi, vurgulu, onKisiAta }) {
+export default function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) {
   const atanmamis = atanmamisKartMi(kisi)
 
   return (
     <li
-      className={`kisi-satiri ${vurgulu ? 'kisi-satiri--vurgulu' : ''}`}
+      className={`kisi-satiri ${vurgulu ? 'kisi-satiri--vurgulu' : ''} ${secili ? 'kisi-satiri--secili' : ''}`}
       data-id={kisi.id}
       data-durum={kisi.status}
       data-atanmamis={atanmamis || undefined}
       data-vurgulu={vurgulu || undefined}
+      data-secili={secili || undefined}
       data-test="kisi-satiri"
+      role="button"
+      tabIndex={0}
+      aria-pressed={secili || false}
+      onClick={() => onSec?.(kisi.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSec?.(kisi.id) }
+      }}
     >
       <span className="kisi-renk" style={{ background: kisi.color }} aria-hidden="true" />
       <span
@@ -51,7 +59,11 @@ export default function KisiSatiri({ kisi, vurgulu, onKisiAta }) {
       )}
 
       {atanmamis ? (
-        <button type="button" className="kisi-ata-dugme" onClick={() => onKisiAta?.(kisi)}>
+        <button
+          type="button"
+          className="kisi-ata-dugme"
+          onClick={(e) => { e.stopPropagation(); onKisiAta?.(kisi) }}
+        >
           Kişi ata
         </button>
       ) : (

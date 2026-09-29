@@ -201,7 +201,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
   (parlak halka + diğerleri soluk).
 - **Doğrulama:** Bildirime tıklayınca hem listede hem ağda aynı kişiler parlar.
 
-#### 1.14 ⬜ Basit kişi detay paneli
+#### 1.14 ✅ Basit kişi detay paneli
 - Kişi satırına veya ağ düğümüne tıklayınca sağda açılan panel:
   - Ad, rol, kurum, yıldız, kart no.
   - "Kiminle ne kadar" tablosu (`edges` filtrelenmiş, o kişiye ait).

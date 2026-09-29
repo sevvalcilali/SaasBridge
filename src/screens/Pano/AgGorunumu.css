@@ -13,6 +13,10 @@
 }
 
 /* Çizgiler: geçmiş görüşme gri, şu an birlikte yeşil + yavaş akış (sakin). */
+.ag-dugum { cursor: pointer; }
+.ag-dugum:focus-visible { outline: none; }
+.ag-dugum:focus-visible > :not(text) { stroke: var(--vurgu); stroke-width: 3; }
+
 .ag-cizgi {
   stroke: var(--cizgi-koyu);
   stroke-linecap: round;

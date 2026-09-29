@@ -9,7 +9,7 @@ import KisiSatiri from './KisiSatiri.jsx'
 import { useSakinSiralama } from './useSakinSiralama.js'
 import './KisiListesi.css'
 
-export default function KisiListesi({ people, vurgulanan = [], onKisiAta }) {
+export default function KisiListesi({ people, vurgulanan = [], seciliId, onKisiSec, onKisiAta }) {
   const [filtre, setFiltre] = useKalici('pano.filtre', 'tumu')
   const [arama, setArama] = useState('')
   const kapRef = useRef(null)
@@ -48,7 +48,14 @@ export default function KisiListesi({ people, vurgulanan = [], onKisiAta }) {
             </h2>
             <ul className="kisi-grup-liste">
               {grup.kisiler.map((kisi) => (
-                <KisiSatiri key={kisi.id} kisi={kisi} vurgulu={vurguSeti.has(kisi.id)} onKisiAta={onKisiAta} />
+                <KisiSatiri
+                  key={kisi.id}
+                  kisi={kisi}
+                  vurgulu={vurguSeti.has(kisi.id)}
+                  secili={seciliId === kisi.id}
+                  onSec={onKisiSec}
+                  onKisiAta={onKisiAta}
+                />
               ))}
             </ul>
           </section>

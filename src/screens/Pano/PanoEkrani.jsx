@@ -9,12 +9,15 @@ import BildirimAkisi from './BildirimAkisi.jsx'
 import AltSerit from './AltSerit.jsx'
 import HataBantlari from './HataBantlari.jsx'
 import AgGorunumu from './AgGorunumu.jsx'
+import DetayPaneli from './DetayPaneli.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
   // Bir bildirime tıklayınca ilgili kişiler vurgulanır (liste satırları; ağ 1.13).
   const [vurgulanan, setVurgulanan] = useState([])
+  // Satıra/düğüme tıklayınca açılan detay paneli (tek panel).
+  const [seciliId, setSeciliId] = useState(null)
 
   // Parıltı 3 sn sonra kendiliğinden söner (brief §7 tıkla-vurgula, sakin).
   useEffect(() => {
@@ -23,6 +26,10 @@ export default function PanoEkrani() {
     return () => clearTimeout(zaman)
   }, [vurgulanan])
 
+  function kisiSec(id) {
+    setSeciliId((onceki) => (onceki === id ? null : id))
+  }
+
   function bildirimTikla(bildirim) {
     setVurgulanan((onceki) =>
       onceki.length === bildirim.people.length && onceki.every((x, i) => x === bildirim.people[i])
@@ -30,6 +37,8 @@ export default function PanoEkrani() {
         : bildirim.people,
     )
   }
+
+  const seciliKisi = durum?.people.find((k) => k.id === seciliId)
 
   if (!durum) {
     return (
@@ -56,10 +65,23 @@ export default function PanoEkrani() {
 
       <div className="pano-govde">
         <section className="pano-sol" data-bolge="sol" aria-label="Kişiler">
-          <KisiListesi people={durum.people} vurgulanan={vurgulanan} onKisiAta={() => {}} />
+          <KisiListesi
+            people={durum.people}
+            vurgulanan={vurgulanan}
+            seciliId={seciliId}
+            onKisiSec={kisiSec}
+            onKisiAta={() => {}}
+          />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
-          <AgGorunumu people={durum.people} edges={durum.edges} live={durum.live} vurgulanan={vurgulanan} />
+          <AgGorunumu
+            people={durum.people}
+            edges={durum.edges}
+            live={durum.live}
+            vurgulanan={vurgulanan}
+            seciliId={seciliId}
+            onKisiSec={kisiSec}
+          />
         </section>
         <aside className="pano-sag" data-bolge="sag" aria-label="Bildirimler">
           <BildirimAkisi alerts={durum.alerts} vurgulanan={vurgulanan} onBildirimTikla={bildirimTikla} />
@@ -69,6 +91,8 @@ export default function PanoEkrani() {
       <footer className="pano-alt" data-bolge="alt">
         <AltSerit durum={durum} />
       </footer>
+
+      {seciliKisi && <DetayPaneli kisi={seciliKisi} durum={durum} onKapat={() => setSeciliId(null)} />}
     </div>
   )
 }

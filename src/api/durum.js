@@ -52,6 +52,20 @@ export function ozetKutulari(durum) {
   ]
 }
 
+// Bir kişinin bugün kiminle ne kadar görüştüğü (edges'ten), süreye göre azalan.
+export function kisiGorusmeleri(kisiId, edges, people) {
+  const harita = new Map(people.map((k) => [k.id, k]))
+  const sonuc = []
+  for (const e of edges) {
+    const digerId = e.a === kisiId ? e.b : e.b === kisiId ? e.a : null
+    if (digerId === null) continue
+    const diger = harita.get(digerId)
+    if (!diger) continue
+    sonuc.push({ kisi: diger, min: e.min })
+  }
+  return sonuc.sort((a, b) => b.min - a.min)
+}
+
 // Etkinlik ilerlemesi yüzde (0..100). Tanımsızsa null (çubuk gizlenir).
 export function etkinlikYuzde(durum) {
   const p = durum.event?.progress

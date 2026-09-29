@@ -121,6 +121,9 @@
   border-color: var(--uyari);
   border-left-color: var(--uyari);
 }
+.kisi-satiri { cursor: pointer; }
+.kisi-satiri:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px; }
+.kisi-satiri[data-secili] { box-shadow: inset 0 0 0 2px var(--vurgu); }
 
 .kisi-renk {
   grid-area: renk;

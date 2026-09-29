@@ -15,15 +15,19 @@ function etiket(n) {
   return s.length > 16 ? s.slice(0, 15) + '…' : s
 }
 
-function Dugum({ n, vurgulu }) {
+function Dugum({ n, vurgulu, secili, onSec }) {
   const ortak = {
     fill: n.color,
-    stroke: 'var(--yuzey)',
-    strokeWidth: 2,
+    stroke: secili ? 'var(--vurgu)' : 'var(--yuzey)',
+    strokeWidth: secili ? 3 : 2,
   }
   return (
     <g className={`ag-dugum ${vurgulu ? 'ag-dugum--vurgulu' : ''}`}
-      data-test="ag-dugum" data-role={n.role} data-id={n.id} data-vurgulu={vurgulu || undefined}>
+      data-test="ag-dugum" data-role={n.role} data-id={n.id}
+      data-vurgulu={vurgulu || undefined} data-secili={secili || undefined}
+      role="button" tabIndex={0} aria-label={n.name}
+      onClick={() => onSec?.(n.id)}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSec?.(n.id) } }}>
       {vurgulu && <circle className="ag-halka" cx={n.x} cy={n.y} r={R + 7} fill="none" />}
       {n.role === 'investor' && <circle cx={n.x} cy={n.y} r={R} {...ortak} />}
       {n.role === 'founder' && <rect x={n.x - R} y={n.y - R} width={R * 2} height={R * 2} rx={5} {...ortak} />}
@@ -36,7 +40,7 @@ function Dugum({ n, vurgulu }) {
   )
 }
 
-export default function AgGorunumu({ people, edges = [], live = [], vurgulanan = [] }) {
+export default function AgGorunumu({ people, edges = [], live = [], vurgulanan = [], seciliId, onKisiSec }) {
   const dugumler = useMemo(() => agYerlesimi(people, { w: VB_W, h: VB_H }), [people])
   const cizgiler = useMemo(() => agCizgileri(edges, live, dugumler), [edges, live, dugumler])
   const vurguSet = useMemo(() => new Set(vurgulanan), [vurgulanan])
@@ -64,7 +68,9 @@ export default function AgGorunumu({ people, edges = [], live = [], vurgulanan =
             />
           ))}
         </g>
-        {dugumler.map((n) => <Dugum key={n.id} n={n} vurgulu={vurguSet.has(n.id)} />)}
+        {dugumler.map((n) => (
+          <Dugum key={n.id} n={n} vurgulu={vurguSet.has(n.id)} secili={seciliId === n.id} onSec={onKisiSec} />
+        ))}
       </svg>
       <p className="ag-not">Düğümlerin konumu fiziksel konum değildir; yalnız rol gruplarını gösterir.</p>
     </div>

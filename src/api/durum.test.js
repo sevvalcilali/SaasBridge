@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -118,4 +118,23 @@ test('etkinlikYuzde: 0..1 → 0..100, null → null, sınır dışı kırpılır
   assert.equal(etkinlikYuzde({ event: { progress: null } }), null)
   assert.equal(etkinlikYuzde({ event: { progress: 1.2 } }), 100)
   assert.equal(etkinlikYuzde({ event: { progress: -0.1 } }), 0)
+})
+
+test('kisiGorusmeleri: kişiye ait kenarlar, karşı taraf çözümlü, süreye göre azalan', () => {
+  const people = [
+    { id: '10', name: 'Ayşe' }, { id: '11', name: 'Can' }, { id: '12', name: 'Ece' },
+  ]
+  const edges = [
+    { a: '10', b: '11', min: 2 },
+    { a: '12', b: '10', min: 9 },   // ters yön
+    { a: '11', b: '12', min: 5 },   // 10'la ilgisiz
+  ]
+  const g = kisiGorusmeleri('10', edges, people)
+  assert.deepEqual(g.map((x) => [x.kisi.id, x.min]), [['12', 9], ['11', 2]])
+})
+
+test('kisiGorusmeleri: karşı tarafı listede olmayan kenar atlanır', () => {
+  const people = [{ id: '10', name: 'Ayşe' }]
+  const g = kisiGorusmeleri('10', [{ a: '10', b: '99', min: 3 }], people)
+  assert.equal(g.length, 0)
 })
