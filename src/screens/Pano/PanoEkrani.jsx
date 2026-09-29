@@ -8,6 +8,7 @@ import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
 import AltSerit from './AltSerit.jsx'
 import HataBantlari from './HataBantlari.jsx'
+import AgGorunumu from './AgGorunumu.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
@@ -58,7 +59,7 @@ export default function PanoEkrani() {
           <KisiListesi people={durum.people} vurgulanan={vurgulanan} onKisiAta={() => {}} />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
-          <span className="iskele-etiket">Ağ görünümü</span>
+          <AgGorunumu people={durum.people} />
         </section>
         <aside className="pano-sag" data-bolge="sag" aria-label="Bildirimler">
           <BildirimAkisi alerts={durum.alerts} vurgulanan={vurgulanan} onBildirimTikla={bildirimTikla} />

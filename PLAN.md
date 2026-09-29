@@ -181,7 +181,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - İkisi birden olabilir (üst üste).
 - **Doğrulama:** Mock kapatılınca bant belirir, tekrar açılınca kalkar; veri silinmez.
 
-#### 1.11 ⬜ Ağ görünümü — düğümler
+#### 1.11 ✅ Ağ görünümü — düğümler
 - `AgGorunumu` bileşeni: SVG, sabit deterministik yerleşim.
   - Yatırımcılar sol sütun, girişimciler sağ sütun, misafirler alt sıra
     (sıra `people` dizisindeki sıra ile aynı — zıplama yok).

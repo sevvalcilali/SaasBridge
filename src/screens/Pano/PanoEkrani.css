@@ -68,6 +68,9 @@
   min-height: 200px;
   overflow: auto;
 }
+/* Ağ, liste yüksekliğine gerilmesin; kendi boyunda üstte dursun (tam
+   viewport-oturması 1.15'te). */
+.pano-orta { align-self: start; }
 
 .pano-alt {
   min-height: 56px;
