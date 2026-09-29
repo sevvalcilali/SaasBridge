@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -65,4 +65,16 @@ test('gruplaRol: rol sırası sabit (yatırımcı→girişimci→misafir), boş 
 test('gruplaRol: misafir grubu da olur', () => {
   const gruplar = gruplaRol([{ id: '1', role: 'guest' }])
   assert.deepEqual(gruplar.map((g) => g.baslik), ['Misafirler'])
+})
+
+test('atanmamisKartMi: sunucunun otomatik eklediği "Kart N" misafiri', () => {
+  assert.equal(atanmamisKartMi({ name: 'Kart 14', role: 'guest' }), true)
+  assert.equal(atanmamisKartMi({ name: 'Kart 3', role: 'guest' }), true)
+})
+
+test('atanmamisKartMi: gerçek kişi atanmamış sayılmaz', () => {
+  assert.equal(atanmamisKartMi({ name: 'Ayşe Demir', role: 'guest' }), false)
+  assert.equal(atanmamisKartMi({ name: 'Kartal Yılmaz', role: 'guest' }), false)
+  // "Kart N" adı ama misafir değilse (elle adlandırılmış) atanmamış sayma
+  assert.equal(atanmamisKartMi({ name: 'Kart 14', role: 'investor' }), false)
 })

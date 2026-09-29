@@ -128,7 +128,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - Liste `people` dizisini rol gruplarıyla gösterir (Yatırımcılar / Girişimciler başlığı).
 - **Doğrulama:** 25 kişilik senaryoda tüm satırlar doğru biçimde render.
 
-#### 1.4 ⬜ Kişi listesi — durum renkleri ve "birlikte" vurgusu
+#### 1.4 ✅ Kişi listesi — durum renkleri ve "birlikte" vurgusu
 - `talking` → `birlikte-zemin` + `birlikte` kenarlık + "X ile · 3 dk 20 sn".
 - `idle` → normal zemin + "boşta".
 - `away` → `pasif-zemin` + "görünmüyor · 2 dk önce".

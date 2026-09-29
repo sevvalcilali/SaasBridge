@@ -22,6 +22,13 @@ export function durumCumlesi(kisi) {
   return 'boşta'
 }
 
+// Sunucu, listede olmayan bir kart duyulunca onu "Kart N", role:"guest"
+// olarak kendiliğinden ekler (brief §5.1). Bu satır "atanmamış kart" olarak
+// öne çıkarılır ve "Kişi ata" düğmesi gösterilir.
+export function atanmamisKartMi(kisi) {
+  return kisi.role === 'guest' && /^Kart \d+$/.test(kisi.name)
+}
+
 const ROL_SIRA = [
   { rol: 'investor', baslik: 'Yatırımcılar' },
   { rol: 'founder', baslik: 'Girişimciler' },
