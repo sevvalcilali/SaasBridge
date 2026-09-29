@@ -59,7 +59,7 @@ export default function PanoEkrani() {
           <KisiListesi people={durum.people} vurgulanan={vurgulanan} onKisiAta={() => {}} />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
-          <AgGorunumu people={durum.people} />
+          <AgGorunumu people={durum.people} edges={durum.edges} live={durum.live} />
         </section>
         <aside className="pano-sag" data-bolge="sag" aria-label="Bildirimler">
           <BildirimAkisi alerts={durum.alerts} vurgulanan={vurgulanan} onBildirimTikla={bildirimTikla} />

@@ -2,7 +2,7 @@
 // Yerleşim deterministik (api/agYerlesim.js) — düğümler sabit durur, zıplamaz.
 // Konum FİZİKSEL konum DEĞİLDİR; bu SVG altında belirtilir. Çizgiler 1.12'de.
 import { useMemo } from 'react'
-import { agYerlesimi } from '../../api/agYerlesim.js'
+import { agYerlesimi, agCizgileri } from '../../api/agYerlesim.js'
 import './AgGorunumu.css'
 
 const VB_W = 1000
@@ -34,8 +34,9 @@ function Dugum({ n }) {
   )
 }
 
-export default function AgGorunumu({ people }) {
+export default function AgGorunumu({ people, edges = [], live = [] }) {
   const dugumler = useMemo(() => agYerlesimi(people, { w: VB_W, h: VB_H }), [people])
+  const cizgiler = useMemo(() => agCizgileri(edges, live, dugumler), [edges, live, dugumler])
 
   return (
     <div className="ag-gorunumu">
@@ -46,6 +47,18 @@ export default function AgGorunumu({ people }) {
         role="img"
         aria-label="Kişi ağı — kim kiminle vakit geçirdi"
       >
+        <g className="ag-cizgiler">
+          {cizgiler.map((c) => (
+            <line
+              key={`${c.a}-${c.b}`}
+              className={`ag-cizgi ${c.birlikte ? 'ag-cizgi--birlikte' : ''}`}
+              data-test="ag-cizgi"
+              data-birlikte={c.birlikte || undefined}
+              x1={c.x1} y1={c.y1} x2={c.x2} y2={c.y2}
+              strokeWidth={c.kalinlik}
+            />
+          ))}
+        </g>
         {dugumler.map((n) => <Dugum key={n.id} n={n} />)}
       </svg>
       <p className="ag-not">Düğümlerin konumu fiziksel konum değildir; yalnız rol gruplarını gösterir.</p>

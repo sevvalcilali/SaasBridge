@@ -2,7 +2,7 @@
 // yalnız rol gruplu düzenli bir dağılım (brief §7: düğümler zıplamaz).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { agYerlesimi } from './agYerlesim.js'
+import { agYerlesimi, agCizgileri } from './agYerlesim.js'
 
 const KISILER = [
   { id: '1', role: 'investor', color: '#111', name: 'A', org: 'Fon A' },
@@ -54,4 +54,43 @@ test('tek kişilik grup ortalanır (bölme sıfır hatası yok)', () => {
   const d = agYerlesimi([{ id: '9', role: 'guest', color: '#000', name: 'Z', org: '' }], { w: W, h: H })
   assert.equal(d.length, 1)
   assert.ok(Number.isFinite(d[0].x) && Number.isFinite(d[0].y))
+})
+
+// --- çizgiler ---
+const DUGUMLER = [
+  { id: '1', x: 100, y: 100 },
+  { id: '2', x: 900, y: 200 },
+  { id: '3', x: 900, y: 400 },
+]
+
+test('agCizgileri: edge → uç koordinatları düğümlerden gelir', () => {
+  const c = agCizgileri([{ a: '1', b: '2', min: 5 }], [], DUGUMLER)
+  assert.equal(c.length, 1)
+  assert.deepEqual([c[0].x1, c[0].y1, c[0].x2, c[0].y2], [100, 100, 900, 200])
+})
+
+test('agCizgileri: kalınlık = min(1 + dk*0.4, 8)', () => {
+  const [ince] = agCizgileri([{ a: '1', b: '2', min: 5 }], [], DUGUMLER)
+  const [kalin] = agCizgileri([{ a: '1', b: '2', min: 100 }], [], DUGUMLER)
+  assert.equal(ince.kalinlik, 3)   // 1 + 2
+  assert.equal(kalin.kalinlik, 8)  // üst sınır
+})
+
+test('agCizgileri: live çift yeşil (birlikte), yön farkı önemsiz', () => {
+  const c = agCizgileri([{ a: '1', b: '2', min: 5 }], [{ a: '2', b: '1' }], DUGUMLER)
+  assert.equal(c[0].birlikte, true)
+  const c2 = agCizgileri([{ a: '1', b: '2', min: 5 }], [{ a: '1', b: '3' }], DUGUMLER)
+  assert.equal(c2[0].birlikte, false)
+})
+
+test('agCizgileri: edge\'de olmayan live çift de çizilir (yeni başlayan görüşme)', () => {
+  const c = agCizgileri([], [{ a: '1', b: '2' }], DUGUMLER)
+  assert.equal(c.length, 1)
+  assert.equal(c[0].birlikte, true)
+  assert.ok(c[0].kalinlik >= 1)
+})
+
+test('agCizgileri: düğümü olmayan çift atlanır (100+ kart)', () => {
+  const c = agCizgileri([{ a: '1', b: '99', min: 5 }], [], DUGUMLER)
+  assert.equal(c.length, 0)
 })

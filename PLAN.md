@@ -189,7 +189,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - "Bu düğümlerin konumu fiziksel konum değildir" yazısı SVG altında.
 - **Doğrulama:** 25 kişilik senaryoda düğümler okunaklı dağılır; konum uyarısı görünür.
 
-#### 1.12 ⬜ Ağ görünümü — çizgiler
+#### 1.12 ✅ Ağ görünümü — çizgiler
 - `edges` dizisinden çizgiler: kalınlık = `Math.min(1 + min * 0.4, 8)`.
 - `live` dizisindeki çiftler yeşil ve `stroke-dasharray` animasyonlu
   (yavaş, sakin — brief "sakin hareket" kuralı).

@@ -12,6 +12,25 @@
   max-height: 62vh;
 }
 
+/* Çizgiler: geçmiş görüşme gri, şu an birlikte yeşil + yavaş akış (sakin). */
+.ag-cizgi {
+  stroke: var(--cizgi-koyu);
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.ag-cizgi--birlikte {
+  stroke: var(--birlikte);           /* YEŞİL = şu an birlikte */
+  opacity: 1;
+  stroke-dasharray: 6 10;
+  animation: ag-akis 2.4s linear infinite;
+}
+@keyframes ag-akis {
+  to { stroke-dashoffset: -16; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-cizgi--birlikte { animation: none; stroke-dasharray: none; }
+}
+
 .ag-etiket {
   font-size: 15px;             /* viewBox birimi; SVG ölçekler */
   fill: var(--metin-2);
