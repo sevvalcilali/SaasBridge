@@ -102,7 +102,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 
 ---
 
-### ⬜ Faz 1 — Organizatör canlı panosu (mikro-adımlar)
+### ✅ Faz 1 — Organizatör canlı panosu (TAMAMLANDI 29.09.2026)
 **Amaç:** Brief'in 1 numaralı önceliği; gerçek API ile de hemen çalışır.
 **Yöntem:** Her adım kendi commit'ini alır; test veya ekran görüntüsüyle doğrulanır.
 
@@ -216,7 +216,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - `localStorage`'da son açık sekme (liste / ağ / bildirimler) korunur.
 - **Doğrulama:** Ekran görüntüleri — 1280px, 900px, 600px genişlik.
 
-#### 1.16 ⬜ 50 kişi stres testi + son dokunuşlar
+#### 1.16 ✅ 50 kişi stres testi + son dokunuşlar
 - Mock `--kisi=50` ile başlatılır; tüm bileşenler akıcı ve okunaklı mı kontrol.
 - React performans: gereksiz yeniden render'lar `React.memo` ve `useMemo` ile
   engellenir (saniyede 2 güncelleme x 50 kişi).

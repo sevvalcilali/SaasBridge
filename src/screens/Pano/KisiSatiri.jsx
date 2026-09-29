@@ -1,13 +1,14 @@
 // Kişi listesi satırı: renk + rol şekli + ad (girişimcide kurum öne) +
 // yıldız + durum (ikon+renk+yazı) + toplam süre. Kimlik renk+şekil+ad ile;
 // durum renk+ikon+yazı üçlüsüyle verilir (renk körlüğü — brief §10).
+import { memo } from 'react'
 import { durumCumlesi, atanmamisKartMi } from '../../api/durum.js'
 import { sureYazisi } from '../../api/format.js'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
 const DURUM_IKON = { talking: '●', idle: '○', away: '◌' }
 
-export default function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) {
+function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) {
   const atanmamis = atanmamisKartMi(kisi)
 
   return (
@@ -72,3 +73,19 @@ export default function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) 
     </li>
   )
 }
+
+// Saniyede 2 güncelleme × çok kişi: SSE her tik yeni kisi NESNESİ ürettiği için
+// referans karşılaştırması yetmez; render edilen alanları alan alan karşılaştırıp
+// değeri değişmeyen satırların yeniden çizimini atlarız (idle/away satırları).
+function esit(a, b) {
+  const k = a.kisi, m = b.kisi
+  return (
+    a.vurgulu === b.vurgulu && a.secili === b.secili &&
+    a.onSec === b.onSec && a.onKisiAta === b.onKisiAta &&
+    k.id === m.id && k.status === m.status && k.withName === m.withName &&
+    k.name === m.name && k.org === m.org && k.color === m.color &&
+    k.stars === m.stars && k.min === m.min && k.live === m.live && k.seenAgo === m.seenAgo
+  )
+}
+
+export default memo(KisiSatiri, esit)

@@ -2,7 +2,7 @@
 // yalnız rol gruplu düzenli bir dağılım (brief §7: düğümler zıplamaz).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { agYerlesimi, agCizgileri } from './agYerlesim.js'
+import { agYerlesimi, agCizgileri, agYukseklik } from './agYerlesim.js'
 
 const KISILER = [
   { id: '1', role: 'investor', color: '#111', name: 'A', org: 'Fon A' },
@@ -54,6 +54,26 @@ test('tek kişilik grup ortalanır (bölme sıfır hatası yok)', () => {
   const d = agYerlesimi([{ id: '9', role: 'guest', color: '#000', name: 'Z', org: '' }], { w: W, h: H })
   assert.equal(d.length, 1)
   assert.ok(Number.isFinite(d[0].x) && Number.isFinite(d[0].y))
+})
+
+test('misafir etiketleri dönüşümlü üst/alt (kalabalıkta çakışmasın)', () => {
+  const misafirler = ['a', 'b', 'c', 'd'].map((id) => ({ id, role: 'guest', color: '#000', name: id, org: '' }))
+  const d = agYerlesimi(misafirler, { w: W, h: H })
+  assert.deepEqual(d.map((n) => n.etiketYukari), [false, true, false, true])
+})
+
+test('sütun kişileri etiketi hep altta', () => {
+  assert.ok(yerlesim().filter((n) => n.role !== 'guest').every((n) => n.etiketYukari === false))
+})
+
+test('agYukseklik: kalabalık sütunda düğüm başına en az 64 birim, min 700', () => {
+  const kalabalik = Array.from({ length: 23 }, (_, i) => ({ id: String(i), role: 'founder' }))
+  assert.equal(agYukseklik([]), 700)
+  assert.equal(agYukseklik(KISILER), 700)
+  const h = agYukseklik(kalabalik)
+  const d = agYerlesimi(kalabalik, { w: W, h })
+  const aralik = d[1].y - d[0].y
+  assert.ok(aralik >= 64, `düğüm aralığı ${aralik} < 64`)
 })
 
 // --- çizgiler ---

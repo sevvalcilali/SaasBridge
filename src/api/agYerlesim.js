@@ -3,6 +3,16 @@
 // ZIPLAMAZ. Düğüm konumu FİZİKSEL konum DEĞİLDİR (brief §7).
 
 const KENAR = 130 // sol/sağ sütun x konumu ve alt kenar boşluğu
+const DUGUM_ARALIGI = 64 // sütunda düğüm başına en az dikey boşluk (düğüm + altındaki etiket)
+
+// Ağın viewBox yüksekliği: kalabalık sütunda düğümler üst üste binmesin diye
+// en kalabalık sütundaki kişi sayısıyla büyür (brief §7: kalabalıkta okunaklılık).
+// Yalnız rol sayılarına bağlıdır → her tik değişmez, yalnız katılımcı eklenince.
+export function agYukseklik(people) {
+  const yat = people.filter((k) => k.role === 'investor').length
+  const gir = people.filter((k) => k.role === 'founder').length
+  return Math.max(700, Math.max(yat, gir) * DUGUM_ARALIGI + 260)
+}
 
 // Bir eksende n öğeyi [bas, bit] aralığına ortalayarak dağıtır.
 function dagit(n, bas, bit) {
@@ -20,12 +30,15 @@ export function agYerlesimi(people, { w = 1000, h = 700 } = {}) {
   const girY = dagit(gir.length, 60, h - 160)   // sağ sütun
   const misX = dagit(mis.length, KENAR, w - KENAR) // alt sıra (sol→sağ)
 
-  const dugum = (k, x, y) => ({ id: k.id, role: k.role, color: k.color, name: k.name, org: k.org, x, y, kisi: k })
+  const dugum = (k, x, y, etiketYukari = false) =>
+    ({ id: k.id, role: k.role, color: k.color, name: k.name, org: k.org, x, y, etiketYukari, kisi: k })
 
   return people.map((k) => {
     if (k.role === 'investor') return dugum(k, KENAR, yatY[yat.indexOf(k)])
     if (k.role === 'founder') return dugum(k, w - KENAR, girY[gir.indexOf(k)])
-    return dugum(k, misX[mis.indexOf(k)], h - 70)
+    // Alt sıradaki komşu etiketler çakışmasın: tek sıradakiler üste yazılır.
+    const i = mis.indexOf(k)
+    return dugum(k, misX[i], h - 70, i % 2 === 1)
   })
 }
 

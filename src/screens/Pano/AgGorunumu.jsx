@@ -1,13 +1,12 @@
 // Ağ görünümü (orta bölge): kişiler düğüm, rol şekliyle + kişinin rengiyle.
 // Yerleşim deterministik (api/agYerlesim.js) — düğümler sabit durur, zıplamaz.
-// Konum FİZİKSEL konum DEĞİLDİR; bu SVG altında belirtilir. Çizgiler 1.12'de.
+// Konum FİZİKSEL konum DEĞİLDİR; bu SVG altında belirtilir.
 import { useMemo } from 'react'
-import { agYerlesimi, agCizgileri } from '../../api/agYerlesim.js'
+import { agYerlesimi, agCizgileri, agYukseklik } from '../../api/agYerlesim.js'
 import './AgGorunumu.css'
 
 const VB_W = 1000
-const VB_H = 700
-const R = 15 // düğüm yarıçapı (viewBox birimi)
+const R = 17 // düğüm yarıçapı (viewBox birimi)
 
 // Kısa etiket: girişimcide kurum, diğerinde ad.
 function etiket(n) {
@@ -28,20 +27,23 @@ function Dugum({ n, vurgulu, secili, onSec }) {
       role="button" tabIndex={0} aria-label={n.name}
       onClick={() => onSec?.(n.id)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSec?.(n.id) } }}>
-      {vurgulu && <circle className="ag-halka" cx={n.x} cy={n.y} r={R + 7} fill="none" />}
+      {vurgulu && <circle className="ag-halka" cx={n.x} cy={n.y} r={R + 8} fill="none" />}
       {n.role === 'investor' && <circle cx={n.x} cy={n.y} r={R} {...ortak} />}
       {n.role === 'founder' && <rect x={n.x - R} y={n.y - R} width={R * 2} height={R * 2} rx={5} {...ortak} />}
       {n.role === 'guest' && (
         <rect x={n.x - R * 0.8} y={n.y - R * 0.8} width={R * 1.6} height={R * 1.6}
           transform={`rotate(45 ${n.x} ${n.y})`} {...ortak} />
       )}
-      <text className="ag-etiket" x={n.x} y={n.y + R + 13} textAnchor="middle">{etiket(n)}</text>
+      <text className="ag-etiket" x={n.x} y={n.etiketYukari ? n.y - R - 8 : n.y + R + 22} textAnchor="middle">
+        {etiket(n)}
+      </text>
     </g>
   )
 }
 
 export default function AgGorunumu({ people, edges = [], live = [], vurgulanan = [], seciliId, onKisiSec }) {
-  const dugumler = useMemo(() => agYerlesimi(people, { w: VB_W, h: VB_H }), [people])
+  const vbH = agYukseklik(people)
+  const dugumler = useMemo(() => agYerlesimi(people, { w: VB_W, h: vbH }), [people, vbH])
   const cizgiler = useMemo(() => agCizgileri(edges, live, dugumler), [edges, live, dugumler])
   const vurguSet = useMemo(() => new Set(vurgulanan), [vurgulanan])
   const vurguAktif = vurgulanan.length > 0
@@ -51,7 +53,8 @@ export default function AgGorunumu({ people, edges = [], live = [], vurgulanan =
       <svg
         className="ag-svg"
         data-vurgu={vurguAktif || undefined}
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        viewBox={`0 0 ${VB_W} ${vbH}`}
+        style={{ aspectRatio: `${VB_W} / ${vbH}` }}
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label="Kişi ağı — kim kiminle vakit geçirdi"

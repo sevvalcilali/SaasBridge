@@ -8,8 +8,7 @@
 
 .ag-svg {
   width: 100%;
-  aspect-ratio: 1000 / 700;   /* viewBox oranı; sütun boyunu şişirmez */
-  max-height: 62vh;
+  height: auto;   /* oran bileşende viewBox'a göre verilir; kalabalıkta uzar */
 }
 
 /* Çizgiler: geçmiş görüşme gri, şu an birlikte yeşil + yavaş akış (sakin). */
@@ -36,7 +35,7 @@
 }
 
 .ag-etiket {
-  font-size: 15px;             /* viewBox birimi; SVG ölçekler */
+  font-size: 24px;             /* viewBox birimi; ~470px sütunda ≈11px */
   fill: var(--metin-2);
   font-family: var(--yazi);
 }

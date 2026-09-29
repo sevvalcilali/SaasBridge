@@ -1,7 +1,7 @@
 // Organizatör canlı panosu — üst düzey ekran (PLAN Faz 1).
 // Bölge iskeleti: üst şerit (1.2 hazır), gövde (sol · orta · sağ), alt şerit.
 // Orta bölgeler adım adım doldurulur (1.3–1.16).
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { useKalici } from '../../api/useKalici.js'
 import UstSerit from './UstSerit.jsx'
@@ -29,17 +29,20 @@ export default function PanoEkrani() {
     return () => clearTimeout(zaman)
   }, [vurgulanan])
 
-  function kisiSec(id) {
+  // Kararlı referanslar: memo'lu satır/düğümler her tik yeniden çizilmesin.
+  const kisiSec = useCallback((id) => {
     setSeciliId((onceki) => (onceki === id ? null : id))
-  }
+  }, [])
 
-  function bildirimTikla(bildirim) {
+  const bildirimTikla = useCallback((bildirim) => {
     setVurgulanan((onceki) =>
       onceki.length === bildirim.people.length && onceki.every((x, i) => x === bildirim.people[i])
         ? [] // aynı bildirime tekrar tıkla → vurguyu kaldır
         : bildirim.people,
     )
-  }
+  }, [])
+
+  const kisiAta = useCallback(() => {}, []) // Faz 2'de bağlanacak
 
   const seciliKisi = durum?.people.find((k) => k.id === seciliId)
 
@@ -88,7 +91,7 @@ export default function PanoEkrani() {
             vurgulanan={vurgulanan}
             seciliId={seciliId}
             onKisiSec={kisiSec}
-            onKisiAta={() => {}}
+            onKisiAta={kisiAta}
           />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
