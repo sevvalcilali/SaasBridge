@@ -2,6 +2,51 @@
 
 .kisi-listesi { display: flex; flex-direction: column; gap: var(--aralik-4); }
 
+/* Arama + filtre çubuğu */
+.filtre-cubugu {
+  position: sticky;
+  top: calc(-1 * var(--aralik-4));
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--aralik-2);
+  padding-bottom: var(--aralik-2);
+  background: var(--yuzey);
+}
+.filtre-arama {
+  font: inherit;
+  width: 100%;
+  padding: var(--aralik-2) var(--aralik-3);
+  border: 1px solid var(--cizgi-koyu);
+  border-radius: var(--kose-tam);
+  background: var(--zemin);
+  color: var(--metin);
+}
+.filtre-arama::placeholder { color: var(--metin-soluk); }
+.filtre-arama:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px; }
+
+.filtre-dugmeler { display: flex; flex-wrap: wrap; gap: var(--aralik-1); }
+.filtre-dugme {
+  font: inherit;
+  font-size: var(--punto-kucuk);
+  cursor: pointer;
+  padding: 3px var(--aralik-3);
+  border: 1px solid var(--cizgi-koyu);
+  border-radius: var(--kose-tam);
+  background: var(--zemin);
+  color: var(--metin-2);
+  transition: background var(--gecis), color var(--gecis);
+}
+.filtre-dugme:hover { background: var(--yuzey-2); }
+.filtre-dugme--secili {
+  background: var(--vurgu);
+  border-color: var(--vurgu);
+  color: var(--metin-ters);
+  font-weight: 600;
+}
+
+.kisi-bos { color: var(--metin-2); padding: var(--aralik-4) 0; }
+
 .kisi-grup-baslik {
   display: flex;
   align-items: center;

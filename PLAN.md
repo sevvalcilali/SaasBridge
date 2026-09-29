@@ -137,7 +137,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 - **Doğrulama:** Ekran görüntüsünde üç durum rengi birbirinden ayrılır; atanmamış
   kart sarı/turuncu vurguyla belirgin.
 
-#### 1.5 ⬜ Kişi listesi — arama ve filtre
+#### 1.5 ✅ Kişi listesi — arama ve filtre
 - Arama kutusu: ad/kurum/kart no üzerinde `includes` (büyük-küçük harf duyarsız).
 - Filtre düğme grubu: Tümü | Yatırımcı | Girişimci | Birlikte | Boşta |
   Görünmüyor | Hiç görüşmemiş (invPeers === 0 ve rol founder).
