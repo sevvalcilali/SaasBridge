@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -102,4 +102,20 @@ test('siralaKisiler: girdiyi değiştirmez', () => {
   const p = [{ id: '1', status: 'away' }, { id: '2', status: 'talking' }]
   siralaKisiler(p)
   assert.deepEqual(p.map((k) => k.id), ['1', '2'])
+})
+
+test('ozetKutulari: stats alanlarını etiketli, biçimli kutulara çevirir', () => {
+  const durum = {
+    stats: { livePairs: 3, done: 12, mixedMin: 21.4, deals: 1, reached: 5, founders: 12 },
+  }
+  const kutular = ozetKutulari(durum)
+  assert.deepEqual(kutular.map((k) => k.deger), ['3', '12', '21 dk 24 sn', '1', '5/12'])
+  assert.ok(kutular.every((k) => typeof k.ad === 'string' && k.ad.length))
+})
+
+test('etkinlikYuzde: 0..1 → 0..100, null → null, sınır dışı kırpılır', () => {
+  assert.equal(etkinlikYuzde({ event: { progress: 0.5 } }), 50)
+  assert.equal(etkinlikYuzde({ event: { progress: null } }), null)
+  assert.equal(etkinlikYuzde({ event: { progress: 1.2 } }), 100)
+  assert.equal(etkinlikYuzde({ event: { progress: -0.1 } }), 0)
 })

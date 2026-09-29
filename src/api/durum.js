@@ -40,6 +40,25 @@ export function siralaKisiler(people) {
     .map((x) => x.k)
 }
 
+// Alt şerit özet kutuları (brief §5.1 stats). Biçimleme burada, JSX'te değil.
+export function ozetKutulari(durum) {
+  const s = durum.stats
+  return [
+    { ad: 'şu an birlikte', deger: String(s.livePairs) },
+    { ad: 'biten görüşme', deger: String(s.done) },
+    { ad: 'karma görüşme', deger: sureYazisi(s.mixedMin) },
+    { ad: 'potansiyel anlaşma', deger: String(s.deals) },
+    { ad: 'yatırımcıya ulaşan girişimci', deger: `${s.reached}/${s.founders}` },
+  ]
+}
+
+// Etkinlik ilerlemesi yüzde (0..100). Tanımsızsa null (çubuk gizlenir).
+export function etkinlikYuzde(durum) {
+  const p = durum.event?.progress
+  if (p == null || !Number.isFinite(p)) return null
+  return Math.round(Math.min(1, Math.max(0, p)) * 100)
+}
+
 const ROL_SIRA = [
   { rol: 'investor', baslik: 'Yatırımcılar' },
   { rol: 'founder', baslik: 'Girişimciler' },

@@ -6,6 +6,7 @@ import { usePano } from '../../api/usePano.js'
 import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
+import AltSerit from './AltSerit.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
@@ -63,7 +64,7 @@ export default function PanoEkrani() {
       </div>
 
       <footer className="pano-alt" data-bolge="alt">
-        <span className="iskele-etiket">Alt şerit · özet</span>
+        <AltSerit durum={durum} />
       </footer>
     </div>
   )

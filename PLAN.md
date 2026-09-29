@@ -167,7 +167,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
   düğümleri parıldama efekti alır (box-shadow pulse, 3 sn sonra söner).
 - **Doğrulama:** Bir bildirime tıklanınca ilgili kişi satırı/satırları vurgulanır.
 
-#### 1.9 ⬜ Alt şerit — özet sayılar ve ilerleme
+#### 1.9 ✅ Alt şerit — özet sayılar ve ilerleme
 - `stats` alanları kutu sırasıyla: şu an birlikte | biten görüşme |
   karma görüşme (sureYazisi) | potansiyel anlaşma | ulaşan/toplam girişimci.
 - Etkinlik ilerleme çubuğu (`event.progress`; null ise gizli).
