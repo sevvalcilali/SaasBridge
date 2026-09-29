@@ -227,19 +227,77 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 
 ---
 
-### ⬜ Faz 2 — Kart atama ekranı (karşılama masası) ⭐
-**Amaç:** Brief'in en önemli yeni özelliği. Tamamı §9 mock uçlarıyla çalışır.
+### ⬜ Faz 2 — Kart atama ekranı (karşılama masası) ⭐ (mikro-adımlar)
+**Amaç:** Brief'in en önemli yeni özelliği (§6). Tamamı §9 mock uçlarıyla çalışır;
+gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 
-> ⚠️ Faz 1 bittiğinde mikro-adımları bu bölümün yerine yazılacak.
+**Model kararı (2.1'de kurulur):** Kişi ≠ Kart. Bir **atama katmanı** eklenir.
+- **Katılımcı** = kayıtlı insan (id, ad, rol, kurum, yıldız, not, renk, atananKart|null).
+- **Kart** = fiziksel cihaz 1–99 (alıcıdaki güç, seenAgo, pil; atanan kişi|boş).
+- `/state` çıktısı Faz 1 ile uyumlu kalır (pano bozulmaz): atanmış+duyulan kartlar
+  kişi olarak, atanmamış duyulan kartlar "Kart N" olarak görünür.
 
-**Kaba adımlar (Faz 1 sonunda detaylandırılacak):**
-- 2.a Mock API katmanı: `/api/people`, `/api/assign`, `/api/cards` mock uçları.
-- 2.b Kişi seç/oluştur formu (dokunmatik-ayakta kullanım, büyük hedefler).
-- 2.c Kart seç: "yaklaştır ve tanı" mock simülasyonu + numara girme.
-- 2.d Kontrol adımı (zaten atanmış mı) ve onay kartı.
-- 2.e Diğer işlemler: iade, kart değişimi, geri al, düzenleme.
-- 2.f CSV toplu ön yükleme, "boştaki kartlar" şeridi, kayıp kart etiketi.
-- 2.g SUNUCUDAN_ISTENENLER.md teslimi.
+#### 2.1 ⬜ Mock: kişi/kart/atama modeli + katılımcı ve atama uçları
+- Mock'u kişi≠kart modeline taşı; `/state` çıktısı alan-alan aynı kalsın (Faz 1 testleri geçmeli).
+- `GET/POST /api/people`, `PATCH/DELETE /api/people/{id}`; `POST /api/assign {kisiId,kart}`,
+  `POST /api/unassign {kart}`. Atama zaman damgalı geçmişe yazılır.
+- **Doğrulama:** kişi ekle→ata→`/state`'te görünür; iade et→kart boşta; süreler silinmez. Mock testleri + Faz 1 şema testi yeşil.
+
+#### 2.2 ⬜ Mock: `GET /api/cards` + "yaklaştır ve tanı" + boştaki kartlar
+- `GET /api/cards` → `[{kart, rssiAlici, seenAgo, atanan, pil}]`.
+- Alıcıya yaklaştırılan kartın simülasyonu (tek kart çok güçlü); iki kart yakınsa ikisi de güçlü.
+- **Doğrulama:** `/api/cards` şeması; "yaklaştır" senaryosunda bir kart belirgin öne çıkar; çift-kart durumu ayırt edilir. Mock testleri.
+
+#### 2.3 ⬜ `api/masaApi.js` — §9 uçlarıyla konuşan tek yer
+- people/assign/unassign/cards için ince sarmalayıcı (client.js felsefesi: tek I/O noktası).
+- **Doğrulama:** gerçek HTTP mock'a karşı uçtan uca (ekle/ata/iade/cards) birim testleri.
+
+#### 2.4 ⬜ Ekran yönlendirme + "Kart Ver" iskeleti
+- Hafif yönlendirme (hash/yol): `/` = Pano, `/kart-ver` = Karşılama masası. Üstte geçiş.
+- Dokunmatik-ayakta düzen iskeleti (büyük hedefler, az yazı).
+- **Doğrulama:** iki ekran arası geçiş; iskelet tabette okunur.
+
+#### 2.5 ⬜ Adım 1 — Kişi seç / yeni kişi oluştur
+- Kayıtlı listede ada göre arama; yoksa hızlı form: **Ad**, **Rol** (büyük düğmeler),
+  **Kurum**, yatırımcıysa **Yıldız (1–5)**, **Not**. Kişi rengi atama anında belirir.
+- **Doğrulama:** arama + yeni kişi oluşturma `/api/people`'a gider; büyük dokunma hedefleri.
+
+#### 2.6 ⬜ Adım 2a — Kartı numarayla seç
+- Numara girişi; yalnız "şu an açık" (duyulan) kartlar önerilir (yeşil nokta = açık).
+- **Doğrulama:** duyulmayan kart uyarısı; açık kartlar önerilir.
+
+#### 2.7 ⬜ Adım 2b — "Yaklaştır ve tanı" akışı
+- "Kartı alıcıya yaklaştırın" → `/api/cards` yoklanır, en güçlü kart otomatik belirir ("Kart 14 bulundu ✓").
+- İki kart yakınsa "İki kart algılandı, birini uzaklaştırın".
+- **Doğrulama:** mock simülasyonunda kart otomatik bulunur; çift-kart uyarısı çıkar.
+
+#### 2.8 ⬜ Adım 3 — Kontrol (açık mı / son duyulma / pil / zaten atanmış mı)
+- Seçilen kartın durumu; **zaten atanmışsa** "Bu kart Ali Kaya'da. Geri alındı mı?" onayı.
+- **Doğrulama:** atanmış kart seçilince uyarı; evet→eski atama kapanır.
+
+#### 2.9 ⬜ Adım 4 — Onay kartı → ekran sıfırlanır (hedef <15 sn/kişi)
+- Kişinin rengiyle "Ayşe Demir → Kart 14" özeti; onayla→`/api/assign`; ekran hemen sıradaki kişiye.
+- **Doğrulama:** onaydan sonra kişi panoda görünür; ekran sıfırlanır; akış hızlı.
+
+#### 2.10 ⬜ İade + son atamayı geri al
+- Kart iadesi (kişi "ayrıldı", kart boşta, **süreler silinmez**); "Geri al" (son atama).
+- **Doğrulama:** iade→pano'dan düşer, rapor süreleri kalır; geri al son atamayı bozar.
+
+#### 2.11 ⬜ Kart değişimi + kişi bilgisi düzenleme
+- Kart değişimi (kişi aynı, kart değişir, **süreler kişide birleşir**); ad/kurum/yıldız/rol düzenleme (renk değişmez).
+- **Doğrulama:** kart değişince eski+yeni süre birleşir; düzenleme `/api/people`'a gider.
+
+#### 2.12 ⬜ CSV toplu ön yükleme + "kart bekliyor" listesi
+- CSV (ad, soyad, rol, kurum, yıldız) yükle → `/api/people/import`; kartsız kişiler "kart bekliyor".
+- **Doğrulama:** CSV yüklenir, kişiler listeye düşer, kapıda atanır.
+
+#### 2.13 ⬜ "Boştaki kartlar" şeridi + kayıp kart etiketi
+- Atanmamış ama açık kartlar ayrı şeritte (stok takibi); `lost` bildirimli kişide "Kartı kontrol et" → pil/kart değişimi.
+- **Doğrulama:** boştaki kartlar görünür; kayıp kart etiketi ve düzeltme akışı.
+
+#### 2.14 ⬜ SUNUCUDAN_ISTENENLER.md + Faz 2 teslimi
+- Netleştirilmiş §9 API listesi (Muhittin'e). Ekran görüntüleri + tasarım gerekçe notu.
+- **Kabul ölçütü (Faz 2 tamamı):** akış mock ile uçtan uca oynanabilir; ekran görüntüleri + not + `SUNUCUDAN_ISTENENLER.md` teslim edildi.
 
 ### ⬜ Faz 3 — Kurulum / eşik ekranı
 
