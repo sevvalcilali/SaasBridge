@@ -112,7 +112,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
   alt şerit. Tablet için 1 sütuna düşen breakpoint (≤900px).
 - **Doğrulama:** Tarayıcıda boş iskelet görünür; geniş ve dar pencerede düzen değişir.
 
-#### 1.2 ⬜ Üst şerit
+#### 1.2 ✅ Üst şerit
 - Etkinlik adı, alt başlık, tarih/mekân (`durum.event.*`).
 - Büyük saat (`durum.clock`; tabular-nums ile titremesin).
 - **ALICI BAĞLI / BAĞLI DEĞİL** rozeti (`receiverAge > 5 → ciddi`).

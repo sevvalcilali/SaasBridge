@@ -1,12 +1,12 @@
 // Organizatör canlı panosu — üst düzey ekran (PLAN Faz 1).
-// Bölge iskeleti: üst şerit, gövde (sol kişi listesi · orta ağ · sağ bildirim),
-// alt şerit. İçerikler adım adım doldurulur (1.2–1.16); bu adım (1.1) yalnız
-// bölge düzenini ve responsive davranışı kurar.
+// Bölge iskeleti: üst şerit (1.2 hazır), gövde (sol · orta · sağ), alt şerit.
+// Orta bölgeler adım adım doldurulur (1.3–1.16).
 import { usePano } from '../../api/usePano.js'
+import UstSerit from './UstSerit.jsx'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
-  const { durum, baglandi, hata } = usePano()
+  const { durum, baglandi, hata, baglanti } = usePano()
 
   if (!durum) {
     return (
@@ -18,12 +18,17 @@ export default function PanoEkrani() {
     )
   }
 
+  function sifirlaIste() {
+    // Yıkıcı işlem: brief §5, tüm süre/geçmiş/bildirim silinir → önce onay.
+    const onay = window.confirm(
+      'Tüm süreler, geçmiş ve bildirimler sıfırlanacak. Emin misiniz?',
+    )
+    if (onay) baglanti.sifirla()
+  }
+
   return (
     <div className={`pano ${baglandi ? '' : 'pano--soluk'}`}>
-      <header className="pano-ust" data-bolge="ust">
-        <span className="iskele-etiket">Üst şerit</span>
-        <span className="canli-rozet" aria-hidden="true">● canlı · {durum.people.length} kişi</span>
-      </header>
+      <UstSerit durum={durum} onSifirla={sifirlaIste} />
 
       <div className="pano-govde">
         <section className="pano-sol" data-bolge="sol" aria-label="Kişiler">
