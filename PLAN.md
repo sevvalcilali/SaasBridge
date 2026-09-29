@@ -248,7 +248,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - Alıcıya yaklaştırılan kartın simülasyonu (tek kart çok güçlü); iki kart yakınsa ikisi de güçlü.
 - **Doğrulama:** `/api/cards` şeması; "yaklaştır" senaryosunda bir kart belirgin öne çıkar; çift-kart durumu ayırt edilir. Mock testleri.
 
-#### 2.3 ⬜ `api/masaApi.js` — §9 uçlarıyla konuşan tek yer
+#### 2.3 ✅ api/masaApi.js — §9 uçlarıyla konuşan tek yer
 - people/assign/unassign/cards için ince sarmalayıcı (client.js felsefesi: tek I/O noktası).
 - **Doğrulama:** gerçek HTTP mock'a karşı uçtan uca (ekle/ata/iade/cards) birim testleri.
 

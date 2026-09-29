@@ -14,6 +14,7 @@ export default defineConfig({
       '/state': hedef,
       '/events': hedef,
       '/control': hedef,
+      '/api': hedef,
     },
   },
 })
