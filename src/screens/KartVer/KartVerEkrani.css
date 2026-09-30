@@ -115,7 +115,7 @@
 .kisisec-yildizlar { display: flex; gap: var(--aralik-1); }
 .kisisec-yildiz {
   font: inherit; font-size: var(--punto-dev); cursor: pointer; line-height: 1;
-  background: none; border: none; color: var(--cizgi-koyu); padding: 0 var(--aralik-1);
+  background: none; border: none; color: var(--metin-soluk); padding: 0 var(--aralik-1); /* boş yıldız ≥3:1 */
 }
 .kisisec-yildiz--dolu { color: var(--olumlu); }
 
@@ -331,3 +331,6 @@
 
 /* Panodan "Kişi ata" ile gelindi: bilgi şeridi (başarı değil) */
 .kartver-hedef { background: var(--vurgu-zemin); border-color: var(--vurgu); }
+
+/* Sunucu kopukken son liste solar ama silinmez; bant net kalır (brief §11, pano ile aynı). */
+.kartver--soluk > *:not(.hata-bantlari) { opacity: 0.6; transition: opacity var(--gecis); }

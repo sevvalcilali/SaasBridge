@@ -15,5 +15,16 @@ export async function jsonIstek(adres, yol, yontem = 'GET', govde, tur) {
   return yanit.json()
 }
 
+// Sunucu yalnız-mock demo ucunu (GET /api/demo) sağlıyor mu? Adres başına bir kez sorulur.
+// Gerçek sunucuda 404 → demo düğmeleri gizli kalır. Ağ hatası "yok" sayılır, sonra yeniden sorulur.
+const demoOnbellek = new Map()
+export function demoVarMi(adres) {
+  if (!demoOnbellek.has(adres)) {
+    const soru = fetch(adres + '/api/demo').then((y) => y.ok, () => { demoOnbellek.delete(adres); return false })
+    demoOnbellek.set(adres, soru)
+  }
+  return demoOnbellek.get(adres)
+}
+
 // Adres verilmezse client.js'teki tek sunucu adresi kullanılır.
 export const adresTemizle = (adres = SUNUCU_ADRESI) => adres.replace(/\/$/, '')

@@ -47,7 +47,7 @@ export default function KisiFormu({ baslangic, renk, kaydetEtiket, gonderiliyor,
       {form.rol === 'investor' && (
         <div className="kisisec-yildiz-blok">
           <span className="kisisec-etiket">Yıldız</span>
-          <div className="kisisec-yildizlar" role="radiogroup" aria-label="Yıldız">
+          <div className="kisisec-yildizlar" role="group" aria-label={`Yıldız: ${form.yildiz || 0} / 5`}>
             {[1, 2, 3, 4, 5].map((n) => (
               <button key={n} type="button"
                 className={`kisisec-yildiz ${form.yildiz >= n ? 'kisisec-yildiz--dolu' : ''}`}
@@ -67,7 +67,8 @@ export default function KisiFormu({ baslangic, renk, kaydetEtiket, gonderiliyor,
       <div className="kisisec-form-dugmeler">
         <button type="button" className="kartver-geri" onClick={onIptal}>İptal</button>
         <button type="button" className="kisisec-ekle" data-test="form-ekle"
-          disabled={!formGecerli(form) || gonderiliyor} onClick={() => onKaydet(form)}>
+          disabled={!formGecerli(form) || gonderiliyor}
+          onClick={() => onKaydet({ ...form, yildiz: form.rol === 'investor' ? form.yildiz : 0 })}>
           {kaydetEtiket}
         </button>
       </div>

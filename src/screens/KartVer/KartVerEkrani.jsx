@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
+import { useKalici } from '../../api/useKalici.js'
 import { rotaKart, rotaParametresi, kartVerAdresi } from '../../api/useRota.js'
 import { geriAlinabilir, GERI_AL_DK, kayipKartlar } from '../../api/masaYardim.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
@@ -13,6 +14,7 @@ import KontrolOnayAdim from './KontrolOnayAdim.jsx'
 import IadePaneli from './IadePaneli.jsx'
 import BostakiKartlar from './BostakiKartlar.jsx'
 import { KayipUyarilari, KartKontrol } from './KayipKartlar.jsx'
+import '../../components/HataBantlari.css'
 import './KartVerEkrani.css'
 
 const ADIMLAR = [
@@ -26,7 +28,7 @@ export default function KartVerEkrani() {
   if (apiRef.current === null) apiRef.current = new MasaApi()
   const api = apiRef.current
 
-  const [mod, setMod] = useState('ver') // 'ver' | 'iade'
+  const [mod, setMod] = useKalici('masa.mod', 'ver') // 'ver' | 'iade' — yenilemede korunur (brief §11)
   const [adim, setAdim] = useState(1)
   const [seciliKisi, setSeciliKisi] = useState(null)
   const [seciliKart, setSeciliKart] = useState(null)
@@ -46,7 +48,8 @@ export default function KartVerEkrani() {
   })
   const [iadeKart, setIadeKart] = useState(null)
 
-  const kartlar = useKartlar(api)
+  const { kartlar, hata: kartHatasi } = useKartlar(api)
+  const [kisiHatasi, setKisiHatasi] = useState(false)
   const kayiplar = useMemo(
     () => (kartlar && katilimcilar ? kayipKartlar(kartlar, katilimcilar) : []),
     [kartlar, katilimcilar],
@@ -63,8 +66,18 @@ export default function KartVerEkrani() {
     })
   }, [kayipAnahtar])
 
-  const yukle = useCallback(() => api.kisileriGetir().then(setKatilimcilar).catch(() => setKatilimcilar([])), [api])
+  // Yükleme başarısızsa son liste KORUNUR (boş liste "kayıt yok" sanılıp aynı kişi ikinci kez
+  // eklenmesin); bant gösterilir ve birkaç saniyede bir yeniden denenir (brief §11).
+  const yukle = useCallback(() => api.kisileriGetir()
+    .then((l) => { setKatilimcilar(l); setKisiHatasi(false) })
+    .catch(() => setKisiHatasi(true)), [api])
   useEffect(() => { yukle() }, [yukle])
+  useEffect(() => {
+    if (!kisiHatasi) return
+    const z = setInterval(yukle, 3000)
+    return () => clearInterval(z)
+  }, [kisiHatasi, yukle])
+  const kopuk = kisiHatasi || kartHatasi
 
   // Son atama brief §6 gereği "birkaç dakika" geri alınabilir; süre dolunca şerit kalkar.
   useEffect(() => {
@@ -153,6 +166,7 @@ export default function KartVerEkrani() {
   }
 
   function modDegistir(yeni) {
+    if (yeni === mod) return // seçili düğmeye tekrar basmak yarım işi silmesin
     setMod(yeni)
     setIadeKart(null)
     setKontrol(null)
@@ -176,7 +190,16 @@ export default function KartVerEkrani() {
   }
 
   return (
-    <main className="kartver">
+    <main className={`kartver ${kopuk ? 'kartver--soluk' : ''}`}>
+      {kopuk && (
+        <div className="hata-bantlari">
+          <p className="hata-bant" role="status" data-test="bant-baglanti">
+            <span aria-hidden="true">⚠</span>
+            Sunucuya bağlanılamıyor, yeniden deneniyor… <span className="hata-bant-not">
+              {katilimcilar ? 'son liste gösteriliyor; atama yapılamaz' : 'kişi listesi alınamadı'}</span>
+          </p>
+        </div>
+      )}
       <header className="kartver-bas">
         <h1>{mod === 'ver' ? 'Kart Ver' : 'Kart İadesi'}</h1>
         <p className="kartver-alt">

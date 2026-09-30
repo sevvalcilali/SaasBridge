@@ -27,7 +27,7 @@ export default function KurulumEkrani() {
   const [perspektif, setPerspektif] = useState(null)  // seçili kişinin kart no'su ya da null
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new KurulumApi()
-  const kartlar = useKartlar(apiRef.current)
+  const { kartlar } = useKartlar(apiRef.current)
   const kalabalik = (durum?.signals.length ?? 0) > KALABALIK_CIFT
   const tablo = useSeyrek(durum && { signals: durum.signals, people: durum.people }, TABLO_TAZELEME_MS, kalabalik)
 

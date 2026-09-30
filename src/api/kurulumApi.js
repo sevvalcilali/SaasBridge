@@ -1,6 +1,7 @@
 // Kurulum ekranının sunucu uçları (eşik /control üzerinden PanoBaglantisi'ndedir).
 // Gerçek sunucu gelince yalnız `adres` değişir.
-import { jsonIstek, adresTemizle } from './http.js'
+import { jsonIstek, adresTemizle, demoVarMi } from './http.js'
+import { kisiKartiMi } from './kartNo.js'
 
 export class KurulumApi {
   constructor({ adres } = {}) {
@@ -8,7 +9,8 @@ export class KurulumApi {
   }
 
   // Kart sağlığı (3.7): alıcının duyduğu tüm kartlar — son duyulma, pil, atanan.
-  kartlariGetir() { return jsonIstek(this.adres, '/api/cards') }
+  async kartlariGetir() { return (await jsonIstek(this.adres, '/api/cards')).filter((k) => kisiKartiMi(k.kart)) }
+  demoVarMi() { return demoVarMi(this.adres) }
 
   // YALNIZ MOCK (donanım yok): iki kartı yüz yüze / sırt sırta tutmayı taklit eder.
   // mod: 'yuzyuze' | 'sirtsirta' | null (bırak). Gerçek sunucuda bu uç yoktur.

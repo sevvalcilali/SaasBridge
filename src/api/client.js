@@ -8,6 +8,7 @@
 // durumu bizim kontrolümüzde olmalı (brief §11: kopunca uyarı göster, son
 // veriyi SİLME) ve aynı kod bağımlılık eklemeden Node testlerinde koşar.
 import { sunucuRengi } from './renkler.js'
+import { kisiKartiMi } from './kartNo.js'
 
 // Sunucunun adresi — gerçek sunucuya geçişte değişen TEK değer (PLAN mimari kuralı 5).
 // Boş = aynı kaynak (üretimde pano.py'nin 8002'si, geliştirmede Vite proxy'si).
@@ -23,7 +24,7 @@ export function durumIsle(ham) {
     ...ham,
     // Kart no 100+ dinleyici cihazdır, kişi değildir (brief §2).
     people: ham.people
-      .filter((k) => !(Number(k.id) >= 100))
+      .filter((k) => kisiKartiMi(k.id))
       .map((k) => ({ ...k, color: sunucuRengi(k.color), sunucuColor: k.color })),
     // Sunucu en eskiyi başa koyar; akışta en yeni en üstte durur (brief §7).
     alerts: [...ham.alerts].sort((a, b) => b.t - a.t),

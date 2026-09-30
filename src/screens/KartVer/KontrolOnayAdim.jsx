@@ -2,7 +2,7 @@
 // Kontrol: kart açık mı, son duyulma, pil, ZATEN BAŞKASINA atanmış mı.
 // Onay: kişinin rengiyle "Ad → Kart N" özeti; onaylanınca atanır ve ekran sıfırlanır.
 import { useEffect, useState } from 'react'
-import { onceYazisi } from '../../api/format.js'
+import { onceYazisi, bulunmaEki } from '../../api/format.js'
 
 export default function KontrolOnayAdim({ api, seciliKisi, seciliKart, katilimcilar, onTamam, onGeri }) {
   const [kart, setKart] = useState(undefined) // undefined = yükleniyor, null = duyulmuyor
@@ -57,7 +57,7 @@ export default function KontrolOnayAdim({ api, seciliKisi, seciliKart, katilimci
 
       {baskaSahip && (
         <div className="kontrol-uyari" role="alert" data-test="zaten-atanmis">
-          <p>Bu kart şu an <strong>{baskaSahip.ad}</strong>'da. Geri alındı mı?</p>
+          <p>Bu kart şu an <strong>{baskaSahip.ad}</strong>{bulunmaEki(baskaSahip.ad)}. Geri alındı mı?</p>
           <label className="kontrol-onay-kutu">
             <input type="checkbox" checked={geriAlindi} onChange={(e) => setGeriAlindi(e.target.checked)}
               data-test="geri-alindi" />

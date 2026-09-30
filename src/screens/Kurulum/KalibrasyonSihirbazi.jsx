@@ -7,6 +7,7 @@ import { ciftSatirlari, dbmYazisi, gorunenAd } from '../../api/sinyal.js'
 import { onerilenEsik, kalanSaniye, KALIBRASYON_SN } from '../../api/kalibrasyon.js'
 import { ESIK_ALT, ESIK_UST } from '../../api/esik.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
+import { useDemo } from '../../api/useDemo.js'
 import KalibrasyonCizim from './KalibrasyonCizim.jsx'
 
 const ADIMLAR = [
@@ -27,6 +28,7 @@ const yuzde = (v) => `${((v - ESIK_ALT) / (ESIK_UST - ESIK_ALT)) * 100}%`
 
 export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsikGonder }) {
   const [cift, setCift] = useState('')
+  const demoVar = useDemo(api) // demo düğmeleri yalnız mock sunucuda
   const [olcum, setOlcum] = useState({ yuzyuze: null, sirtsirta: null })
   const [olcuyor, setOlcuyor] = useState(null) // { tur, baslangic }
   const [simdi, setSimdi] = useState(() => Date.now())
@@ -92,6 +94,7 @@ export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsi
         <select value={cift} onChange={(e) => cifteGec(e.target.value)} data-test="kalib-cift">
           <option value="">— çift seçin —</option>
           <CiftSecenekleri satirlar={satirlar} imza={secenekImzasi(satirlar)} />
+          {cift && !secili && <option value={cift}>{cift.replace('-', ' · ')} — şu an duyulmuyor</option>}
         </select>
       </label>
 
@@ -126,12 +129,14 @@ export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsi
                           Kaydet ({KALIBRASYON_SN} sn)
                         </button>
                       )}
-                      <div className="yaklastir-demo">
-                        <span className="yaklastir-demo-etiket">Demo — donanım yok, bu duruşu taklit et:</span>
-                        <button type="button" className="kartver-geri" disabled={!secili} onClick={() => demo(a.tur)} data-test={`kalib-demo-${a.tur}`}>
-                          Çifti {a.baslik.toLocaleLowerCase('tr')} tut
-                        </button>
-                      </div>
+                      {demoVar && (
+                        <div className="yaklastir-demo">
+                          <span className="yaklastir-demo-etiket">Demo — donanım yok, bu duruşu taklit et:</span>
+                          <button type="button" className="kartver-geri" disabled={!secili} onClick={() => demo(a.tur)} data-test={`kalib-demo-${a.tur}`}>
+                            Çifti {a.baslik.toLocaleLowerCase('tr')} tut
+                          </button>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

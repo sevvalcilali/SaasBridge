@@ -3,6 +3,8 @@
 // (b) Numarayı yaz: yalnız şu an açık (duyulan) kartlar önerilir.
 import { useEffect, useState } from 'react'
 import { acikKartlar, kartOner, baskinKart } from '../../api/masaYardim.js'
+import { kartNoCoz, KART_EN_BUYUK } from '../../api/kartNo.js'
+import { useDemo } from '../../api/useDemo.js'
 
 const YOKLAMA_MS = 1000
 
@@ -17,6 +19,7 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
   const [kartlar, setKartlar] = useState(null)
   const [mod, setMod] = useState('yaklastir')
   const [girdi, setGirdi] = useState('')
+  const demo = useDemo(api) // demo düğmeleri yalnız mock sunucuda
 
   useEffect(() => {
     let iptal = false
@@ -29,7 +32,10 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
   const acik = kartlar ? acikKartlar(kartlar) : []
   const baskin = kartlar ? baskinKart(kartlar) : { kart: null, coklu: false }
   const oneriler = kartOner(acik, girdi)
-  const girdiAcik = acik.some((k) => k.kart === girdi.trim())
+  const kartNo = kartNoCoz(girdi) // "007" → "7"; 0, 100+ (dinleyici) → null
+  const girdiAcik = kartNo != null && acik.some((k) => k.kart === kartNo)
+  // Demo isteği başarısız olursa (ör. sunucu yok) sessizce geç; yaklaştır ekranı zaten bekliyor.
+  const yaklastir = (...kartlar_) => api.yaklastir(...kartlar_).catch(() => {})
 
   return (
     <div className="kartsec">
@@ -69,13 +75,15 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
             </p>
           )}
 
-          <div className="yaklastir-demo">
-            <span className="yaklastir-demo-etiket">Demo — donanım yok, yaklaştırmayı taklit et:</span>
-            <button type="button" className="kartver-geri" data-test="demo-yaklastir"
-              onClick={() => kartlar && api.yaklastir(bosKartNo(kartlar))}>Boş bir kartı yaklaştır</button>
-            <button type="button" className="kartver-geri" data-test="demo-iki"
-              onClick={() => api.yaklastir('96', '97')}>İki kartı birden yaklaştır</button>
-          </div>
+          {demo && (
+            <div className="yaklastir-demo">
+              <span className="yaklastir-demo-etiket">Demo — donanım yok, yaklaştırmayı taklit et:</span>
+              <button type="button" className="kartver-geri" data-test="demo-yaklastir"
+                onClick={() => kartlar && yaklastir(bosKartNo(kartlar))}>Boş bir kartı yaklaştır</button>
+              <button type="button" className="kartver-geri" data-test="demo-iki"
+                onClick={() => yaklastir('96', '97')}>İki kartı birden yaklaştır</button>
+            </div>
+          )}
         </div>
       )}
 
@@ -87,9 +95,14 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
               placeholder="Örn. 14" data-test="kart-numara" autoFocus />
           </label>
 
-          {girdi && !girdiAcik && (
+          {girdi && !kartNo && (
+            <p className="kartsec-uyari" role="status" data-test="kart-gecersiz">
+              ⚠ Kart numarası 1–{KART_EN_BUYUK} arası olmalı (100 ve üstü dinleyici cihazdır).
+            </p>
+          )}
+          {kartNo && !girdiAcik && (
             <p className="kartsec-uyari" role="status" data-test="kart-duyulmuyor">
-              ⚠ Kart {girdi} şu an duyulmuyor — açık mı, pili var mı kontrol edin.
+              ⚠ Kart {kartNo} şu an duyulmuyor — açık mı, pili var mı kontrol edin.
             </p>
           )}
 
@@ -116,7 +129,7 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
         <button type="button" className="kartver-geri" onClick={onGeri}>← Kişi</button>
         {mod === 'numara' && (
           <button type="button" className="kisisec-ekle" data-test="kart-sec-dugme"
-            disabled={!girdi.trim()} onClick={() => onKartSec(girdi.trim())}>Bu kartı seç</button>
+            disabled={!kartNo} onClick={() => onKartSec(kartNo)}>Bu kartı seç</button>
         )}
       </div>
     </div>

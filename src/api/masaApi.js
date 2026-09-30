@@ -2,7 +2,8 @@
 // fetch yapmaz; buradan çağırır. Gerçek sunucu gelince yalnız `adres` değişir
 // (varsayılan: aynı kaynak). client.js ile aynı felsefe.
 import { katilimciRengiUyarla as renkUyarla } from './renkler.js'
-import { jsonIstek, adresTemizle } from './http.js'
+import { jsonIstek, adresTemizle, demoVarMi } from './http.js'
+import { kisiKartiMi } from './kartNo.js'
 
 export class MasaApi {
   constructor({ adres } = {}) {
@@ -27,6 +28,9 @@ export class MasaApi {
   iade(kart, { ayrildi = true } = {}) { return this.#iste('/api/unassign', 'POST', { kart, ayrildi }) }
 
   // --- kartlar / yaklaştır ve tanı ---
-  kartlariGetir() { return this.#iste('/api/cards') }
+  // Dinleyici cihazlar (100+) kişi kartı değildir: boştaki/önerilen kartlarda görünmez.
+  async kartlariGetir() { return (await this.#iste('/api/cards')).filter((k) => kisiKartiMi(k.kart)) }
   yaklastir(kart, kart2) { return this.#iste('/api/yaklastir', 'POST', { kart, kart2 }) }
+  // Demo düğmeleri yalnız mock'ta (GET /api/demo var) gösterilir; gerçek sunucuda yok.
+  demoVarMi() { return demoVarMi(this.adres) }
 }
