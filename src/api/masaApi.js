@@ -1,12 +1,8 @@
 // Karşılama masası (§9) uçlarıyla konuşan TEK yer. Ekran bileşenleri doğrudan
 // fetch yapmaz; buradan çağırır. Gerçek sunucu gelince yalnız `adres` değişir
 // (varsayılan: aynı kaynak). client.js ile aynı felsefe.
-import { sunucuRengi } from './renkler.js'
+import { katilimciRengiUyarla as renkUyarla } from './renkler.js'
 import { jsonIstek, adresTemizle } from './http.js'
-
-// Kişi rengi panodakiyle aynı açık palete çevrilir (client.js ile aynı eşleme):
-// renk kişiyi takip eder ve yeşil yalnız "birlikte" demektir (brief §10).
-const renkUyarla = (k) => ({ ...k, renk: sunucuRengi(k.renk) })
 
 export class MasaApi {
   constructor({ adres = '' } = {}) {

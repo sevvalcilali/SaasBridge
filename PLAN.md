@@ -422,10 +422,11 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Doğrulama:** mock testi — kayıt açılır/kapanır, iade sonrası kalır, çift toplamı kenar süresiyle tutarlı.
 - **Yapıldı:** `oturumAc/oturumKapat`; başladığı tik de sayıldığı için `start = simSn − DT` (kenar süresiyle birebir); kayıtsız kart kimliği `kart:N`, kişi atanınca `kenarlariTasi` kayıtları da taşır. `mock-server/oturum.test.js` (3× kararlı).
 
-#### 4.2 ⬜ api: oturum/rapor yardımcıları + RaporApi
+#### 4.2 ✅ api: oturum/rapor yardımcıları + RaporApi
 - `RaporApi` (people + sessions, ortak http katmanı). Saf fonksiyonlar: oturum süresi, saat yazısı,
   kişi toplamları, çift toplamları, girişimci → ulaştığı yatırımcılar, en uzun görüşmeler.
 - **Doğrulama:** birim testleri (ayrılan kişi dahil, sürmekte olan görüşme dahil).
+- **Yapıldı:** `api/rapor.js` (raporHesapla, kisiOturumlari, etkinlikSaati, raporAdi…) + 6 test; `api/raporApi.js`; kişi rengi dönüşümü `renkler.katilimciRengiUyarla` (masa + rapor ortak).
 
 #### 4.3 ⬜ Kişi ayrıntı paneli (derin)
 - Faz 1 panelinin altına **görüşme zaman çizelgesi** (bugün, zaman ekseninde çubuklar, karşı kişi etiketi,

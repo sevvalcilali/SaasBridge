@@ -84,3 +84,13 @@ test('renk: masaya gelen kişi rengi panodakiyle aynı açık palette; yeşil yo
   assert.ok(palet.has(yeni.renk))
   assert.ok(palet.has((await api.kisiGuncelle(yeni.kisiId, { kurum: 'X' })).renk))
 })
+
+test('RaporApi: kayıt defteri (renk uyarlanmış) + görüşme kayıtları', async () => {
+  const { RaporApi } = await import('./raporApi.js')
+  const { ACIK_PALET } = await import('./renkler.js')
+  const r = new RaporApi({ adres: 'http://localhost:8114' })
+  const kisiler = await r.kisileriGetir()
+  assert.ok(kisiler.length > 0 && kisiler.every((k) => Object.values(ACIK_PALET).includes(k.renk)))
+  const o = await r.oturumlariGetir()
+  assert.ok(Array.isArray(o))
+})

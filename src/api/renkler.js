@@ -30,3 +30,7 @@ export function sunucuRengi(hex) {
   if (!hex) return ACIK_PALET.gri
   return ESLEME.get(hex.toLowerCase()) ?? hex
 }
+
+// Kayıt defterindeki katılımcının rengi (masa / rapor): panodakiyle aynı eşleme.
+// Renk kişiyi takip eder ve yeşil yalnız "birlikte" demektir (brief §10).
+export const katilimciRengiUyarla = (k) => ({ ...k, renk: sunucuRengi(k.renk) })
