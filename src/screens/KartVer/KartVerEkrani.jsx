@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
+import KartSecAdim from './KartSecAdim.jsx'
 import './KartVerEkrani.css'
 
 const ADIMLAR = [
@@ -18,6 +19,7 @@ export default function KartVerEkrani() {
 
   const [adim, setAdim] = useState(1)
   const [seciliKisi, setSeciliKisi] = useState(null)
+  const [seciliKart, setSeciliKart] = useState(null)
   const [katilimcilar, setKatilimcilar] = useState(null)
 
   const yukle = useCallback(() => api.kisileriGetir().then(setKatilimcilar).catch(() => setKatilimcilar([])), [api])
@@ -26,6 +28,11 @@ export default function KartVerEkrani() {
   function kisiSec(kisi) {
     setSeciliKisi(kisi)
     setAdim(2)
+  }
+
+  function kartSec(kart) {
+    setSeciliKart(kart)
+    setAdim(3)
   }
 
   return (
@@ -50,9 +57,14 @@ export default function KartVerEkrani() {
         )}
         {adim === 2 && (
           <div className="kartver-yer" data-test="adim-2">
-            <p className="kartver-secili">Seçilen kişi: <strong>{seciliKisi?.ad}</strong></p>
-            <p className="kartver-iskele">Kart seçimi 2.6–2.7'de gelecek.</p>
-            <button type="button" className="kartver-geri" onClick={() => setAdim(1)}>← Kişi adımına dön</button>
+            <KartSecAdim api={api} seciliKisi={seciliKisi} onKartSec={kartSec} onGeri={() => setAdim(1)} />
+          </div>
+        )}
+        {adim === 3 && (
+          <div className="kartver-yer" data-test="adim-3">
+            <p className="kartver-secili"><strong>{seciliKisi?.ad}</strong> → <strong>Kart {seciliKart}</strong></p>
+            <p className="kartver-iskele">Kontrol ve onay 2.8–2.9'da gelecek.</p>
+            <button type="button" className="kartver-geri" onClick={() => setAdim(2)}>← Kart adımına dön</button>
           </div>
         )}
       </section>

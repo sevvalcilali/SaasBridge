@@ -262,7 +262,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   **Kurum**, yatırımcıysa **Yıldız (1–5)**, **Not**. Kişi rengi atama anında belirir.
 - **Doğrulama:** arama + yeni kişi oluşturma `/api/people`'a gider; büyük dokunma hedefleri.
 
-#### 2.6 ⬜ Adım 2a — Kartı numarayla seç
+#### 2.6 ✅ Adım 2a — Kartı numarayla seç
 - Numara girişi; yalnız "şu an açık" (duyulan) kartlar önerilir (yeşil nokta = açık).
 - **Doğrulama:** duyulmayan kart uyarısı; açık kartlar önerilir.
 
