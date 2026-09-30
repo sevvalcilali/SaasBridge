@@ -267,3 +267,33 @@
   margin: 0; display: flex; align-items: center; gap: var(--aralik-2);
   color: var(--metin-2); font-size: var(--punto-kucuk);
 }
+
+/* --- 2.12: kart bekliyor / ayrıldı etiketleri + CSV toplu yükleme --- */
+/* Etiket renk + yazı ile verilir; yeşil kullanılmaz (yeşil = birlikte) */
+.kisisec-etiket-durum { font-weight: 700; }
+.kisisec-etiket-durum--bekliyor {
+  background: var(--vurgu-zemin); color: var(--metin);
+  border-radius: var(--kose-tam); padding: 0 var(--aralik-2);
+}
+.kisisec-etiket-durum--ayrildi { color: var(--metin-soluk); font-style: italic; font-weight: 400; }
+
+.kisisec-alt { display: grid; grid-template-columns: 1fr 1fr; gap: var(--aralik-2); }
+@media (max-width: 480px) { .kisisec-alt { grid-template-columns: 1fr; } }
+
+.csv { width: 100%; display: flex; flex-direction: column; gap: var(--aralik-3); }
+.csv-ornek {
+  margin: 0; padding: var(--aralik-3); overflow-x: auto;
+  background: var(--zemin); border: 1px dashed var(--cizgi-koyu); border-radius: var(--kose);
+  font-size: var(--punto-kucuk); color: var(--metin-2);
+}
+.csv-sec { display: grid; place-items: center; cursor: pointer; position: relative; }
+.csv-sec--mesgul { opacity: 0.6; cursor: progress; }
+.csv-sec:focus-within { outline: 2px solid var(--vurgu); outline-offset: 2px; }
+/* Dosya girdisi görünmez ama klavye ve ekran okuyucu için erişilebilir kalır */
+.csv-girdi { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.csv-sonuc {
+  padding: var(--aralik-3) var(--aralik-4);
+  background: var(--yuzey-2); border: 1px solid var(--cizgi-koyu); border-radius: var(--kose);
+}
+.csv-sonuc p { margin: 0 0 var(--aralik-1); }
+.csv-atlanan { margin: 0; padding-left: var(--aralik-5); color: var(--uyari); font-weight: 600; }

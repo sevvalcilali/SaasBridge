@@ -25,7 +25,7 @@ test('GET /api/people: başlangıç kadrosu, her katılımcı bir karta atanmı�
   const kisiler = await getj(`${B}/api/people`)
   assert.equal(kisiler.length, 25)
   for (const k of kisiler) {
-    assert.deepEqual(Object.keys(k).sort(), ['ad', 'atananKart', 'kisiId', 'kurum', 'not', 'renk', 'rol', 'yildiz'])
+    assert.deepEqual(Object.keys(k).sort(), ['ad', 'atananKart', 'ayrildi', 'kisiId', 'kurum', 'not', 'renk', 'rol', 'yildiz'])
     assert.ok(['investor', 'founder', 'guest'].includes(k.rol))
     assert.match(k.renk, /^#[0-9a-f]{6}$/i)
     assert.ok(k.atananKart, 'başlangıçta kart atanmış olmalı')

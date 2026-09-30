@@ -57,3 +57,19 @@ test('kisiGuncelle: bilgi değişir; kisiSil: kayıttan düşer', async () => {
 test('hata: olmayan kişi güncellemesi reddedilir', async () => {
   await assert.rejects(() => api.kisiGuncelle('yok-boyle-kisi', { kurum: 'X' }))
 })
+
+test('iceAktar: CSV metni gider, özet döner; iade ayrildi seçeneği', async () => {
+  const sonuc = await api.iceAktar('ad;soyad;rol;kurum;yıldız\nNur;Işık;Yatırımcı;Liman;3\nX;Y;bilinmez;;\n')
+  assert.equal(sonuc.eklenen, 1)
+  assert.equal(sonuc.atlanan.length, 1)
+  const nur = (await api.kisileriGetir()).find((k) => k.ad === 'Nur Işık')
+  assert.equal(nur.atananKart, null)
+  assert.equal(nur.ayrildi, false)
+
+  await api.ata(nur.kisiId, '61')
+  await api.iade('61', { ayrildi: false })          // geri al
+  assert.equal((await api.kisileriGetir()).find((k) => k.kisiId === nur.kisiId).ayrildi, false)
+  await api.ata(nur.kisiId, '61')
+  await api.iade('61')                               // kart iadesi
+  assert.equal((await api.kisileriGetir()).find((k) => k.kisiId === nur.kisiId).ayrildi, true)
+})

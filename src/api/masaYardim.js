@@ -9,6 +9,14 @@ export function katilimciAra(liste, arama) {
   return liste.filter((k) => tr(`${k.ad} ${k.kurum}`).includes(q))
 }
 
+// Kişinin masadaki durumu (brief §6.3): kartı var / "kart bekliyor" / "ayrıldı".
+export function kisiDurumu(k) {
+  if (k.atananKart) return { tur: 'kartli', etiket: `Kart ${k.atananKart}` }
+  if (k.ayrildi) return { tur: 'ayrildi', etiket: 'ayrıldı' }
+  return { tur: 'bekliyor', etiket: 'kart bekliyor' }
+}
+export const kartBekleyenler = (liste) => liste.filter((k) => kisiDurumu(k).tur === 'bekliyor')
+
 // Yeni kişi formu geçerli mi: ad zorunlu, rol tanımlı olmalı.
 export function formGecerli(form) {
   return Boolean(form?.ad?.trim()) && ['investor', 'founder', 'guest'].includes(form?.rol)

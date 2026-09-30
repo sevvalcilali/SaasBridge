@@ -65,7 +65,7 @@ export default function KartVerEkrani() {
     if (!geriAlinabilir(sonAtama) || geriAliniyor) { setSonAtama(null); return }
     setGeriAliniyor(true)
     try {
-      await api.iade(sonAtama.kart)
+      await api.iade(sonAtama.kart, { ayrildi: false }) // yanlış atama: kişi ayrılmadı, kart bekliyor
       // Kart değişiminde eski kart geri verilmez (bırakılmıştı); kişi kartsız kalır.
       const ek = sonAtama.eskiKart ? ` ${sonAtama.ad} şu an kartsız.` : ''
       setBilgi(`↶ Geri alındı: ${sonAtama.ad} → Kart ${sonAtama.kart} ataması kaldırıldı, kart boşta.${ek}`)

@@ -99,7 +99,7 @@ kisiler.forEach((k) => {
   const kat = {
     kisiId: 'k' + (++kisiIdSayaci),
     ad: k.name, rol: k.role, kurum: k.org, yildiz: k.tier,
-    not: '', renk: k.color, atananKart: k.id, min: 0, invMin: 0,
+    not: '', renk: k.color, atananKart: k.id, ayrildi: false, min: 0, invMin: 0,
   }
   k.kisiId = kat.kisiId
   katilimcilar.push(kat)
@@ -143,7 +143,7 @@ const kartKat = (kart) => katilimcilar.find((k) => k.atananKart === kart)
 const yeniRenk = () => PALET[(renkSayaci++) % PALET.length]
 const katDto = (k) => ({
   kisiId: k.kisiId, ad: k.ad, rol: k.rol, kurum: k.kurum,
-  yildiz: k.yildiz, not: k.not, renk: k.renk, atananKart: k.atananKart,
+  yildiz: k.yildiz, not: k.not, renk: k.renk, atananKart: k.atananKart, ayrildi: k.ayrildi,
 })
 
 function kisiEkle({ ad, rol, kurum, yildiz, not }) {
@@ -153,7 +153,7 @@ function kisiEkle({ ad, rol, kurum, yildiz, not }) {
     rol: ['investor', 'founder', 'guest'].includes(rol) ? rol : 'guest',
     kurum: kurum || '',
     yildiz: rol === 'investor' ? Math.max(0, Math.min(5, yildiz | 0)) : 0,
-    not: not || '', renk: yeniRenk(), atananKart: null, min: 0, invMin: 0,
+    not: not || '', renk: yeniRenk(), atananKart: null, ayrildi: false, min: 0, invMin: 0,
   }
   katilimcilar.push(kat)
   return kat
@@ -195,6 +195,7 @@ function ata(kisiId, kart) {
   if (eski && eski !== kat) iadeKat(eski, kart)      // kart başkasındaysa geri al
   if (kat.atananKart && kat.atananKart !== kart) iadeKat(kat, kat.atananKart) // kişinin eski kartını bırak
   kat.atananKart = kart
+  kat.ayrildi = false
   let e = kisiBul(kart)
   if (!e) {
     e = { id: kart, esler: new Set(), seenAgo: 0, min: 0, invMin: 0, bias: rndAralik(-3, 3) }
@@ -221,12 +222,80 @@ function kenarlariTasi(eski, yeni) {
   }
 }
 
-function iade(kart) {
+// Kart iadesi (brief §6): kişi "ayrıldı" olur. "Geri al" (yanlış atama) ayrildi=false
+// gönderir: kişi ayrılmadı, hâlâ kart bekliyor.
+function iade(kart, ayrildi = true) {
   kart = String(kart)
   const kat = kartKat(kart)
-  if (kat) iadeKat(kat, kart)
+  if (kat) { iadeKat(kat, kart); kat.ayrildi = ayrildi }
   else kartiCikar(kart)
   return true
+}
+
+// ---------- toplu ön yükleme (§9-5: POST /api/people/import, CSV) ----------
+// Sütunlar: ad, soyad, rol, kurum, yıldız (brief §6.2). Başlık satırı varsa
+// sütunlar ada göre eşlenir, yoksa bu sırayla okunur. Ayraç ; , veya sekme
+// (Türkçe Excel ; kullanır). Rol Türkçe ya da İngilizce yazılabilir.
+const trKucuk = (s) => (s ?? '').trim().toLocaleLowerCase('tr')
+const ROL_ADLARI = {
+  yatırımcı: 'investor', yatirimci: 'investor', investor: 'investor',
+  girişimci: 'founder', girisimci: 'founder', founder: 'founder',
+  misafir: 'guest', guest: 'guest',
+}
+const SUTUN_ADLARI = { ad: 'ad', isim: 'ad', soyad: 'soyad', soyadı: 'soyad', rol: 'rol', kurum: 'kurum', şirket: 'kurum', yıldız: 'yildiz', yildiz: 'yildiz' }
+
+function csvSatirlari(metin) {
+  metin = metin.replace(/^\uFEFF/, '')
+  const ilk = metin.split(/\r?\n/, 1)[0]
+  const ayrac = [';', '\t', ','].reduce((en, a) => (ilk.split(a).length > ilk.split(en).length ? a : en), ',')
+  const satirlar = []
+  let satir = [], alan = '', tirnak = false
+  for (let i = 0; i < metin.length; i++) {
+    const c = metin[i]
+    if (tirnak) {
+      if (c === '"' && metin[i + 1] === '"') { alan += '"'; i++ }
+      else if (c === '"') tirnak = false
+      else alan += c
+    } else if (c === '"') tirnak = true
+    else if (c === ayrac) { satir.push(alan); alan = '' }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && metin[i + 1] === '\n') i++
+      satir.push(alan); satirlar.push(satir); satir = []; alan = ''
+    } else alan += c
+  }
+  if (alan || satir.length) { satir.push(alan); satirlar.push(satir) }
+  return satirlar
+}
+
+function csvIceAktar(metin) {
+  const satirlar = csvSatirlari(metin)
+  let sutunlar = ['ad', 'soyad', 'rol', 'kurum', 'yildiz']
+  let bas = 0
+  if (satirlar.length && SUTUN_ADLARI[trKucuk(satirlar[0][0])]) {
+    sutunlar = satirlar[0].map((b) => SUTUN_ADLARI[trKucuk(b)] ?? null)
+    bas = 1
+  }
+  const mevcut = new Set(katilimcilar.map((k) => `${trKucuk(k.ad)}|${trKucuk(k.kurum)}`))
+  let eklenen = 0
+  const atlanan = []
+  for (let i = bas; i < satirlar.length; i++) {
+    const hucre = satirlar[i]
+    if (hucre.every((h) => !h.trim())) continue // boş satır
+    const v = {}
+    sutunlar.forEach((s, j) => { if (s) v[s] = (hucre[j] ?? '').trim() })
+    const satir = i + 1 // kullanıcıya dosyadaki satır no
+    const ad = [v.ad, v.soyad].filter(Boolean).join(' ')
+    const rol = ROL_ADLARI[trKucuk(v.rol)]
+    if (!v.ad) { atlanan.push({ satir, sebep: 'ad boş' }); continue }
+    if (!rol) { atlanan.push({ satir, sebep: `rol anlaşılamadı: "${v.rol ?? ''}"` }); continue }
+    const kurum = v.kurum ?? ''
+    const anahtarK = `${trKucuk(ad)}|${trKucuk(kurum)}`
+    if (mevcut.has(anahtarK)) { atlanan.push({ satir, sebep: `${ad} zaten kayıtlı` }); continue }
+    mevcut.add(anahtarK)
+    kisiEkle({ ad, rol, kurum, yildiz: Number(v.yildiz) || 0 })
+    eklenen++
+  }
+  return { eklenen, atlanan }
 }
 
 // "Yaklaştır ve tanı": alıcıya yaklaştırılmış kartlar → kartNo → bitiş simSn.
@@ -584,12 +653,17 @@ function sifirla() {
 // ---------- HTTP + SSE ----------
 const sseIstemciler = new Set()
 
-function govdeOku(istek) {
+function metinOku(istek) {
   return new Promise((coz) => {
     let g = ''
+    istek.setEncoding('utf8') // çok baytlı Türkçe harfler parça sınırında bölünmesin
     istek.on('data', (p) => { g += p })
-    istek.on('end', () => { try { coz(JSON.parse(g || '{}')) } catch { coz(null) } })
+    istek.on('end', () => coz(g))
   })
+}
+async function govdeOku(istek) {
+  const g = await metinOku(istek)
+  try { return JSON.parse(g || '{}') } catch { return null }
 }
 const json = (yanit, kod, veri) => {
   yanit.writeHead(kod, { 'Content-Type': 'application/json; charset=utf-8' })
@@ -616,6 +690,13 @@ async function apiYonlendir(istek, yanit) {
     const g = await govdeOku(istek)
     if (!g || !g.ad) { json(yanit, 400, { ok: false, hata: 'ad gerekli' }); return true }
     json(yanit, 200, katDto(kisiEkle(g))); return true
+  }
+
+  // /api/people/{id}'den ÖNCE: yoksa "import" kişi kimliği sanılır
+  if (istek.method === 'POST' && yol === '/api/people/import') {
+    const metin = await metinOku(istek)
+    if (!metin.replace(/^\uFEFF/, '').trim()) { json(yanit, 400, { ok: false, hata: 'boş dosya' }); return true }
+    json(yanit, 200, csvIceAktar(metin)); return true
   }
 
   const eslesme = yol.match(/^\/api\/people\/([^/]+)$/)
@@ -650,7 +731,7 @@ async function apiYonlendir(istek, yanit) {
   if (istek.method === 'POST' && yol === '/api/unassign') {
     const g = await govdeOku(istek)
     if (!g || g.kart == null) { json(yanit, 400, { ok: false }); return true }
-    iade(g.kart); json(yanit, 200, { ok: true }); return true
+    iade(g.kart, g.ayrildi !== false); json(yanit, 200, { ok: true }); return true
   }
 
   return false

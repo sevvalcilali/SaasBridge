@@ -303,9 +303,19 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   değişen alanlar PATCH edilir (`duzenlemeFarki`), renk gösterilir ama değiştirilemez.
   Mock PATCH: geçersiz rol/boş ad yok sayılır, yıldız 0–5. 113/113 test + tarayıcı uçtan uca.
 
-#### 2.12 ⬜ CSV toplu ön yükleme + "kart bekliyor" listesi
+#### 2.12 ✅ CSV toplu ön yükleme + "kart bekliyor" listesi
 - CSV (ad, soyad, rol, kurum, yıldız) yükle → `/api/people/import`; kartsız kişiler "kart bekliyor".
 - **Doğrulama:** CSV yüklenir, kişiler listeye düşer, kapıda atanır.
+- **Yapıldı (30.09.2026):** Kişiye `ayrildi` alanı (Şevval onayı): kart iadesi → `true`,
+  kart verilince → `false`. `POST /api/unassign {kart, ayrildi}` — varsayılan `true`;
+  "Geri al" `false` gönderir (yanlış atamada kişi ayrılmış sayılmaz); başkasından alınan kart
+  da kişiyi ayrılmış yapmaz. `POST /api/people/import` ham CSV alır → `{eklenen, atlanan:
+  [{satir, sebep}]}`: başlık varsa sütun adına göre, yoksa sırayla; ayraç `;` `,` sekme;
+  tırnaklı alan; rol Türkçe/İngilizce; aynı ad+kurum ikinci kez eklenmez. Arayüz: dosya
+  UTF-8, değilse Windows-1254 okunur (Türkçe Excel). Adım 1'de "Tümü | Kart bekliyor (n)"
+  filtresi, satırda "kart bekliyor" / "ayrıldı" etiketi; yükleme sonrası bekleyenler açılır.
+  Excel (.xlsx) desteği yok — bağımlılık gerektirir, istenirse onaya sunulur.
+  123/123 test + tarayıcı uçtan uca.
 
 #### 2.13 ⬜ "Boştaki kartlar" şeridi + kayıp kart etiketi
 - Atanmamış ama açık kartlar ayrı şeritte (stok takibi); `lost` bildirimli kişide "Kartı kontrol et" → pil/kart değişimi.
@@ -388,8 +398,9 @@ saasBridge/
 - [ ] **Atama geçmişi mock'ta yok:** 2.1'de "zaman damgalı geçmişe yazılır" denmişti ama
       yazılmıyor. Geri al şimdilik masanın kendi son atamasıyla (istemci) çalışır.
       Sunucu tarafı geçmiş → 2.14 `SUNUCUDAN_ISTENENLER.md`.
-- [ ] **"Ayrıldı" ayrı durum değil:** iade edilen kişi "kartsız" görünür. 2.12'deki
-      "kart bekliyor" listesi ayrılanları ayırmalı → model kararı gerekiyor.
+- [x] ~~**"Ayrıldı" ayrı durum değil**~~ → 2.12'de `ayrildi` alanı eklendi (onaylı).
+      `SUNUCUDAN_ISTENENLER.md`'ye (2.14) yazılacak: `/api/people` `ayrildi`,
+      `/api/unassign` `ayrildi` bayrağı, `/api/people/import` yanıt biçimi.
 - [x] ~~**Kenarlar kart no ile anahtarlı**~~ → 2.11'de düzeltildi (kenarlar kişiye bağlı).
 - [ ] **Kart değişiminde "Geri al"** yeni kartı boşa çıkarır, eski kartı geri vermez;
       kişi kartsız kalır (ekranda bu söylenir). Eski kartı geri vermek istenirse ayrıca karar.

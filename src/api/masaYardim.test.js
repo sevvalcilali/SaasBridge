@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki, kisiDurumu, kartBekleyenler } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -100,4 +100,19 @@ test('duzenlemeFarki: yalnız değişen alanlar; renk hiç yok', () => {
 test('duzenlemeFarki: yatırımcılıktan çıkınca yıldız 0 olur', () => {
   const kisi = { ad: 'Ayşe', rol: 'investor', kurum: '', yildiz: 3, not: '' }
   assert.deepEqual(duzenlemeFarki(kisi, { ...kisi, rol: 'founder' }), { rol: 'founder', yildiz: 0 })
+})
+
+test('kisiDurumu: kartlı / kart bekliyor / ayrıldı', () => {
+  assert.deepEqual(kisiDurumu({ atananKart: '14', ayrildi: false }), { tur: 'kartli', etiket: 'Kart 14' })
+  assert.deepEqual(kisiDurumu({ atananKart: null, ayrildi: false }), { tur: 'bekliyor', etiket: 'kart bekliyor' })
+  assert.deepEqual(kisiDurumu({ atananKart: null, ayrildi: true }), { tur: 'ayrildi', etiket: 'ayrıldı' })
+})
+
+test('kartBekleyenler: ayrılanlar ve kartlılar dışarıda', () => {
+  const l = [
+    { kisiId: 'a', atananKart: '3', ayrildi: false },
+    { kisiId: 'b', atananKart: null, ayrildi: false },
+    { kisiId: 'c', atananKart: null, ayrildi: true },
+  ]
+  assert.deepEqual(idler(kartBekleyenler(l)), ['b'])
 })

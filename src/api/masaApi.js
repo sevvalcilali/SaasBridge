@@ -7,11 +7,12 @@ export class MasaApi {
     this.adres = adres.replace(/\/$/, '')
   }
 
-  async #iste(yol, yontem = 'GET', govde) {
+  // Gövde varsayılan JSON; `tur` verilirse (ör. CSV) metin olduğu gibi gider.
+  async #iste(yol, yontem = 'GET', govde, tur) {
     const secenek = { method: yontem, headers: {} }
     if (govde !== undefined) {
-      secenek.headers['Content-Type'] = 'application/json'
-      secenek.body = JSON.stringify(govde)
+      secenek.headers['Content-Type'] = tur ?? 'application/json'
+      secenek.body = tur ? govde : JSON.stringify(govde)
     }
     const yanit = await fetch(this.adres + yol, secenek)
     if (!yanit.ok) throw new Error(`${yontem} ${yol} → ${yanit.status}`)
@@ -23,10 +24,13 @@ export class MasaApi {
   kisiEkle(veri) { return this.#iste('/api/people', 'POST', veri) }
   kisiGuncelle(kisiId, veri) { return this.#iste(`/api/people/${encodeURIComponent(kisiId)}`, 'PATCH', veri) }
   kisiSil(kisiId) { return this.#iste(`/api/people/${encodeURIComponent(kisiId)}`, 'DELETE', {}) }
+  // Toplu ön yükleme (§9-5): CSV metni → { eklenen, atlanan: [{ satir, sebep }] }
+  iceAktar(csvMetni) { return this.#iste('/api/people/import', 'POST', csvMetni, 'text/csv; charset=utf-8') }
 
   // --- atama ---
   ata(kisiId, kart) { return this.#iste('/api/assign', 'POST', { kisiId, kart }) }
-  iade(kart) { return this.#iste('/api/unassign', 'POST', { kart }) }
+  // Kart iadesi kişiyi "ayrıldı" yapar; yanlış atamayı geri almak yapmaz (ayrildi: false).
+  iade(kart, { ayrildi = true } = {}) { return this.#iste('/api/unassign', 'POST', { kart, ayrildi }) }
 
   // --- kartlar / yaklaştır ve tanı ---
   kartlariGetir() { return this.#iste('/api/cards') }
