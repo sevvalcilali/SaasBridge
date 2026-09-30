@@ -453,7 +453,7 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Kabul ölçütü:** panel çizelgesi + kısayollar + rapor + yazdırma + CSV mock ile uçtan uca; not + görüntüler.
 - **Yapıldı:** `docs/faz4/FAZ4_TESLIM.md` + 6 ekran görüntüsü + `ornek_rapor.pdf` + 2 örnek CSV (tek kabul senaryosundan); `SUNUCUDAN_ISTENENLER.md` §6 (sessions biçimi kesin; report.csv isteğe bağlı). Faz 2 ve Faz 3 kabul senaryoları yeniden koşuldu — gerileme yok. 179/179 test.
 
-### 🟡 Faz 5 — Cilalar (onaylandı 30.09.2026: "faz 5 devam et bitince haber ver")
+### ✅ Faz 5 — Cilalar (TAMAMLANDI 30.09.2026; onay: "faz 5 devam et bitince haber ver")
 **Amaç:** Brief §4.5 (sunum modu), §10 (koyu/açık tema, doğrulanmış palet), §12-5 (100+ kişi).
 Şevval talimatı: **sorgulamadan bitir, bitince haber ver.** Kararlar PLAN'a not düşülür.
 
@@ -496,8 +496,12 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
   çizgiler soluk; Kurulum'da >100 çiftte tablo 2 sn'de bir tazelenir (`useSeyrek` + memo), kalibrasyon seçenekleri
   yalnız çift listesi değişince çizilir. Pano ağı tek sütun kaldı (sayfa kaydırılabiliyor).
 
-#### 5.5 ⬜ Faz 5 teslimi
+#### 5.5 ✅ Faz 5 teslimi
 - Ekran görüntüleri + `docs/faz5/FAZ5_TESLIM.md`; önceki fazların kabul senaryoları yeniden.
+- **Yapıldı:** `docs/faz5/FAZ5_TESLIM.md` + 12 görüntü (palet karşılaştırması dahil) + koyu temadan alınmış örnek PDF;
+  Faz 5 kabul senaryosu 15/15; Faz 2 (11/11), Faz 3 (16/16), Faz 4 (13/13) yeniden koşuldu — gerileme yok. 194/194 test.
+
+> Brief §12'nin beş önceliği bitti. Sonraki iş için (gerçek sunucuya bağlanma, açık sorular) Şevval'e sorulacak.
 
 ---
 
