@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -46,4 +46,19 @@ test('kartOner: numara ön ekine göre süzer; boşta hepsi', () => {
   assert.deepEqual(kartOner(KARTLAR, '1').map((k) => k.kart), ['10', '11', '12', '113'])
   assert.deepEqual(kartOner(KARTLAR, '11').map((k) => k.kart), ['11', '113'])
   assert.deepEqual(kartOner(KARTLAR, '113').map((k) => k.kart), ['113'])
+})
+
+test('baskinKart: tek güçlü kart → o bulunur', () => {
+  // KARTLAR'da yalnız 11 güçlü (-50); diğerleri ≤ -70
+  assert.deepEqual(baskinKart(KARTLAR), { kart: '11', coklu: false })
+})
+
+test('baskinKart: iki güçlü kart → çoklu (birini uzaklaştır)', () => {
+  const iki = [...KARTLAR, { kart: '20', rssiAlici: -45, seenAgo: 0.3, atanan: null, pil: 80 }]
+  assert.deepEqual(baskinKart(iki), { kart: null, coklu: true })
+})
+
+test('baskinKart: hiç güçlü yok → boş', () => {
+  const zayif = KARTLAR.map((k) => ({ ...k, rssiAlici: -78 }))
+  assert.deepEqual(baskinKart(zayif), { kart: null, coklu: false })
 })

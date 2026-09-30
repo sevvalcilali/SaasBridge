@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
 import KartSecAdim from './KartSecAdim.jsx'
+import KontrolOnayAdim from './KontrolOnayAdim.jsx'
 import './KartVerEkrani.css'
 
 const ADIMLAR = [
@@ -21,9 +22,26 @@ export default function KartVerEkrani() {
   const [seciliKisi, setSeciliKisi] = useState(null)
   const [seciliKart, setSeciliKart] = useState(null)
   const [katilimcilar, setKatilimcilar] = useState(null)
+  const [sonAtama, setSonAtama] = useState(null)
 
   const yukle = useCallback(() => api.kisileriGetir().then(setKatilimcilar).catch(() => setKatilimcilar([])), [api])
   useEffect(() => { yukle() }, [yukle])
+
+  // "Verildi" bildirimi birkaç saniye sonra kendiliğinden kalkar.
+  useEffect(() => {
+    if (!sonAtama) return
+    const z = setTimeout(() => setSonAtama(null), 4000)
+    return () => clearTimeout(z)
+  }, [sonAtama])
+
+  // Onay → ekran hemen sıradaki kişiye sıfırlanır (hedef <15 sn/kişi).
+  function tamamla(atama) {
+    setSonAtama(atama)
+    setSeciliKisi(null)
+    setSeciliKart(null)
+    setAdim(1)
+    yukle()
+  }
 
   function kisiSec(kisi) {
     setSeciliKisi(kisi)
@@ -41,6 +59,12 @@ export default function KartVerEkrani() {
         <h1>Kart Ver</h1>
         <p className="kartver-alt">Karşılama masası — gelen kişiye kart verin</p>
       </header>
+
+      {sonAtama && (
+        <p className="kartver-verildi" role="status" data-test="verildi">
+          ✓ {sonAtama.ad} → Kart {sonAtama.kart} verildi. Sıradaki kişi.
+        </p>
+      )}
 
       <ol className="kartver-adimlar" aria-label="Adımlar">
         {ADIMLAR.map((a) => (
@@ -62,9 +86,8 @@ export default function KartVerEkrani() {
         )}
         {adim === 3 && (
           <div className="kartver-yer" data-test="adim-3">
-            <p className="kartver-secili"><strong>{seciliKisi?.ad}</strong> → <strong>Kart {seciliKart}</strong></p>
-            <p className="kartver-iskele">Kontrol ve onay 2.8–2.9'da gelecek.</p>
-            <button type="button" className="kartver-geri" onClick={() => setAdim(2)}>← Kart adımına dön</button>
+            <KontrolOnayAdim api={api} seciliKisi={seciliKisi} seciliKart={seciliKart}
+              katilimcilar={katilimcilar} onTamam={tamamla} onGeri={() => setAdim(2)} />
           </div>
         )}
       </section>

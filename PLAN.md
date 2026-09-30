@@ -266,16 +266,16 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - Numara girişi; yalnız "şu an açık" (duyulan) kartlar önerilir (yeşil nokta = açık).
 - **Doğrulama:** duyulmayan kart uyarısı; açık kartlar önerilir.
 
-#### 2.7 ⬜ Adım 2b — "Yaklaştır ve tanı" akışı
+#### 2.7 ✅ Adım 2b — "Yaklaştır ve tanı" akışı
 - "Kartı alıcıya yaklaştırın" → `/api/cards` yoklanır, en güçlü kart otomatik belirir ("Kart 14 bulundu ✓").
 - İki kart yakınsa "İki kart algılandı, birini uzaklaştırın".
 - **Doğrulama:** mock simülasyonunda kart otomatik bulunur; çift-kart uyarısı çıkar.
 
-#### 2.8 ⬜ Adım 3 — Kontrol (açık mı / son duyulma / pil / zaten atanmış mı)
+#### 2.8 ✅ Adım 3 — Kontrol (açık/son duyulma/pil/zaten atanmış)
 - Seçilen kartın durumu; **zaten atanmışsa** "Bu kart Ali Kaya'da. Geri alındı mı?" onayı.
 - **Doğrulama:** atanmış kart seçilince uyarı; evet→eski atama kapanır.
 
-#### 2.9 ⬜ Adım 4 — Onay kartı → ekran sıfırlanır (hedef <15 sn/kişi)
+#### 2.9 ✅ Adım 4 — Onay kartı → ekran sıfırlanır
 - Kişinin rengiyle "Ayşe Demir → Kart 14" özeti; onayla→`/api/assign`; ekran hemen sıradaki kişiye.
 - **Doğrulama:** onaydan sonra kişi panoda görünür; ekran sıfırlanır; akış hızlı.
 

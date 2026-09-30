@@ -28,3 +28,12 @@ export function kartOner(kartlar, girdi) {
   if (!q) return kartlar
   return kartlar.filter((k) => k.kart.startsWith(q))
 }
+
+// "Yaklaştır ve tanı": alıcıya yaklaştırılan kart belirgin en güçlüdür.
+// Tek güçlü kart → bulundu; iki+ → "birini uzaklaştırın"; hiç → beklemede.
+export function baskinKart(kartlar, esik = -55) {
+  const guclu = kartlar.filter((k) => k.rssiAlici > esik)
+  if (guclu.length === 1) return { kart: guclu[0].kart, coklu: false }
+  if (guclu.length >= 2) return { kart: null, coklu: true }
+  return { kart: null, coklu: false }
+}

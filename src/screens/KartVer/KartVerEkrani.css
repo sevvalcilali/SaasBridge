@@ -160,4 +160,81 @@
   background: var(--metin); box-shadow: 0 0 0 3px var(--yuzey-2);
 }
 .kartsec-no { font-weight: 700; font-size: var(--punto-orta); }
+
+/* Mod seçimi: yaklaştır / numara */
+.kartsec-mod { display: flex; gap: var(--aralik-2); }
+.kartsec-mod-dugme {
+  flex: 1; font: inherit; font-weight: 700; cursor: pointer;
+  min-height: 52px; border-radius: var(--kose);
+  border: 2px solid var(--cizgi-koyu); background: var(--zemin); color: var(--metin);
+}
+.kartsec-mod-dugme--secili { background: var(--vurgu); border-color: var(--vurgu); color: var(--metin-ters); }
+.kartsec-onerilen { font-size: var(--punto-kucuk); font-weight: 400; opacity: 0.85; margin-left: var(--aralik-1); }
+
+/* Yaklaştır ve tanı */
+.yaklastir { display: flex; flex-direction: column; gap: var(--aralik-3); }
+.yaklastir-bekle {
+  display: flex; align-items: center; gap: var(--aralik-3); justify-content: center;
+  min-height: 120px; margin: 0;
+  font-size: var(--punto-buyuk); font-weight: 700; color: var(--metin-2);
+  background: var(--zemin); border: 2px dashed var(--cizgi-koyu); border-radius: var(--kose-buyuk);
+}
+.yaklastir-halka {
+  width: 18px; height: 18px; border-radius: var(--kose-tam);
+  border: 3px solid var(--vurgu); animation: yaklastir-nabiz 1.4s ease-in-out infinite;
+}
+@keyframes yaklastir-nabiz { 50% { transform: scale(1.35); opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) { .yaklastir-halka { animation: none; } }
+
+.yaklastir-bulundu {
+  display: flex; flex-direction: column; align-items: center; gap: var(--aralik-3);
+  min-height: 120px; justify-content: center;
+  background: var(--olumlu-zemin); border: 2px solid var(--olumlu); border-radius: var(--kose-buyuk);
+  padding: var(--aralik-4);
+}
+.yaklastir-buyuk { font-size: var(--punto-dev); font-weight: 700; color: var(--metin); }
+
+.yaklastir-demo {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--aralik-2);
+  padding-top: var(--aralik-3); border-top: 1px dashed var(--cizgi);
+}
+.yaklastir-demo-etiket { width: 100%; font-size: var(--punto-kucuk); color: var(--metin-soluk); }
+
+/* --- Adım 3: kontrol + onay --- */
+.kontrol { width: 100%; display: flex; flex-direction: column; gap: var(--aralik-3); }
+.kontrol-baslik { margin: 0; font-size: var(--punto-kucuk); text-transform: uppercase; letter-spacing: 0.04em; color: var(--metin-2); }
+.kontrol-bilgi { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--aralik-3); }
+.kontrol-bilgi > div { background: var(--zemin); border: 1px solid var(--cizgi); border-radius: var(--kose); padding: var(--aralik-3); }
+.kontrol-bilgi dt { color: var(--metin-2); font-size: var(--punto-kucuk); }
+.kontrol-bilgi dd { margin: 0; font-weight: 700; font-size: var(--punto-orta); }
+
+.kontrol-uyari {
+  background: var(--uyari-zemin); border: 2px solid var(--uyari); border-radius: var(--kose);
+  padding: var(--aralik-3) var(--aralik-4);
+}
+.kontrol-uyari p { margin: 0 0 var(--aralik-2); font-size: var(--punto-orta); color: var(--metin); }
+.kontrol-onay-kutu { display: flex; align-items: center; gap: var(--aralik-2); font-weight: 700; color: var(--uyari); cursor: pointer; min-height: 44px; }
+.kontrol-onay-kutu input { width: 24px; height: 24px; accent-color: var(--uyari); }
+.kontrol-not { margin: 0; color: var(--metin-2); }
+
+/* Onay kartı: kişinin rengi yalnız işaret/kenarda; metin normal renkte (brief §10) */
+.onay-kart {
+  display: flex; align-items: center; gap: var(--aralik-3);
+  padding: var(--aralik-4) var(--aralik-5);
+  background: var(--yuzey); border: 2px solid var(--cizgi);
+  border-left: 10px solid var(--kisi-renk);
+  border-radius: var(--kose-buyuk);
+}
+.onay-renk { width: 22px; height: 22px; border-radius: var(--kose-tam); background: var(--kisi-renk); flex: none; }
+.onay-metin { font-size: var(--punto-buyuk); }
+.onay-dugme { min-width: 160px; font-size: var(--punto-orta); }
+
+/* Onay sonrası kısa bildirim — yeşil DEĞİL (yeşil = birlikte) */
+.kartver-verildi {
+  margin: 0 0 var(--aralik-4); text-align: center;
+  padding: var(--aralik-3) var(--aralik-4);
+  background: var(--olumlu-zemin); color: var(--metin);
+  border: 1px solid var(--olumlu); border-radius: var(--kose);
+  font-weight: 700; font-size: var(--punto-orta);
+}
 .kartsec-etiket { margin-left: auto; font-size: var(--punto-kucuk); color: var(--metin-2); }
