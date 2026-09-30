@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { ESIK_ALT, ESIK_UST, esikSinirla, gecikmeliGonderici, esikUstuCiftSayisi } from '../../api/esik.js'
 
-export default function EsikAyari({ esik, signals, onGonder }) {
+// onTaslak: sürüklenen değer (ya da null) — grafik eşik çizgisini anında taşısın diye.
+export default function EsikAyari({ esik, signals, onGonder, onTaslak }) {
   const [taslak, setTaslak] = useState(null) // sürüklenen / kaydedilmeyi bekleyen değer
   const [kayit, setKayit] = useState('bos')  // bos | kaydediliyor | kaydedildi | hata
 
@@ -19,6 +20,7 @@ export default function EsikAyari({ esik, signals, onGonder }) {
     )
   }
   useEffect(() => () => gondericiRef.current.iptal(), [])
+  useEffect(() => { onTaslak?.(taslak) }, [taslak, onTaslak])
 
   // Sunucu yeni değeri yayınlayınca taslak bırakılır: gösterilen değer artık sunucunun.
   useEffect(() => {

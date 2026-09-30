@@ -374,11 +374,12 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** mock'ta dört durum da görünür; `ab/ba` null ise "—".
 - **Yapıldı:** `api/sinyal.js` (durum türetme, yön farkı ≥8 dB ⇄, seyrek n<5, küçük kart no solda — kişiler yer değişince ab/ba da çevrilir) + testleri; ortak `components/KisiRozeti` (renk + rol şekli + ad + kart no). Tarayıcıda dört durum görüldü (1×: birlikte/başlıyor; 10×: bitiyor/eşik altı), sıra hiç bozulmadı.
 
-#### 3.4 ⬜ Canlı sinyal grafiği
+#### 3.4 ✅ Canlı sinyal grafiği
 - `history` (son 90 sn): her çift bir çizgi (iki kişinin rengi), eşik yatay kesikli çizgi, eşik üstü
   bölge hafif **nötr** tonlu (yeşil değil), çizgi sonunda doğrudan etiket ("3 · 4"), üzerine gelince değer. Eşik kaydırılırken
   çizgi anında yer değiştirir. Çok çift varsa en güçlü N çift + "tümü" seçeneği.
 - **Doğrulama:** grafik canlı akar, eşik çizgisi kaydırıcıyla oynar, hover değeri doğru.
+- **Yapıldı:** `api/grafik.js` (seri seçimi, sabit eksen -95…-35, etiket çakışma önleme, anlık değerler) + testleri; `SinyalGrafigi` bağımlılıksız SVG, kabın gerçek px genişliğinde (ResizeObserver) çizilir — yazılar her ekranda okunur; iki renkli çizgi (iki kişi), nötr eşik bölgesi, "3 · 4" uç etiketleri, çapraz çizgi + ipucu; varsayılan en güçlü 6 çift + "Tümünü göster". Kaydırıcının taslak değeri ekran düzeyine taşındı: eşik çizgisi sürüklerken anında oynar.
 
 #### 3.5 ⬜ Perspektif (kişi seçimi)
 - Bir kişi seçilince grafik ve tablo yalnız onun çiftlerini gösterir ("perspektif" düğmeleri / kişi seçici).
@@ -455,6 +456,14 @@ saasBridge/
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,
       telefon bildirimi vb. kapsam dışı).
+
+**3.4 sırasında fark edilen (onay bekliyor):**
+- [ ] **Kişi paleti renk ayrımı doğrulamasından geçmiyor** (dataviz doğrulayıcısı, OKLab, açık
+      zemin `#fffdf8`): mercan `#bf4545` ↔ turuncu `#c25022` normal görüşte bile ΔE 4.8 (<15);
+      hardal ↔ turuncu renk körlüğünde ΔE 1.7; petrol ve gri düşük canlılık. Faz 1'deki test
+      CIELAB ölçütüyle geçiyordu. Etkisi sınırlı: 7 renk 25+ kişiye dağıldığı için kimlik her
+      ekranda zaten renk + şekil + ad (grafikte "3 · 4" etiketi) ile veriliyor. Öneri: Faz 5
+      (tema) ile birlikte paleti doğrulayıcıdan geçen tonlarla yeniden adımlamak.
 
 **2.10 sırasında fark edilen, kapsam dışı bırakılanlar (onay bekliyor):**
 - [x] ~~**Masa ekranlarında renk dönüşümü yok**~~ → düzeltildi (Faz 2 bitirme talimatı):

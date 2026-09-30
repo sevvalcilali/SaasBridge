@@ -1,14 +1,17 @@
 // Kurulum / eşik ekranı (brief §4.3, §8) — teknik kişi etkinlik öncesi kullanır:
 // eşik ayarı, canlı sinyal grafiği, çift tablosu, kalibrasyon, kart sağlığı.
 // Veri panoyla aynı kaynaktan (usePano / SSE); dBm burada gösterilebilir, metre yok.
+import { useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
+import SinyalGrafigi from './SinyalGrafigi.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
+  const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
 
   if (!durum) {
     return (
@@ -30,10 +33,11 @@ export default function KurulumEkrani() {
         <div className="kurulum-ana">
           <section className="kurulum-kutu" aria-labelledby="k-esik" data-test="kutu-esik">
             <h2 id="k-esik" className="kurulum-baslik">Eşik</h2>
-            <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} />
+            <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} onTaslak={setTaslakEsik} />
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-grafik" data-test="kutu-grafik">
             <h2 id="k-grafik" className="kurulum-baslik">Canlı sinyal (son {durum.chartSeconds} sn)</h2>
+            <SinyalGrafigi history={durum.history} people={durum.people} esik={taslakEsik ?? durum.threshold} pencere={durum.chartSeconds} />
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
             <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{durum.signals.length}</span></h2>
