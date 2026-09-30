@@ -8,11 +8,11 @@ import UstSerit from './UstSerit.jsx'
 import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
 import AltSerit from './AltSerit.jsx'
-import HataBantlari from './HataBantlari.jsx'
+import HataBantlari from '../../components/HataBantlari.jsx'
 import AgGorunumu from './AgGorunumu.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
+import { kartVerAdresi, KURULUM_ADRESI } from '../../api/useRota.js'
 import './PanoEkrani.css'
-import { kartVerAdresi } from '../../api/useRota.js'
 
 export default function PanoEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
@@ -45,6 +45,8 @@ export default function PanoEkrani() {
 
   // Atanmamış kart ("Kart N") → karşılama masası o kartla açılır, kişi seçilir.
   const kisiAta = useCallback((kisi) => { window.location.hash = kartVerAdresi(kisi.id) }, [])
+  // Eşik rozeti → Kurulum sayfası (eşik ayarı, Faz 3).
+  const esikAc = useCallback(() => { window.location.hash = KURULUM_ADRESI }, [])
 
   const seciliKisi = durum?.people.find((k) => k.id === seciliId)
 
@@ -69,7 +71,7 @@ export default function PanoEkrani() {
   return (
     <div className={`pano ${baglandi ? '' : 'pano--soluk'}`}>
       <HataBantlari durum={durum} baglandi={baglandi} />
-      <UstSerit durum={durum} onSifirla={sifirlaIste} />
+      <UstSerit durum={durum} onSifirla={sifirlaIste} onEsikTikla={esikAc} />
 
       <nav className="pano-sekmeler" role="tablist" aria-label="Bölüm">
         {[['kisiler', 'Kişiler'], ['ag', 'Ağ'], ['bildirimler', 'Bildirimler']].map(([deger, etiket]) => (

@@ -1,9 +1,11 @@
-// Hafif hash yönlendirme (bağımlılık yok). #/ = Pano, #/kart-ver = Karşılama masası.
+// Hafif hash yönlendirme (bağımlılık yok). #/ = Pano, #/kart-ver = Karşılama masası,
+// #/kurulum = Kurulum / eşik ekranı (teknik).
 // Aynı anda birden çok ekran açık olabilir (masa tableti + organizatör laptopu).
 // #/kart-ver?kart=14 → masa "Kart 14 için kişi seçin" ile açılır (panodaki "Kişi ata").
 import { useEffect, useState } from 'react'
 
 const KART_VER = '#/kart-ver'
+export const KURULUM_ADRESI = '#/kurulum'
 
 export function useRota() {
   const [hash, setHash] = useState(() => window.location.hash)
@@ -16,7 +18,9 @@ export function useRota() {
 }
 
 export function rotaAdi(hash) {
-  return hash === KART_VER || hash.startsWith(`${KART_VER}?`) ? 'kart-ver' : 'pano'
+  if (hash === KART_VER || hash.startsWith(`${KART_VER}?`)) return 'kart-ver'
+  if (hash === KURULUM_ADRESI) return 'kurulum'
+  return 'pano'
 }
 
 // #/kart-ver?kart=N → "N" (yoksa null)

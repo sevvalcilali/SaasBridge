@@ -352,11 +352,12 @@ eşik üstü ≠ birlikte; yeşil yalnız "birlikte"). (2) Kart sağlığında *
 değişmez; son duyulma + pil). (3) Faz 3 **sorgulamadan bitirilir**; kararlar PLAN'a not düşülür,
 Faz 4 başlamadan sorulur.
 
-#### 3.1 ⬜ Kurulum sayfası iskeleti + yönlendirme
+#### 3.1 ✅ Kurulum sayfası iskeleti + yönlendirme
 - `#/kurulum` rotası, üst sekmede "Kurulum". Panodaki eşik rozeti buraya götürür (Faz 1.2 köprüsü).
 - Düzen: üstte eşik, ortada grafik, altta çift tablosu; yanda/altta kart sağlığı. Tablet düzeni.
 - Alıcı bağlı değil / sunucuya bağlanılamıyor bantları (Faz 1 bileşenleri yeniden kullanılır).
 - **Doğrulama:** üç ekran arası geçiş; panodaki eşik rozeti Kurulum'u açar.
+- **Yapıldı:** `#/kurulum` + sekme; eşik rozeti bağlandı; `HataBantlari` → `components/` (pano + kurulum ortak); iki sütun, ≤900 px tek sütun.
 
 #### 3.2 ⬜ Eşik kaydırıcısı
 - -95…-35 dBm, anlık değer büyük yazıyla; bırakınca ~250 ms sonra `POST /control threshold`

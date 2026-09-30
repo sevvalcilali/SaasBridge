@@ -28,7 +28,7 @@ export default function UstSerit({ durum, onSifirla, onEsikTikla }) {
             {bagli ? 'ALICI BAĞLI' : 'ALICI BAĞLI DEĞİL'}
           </span>
 
-          <button type="button" className="esik-chip" onClick={onEsikTikla} title="Eşik ayarı (Faz 3'te açılacak)">
+          <button type="button" className="esik-chip" onClick={onEsikTikla} title="Eşik ayarı — Kurulum sayfasını aç">
             Eşik <strong className="sayi">{durum.threshold}</strong> dBm
           </button>
 

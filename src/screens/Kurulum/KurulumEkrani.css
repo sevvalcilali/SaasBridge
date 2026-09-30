@@ -1,0 +1,44 @@
+/* Kurulum / eşik ekranı — teknik ekran; masaüstü öncelikli, tablette tek sütun. Token. */
+
+.kurulum {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--aralik-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--aralik-4);
+}
+.kurulum--bos { min-height: 60vh; align-items: center; justify-content: center; }
+/* Bağlantı kopunca içerik solar ama silinmez; bantlar net kalır (brief §11) */
+.kurulum--soluk > *:not(.hata-bantlari) { opacity: 0.5; transition: opacity var(--gecis); }
+
+.kurulum-bas h1 { margin: 0; font-size: var(--punto-dev); }
+.kurulum-alt { margin: var(--aralik-1) 0 0; color: var(--metin-2); }
+
+.kurulum-govde {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--aralik-4);
+  align-items: start;
+}
+.kurulum-ana, .kurulum-yan { display: flex; flex-direction: column; gap: var(--aralik-4); min-width: 0; }
+
+.kurulum-kutu {
+  background: var(--yuzey);
+  border: 1px solid var(--cizgi);
+  border-radius: var(--kose-buyuk);
+  box-shadow: var(--golge);
+  padding: var(--aralik-4);
+  min-width: 0;
+}
+.kurulum-baslik {
+  margin: 0 0 var(--aralik-3);
+  font-size: var(--punto-kucuk);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--metin-2);
+}
+
+@media (max-width: 900px) {
+  .kurulum-govde { grid-template-columns: minmax(0, 1fr); }
+}
