@@ -118,6 +118,7 @@ let simSn = 0                       // benzetim saniyesi (elapsed)
 let ciftler = new Map()             // "a-b" → çift kaydı
 let kenarlar = new Map()            // "a-b" → toplam dakika
 let bildirimler = []
+let oturumlar = []                  // görüşme kayıtları (§9-6): { a, b, start, end } kişi kimliğiyle
 let anlasmalar = new Set()          // anlaşma çıkmış çift anahtarları
 let bitenGorusme = 0
 let esik = -72
@@ -143,6 +144,17 @@ const anahtar = (a, b) => (Number(a) < Number(b) ? `${a}-${b}` : `${b}-${a}`)
 // (brief §6). Kişisi olmayan (atanmamış) kart kendi adıyla tutulur.
 const kimlik = (e) => e.kisiId ?? `kart:${e.id}`
 const kenarAnahtari = (x, y) => (x < y ? `${x}|${y}` : `${y}|${x}`)
+
+// Görüşme kaydı (§9-6): birlikte başlayınca açılır, bitince kapanır. start/end etkinlik
+// saniyesi. Başladığı tik de süreye sayıldığı için (kenar süresi gibi) start = simSn - DT.
+function oturumAc(c) {
+  c.oturum = { a: kimlik(kisiBul(c.a)), b: kimlik(kisiBul(c.b)), start: simSn - DT, end: null }
+  oturumlar.push(c.oturum)
+}
+function oturumKapat(c) {
+  if (c.oturum && c.oturum.end === null) c.oturum.end = simSn
+  c.oturum = null
+}
 const kisiBul = (id) => kisiler.find((k) => k.id === id)
 const gorunenAd = (k) => (k.role === 'founder' && k.org ? k.org : k.name)
 
@@ -175,7 +187,7 @@ function kartiCikar(kart) {
   for (const [key, c] of ciftler) {
     if (c.a !== kart && c.b !== kart) continue
     fizikselAyril(c.a, c.b)
-    if (c.together) bitenGorusme++
+    if (c.together) { bitenGorusme++; oturumKapat(c) }
     ciftler.delete(key)
   }
   kisiler = kisiler.filter((k) => k.id !== kart)
@@ -230,6 +242,7 @@ function kenarlariTasi(eski, yeni) {
     const kk = kenarAnahtari(x === eski ? yeni : x, y === eski ? yeni : y)
     kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + dk)
   }
+  for (const o of oturumlar) { if (o.a === eski) o.a = yeni; if (o.b === eski) o.b = yeni }
 }
 
 // Kart iadesi (brief §6): kişi "ayrıldı" olur. "Geri al" (yanlış atama) ayrildi=false
@@ -451,6 +464,7 @@ function tik() {
     if (ustunde) { c.ustundeSn += DT; c.altindaSn = 0 } else { c.altindaSn += DT; c.ustundeSn = 0 }
     if (!c.together && ustunde && c.ustundeSn >= GIRIS_SN) {
       c.together = true; c.birlikteSn = 0
+      oturumAc(c)
       if (anlasmalar.has(key)) {
         const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
         bildir('repeat', 'deal', 'Yeniden bir arada',
@@ -475,6 +489,7 @@ function tik() {
       }
       if (!c.fiziksel && c.altindaSn >= CIKIS_SN) {
         c.together = false
+        oturumKapat(c)
         bitenGorusme++
       }
     }
@@ -652,6 +667,7 @@ function sifirla() {
   ciftler = new Map()
   kenarlar = new Map()
   bildirimler = []
+  oturumlar = []
   anlasmalar = new Set()
   bitenGorusme = 0
   yalnizSn = new Map()
@@ -693,6 +709,11 @@ async function apiYonlendir(istek, yanit) {
   const yol = url.split('?')[0]
 
   if (istek.method === 'GET' && yol === '/api/people') { json(yanit, 200, katilimcilar.map(katDto)); return true }
+
+  if (istek.method === 'GET' && yol === '/api/sessions') {
+    const y = (v) => (v === null ? null : Math.round(v * 10) / 10)
+    json(yanit, 200, oturumlar.map((o) => ({ a: o.a, b: o.b, start: y(o.start), end: y(o.end) }))); return true
+  }
 
   if (istek.method === 'GET' && yol === '/api/cards') { json(yanit, 200, kartlariListele()); return true }
 

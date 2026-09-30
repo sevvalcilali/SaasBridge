@@ -416,10 +416,11 @@ defterinden (`/api/people`) üretilir — kartı iade edilip ayrılanlar da rapo
 `start/end` etkinlik saniyesi (`/state.elapsed` ile aynı ölçek), `a/b` = `kisiId`, sürmekte olan
 görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saat − `elapsed`.
 
-#### 4.1 ⬜ Mock: `GET /api/sessions`
+#### 4.1 ✅ Mock: `GET /api/sessions`
 - Birlikte başlayınca kayıt açılır, bitince (ya da kart iade/değişiminde) kapanır; kişi bazlı
   (kart değişse de aynı kişi), atanmamış kartın kayıtları kişi atanınca ona geçer; sıfırla temizler.
 - **Doğrulama:** mock testi — kayıt açılır/kapanır, iade sonrası kalır, çift toplamı kenar süresiyle tutarlı.
+- **Yapıldı:** `oturumAc/oturumKapat`; başladığı tik de sayıldığı için `start = simSn − DT` (kenar süresiyle birebir); kayıtsız kart kimliği `kart:N`, kişi atanınca `kenarlariTasi` kayıtları da taşır. `mock-server/oturum.test.js` (3× kararlı).
 
 #### 4.2 ⬜ api: oturum/rapor yardımcıları + RaporApi
 - `RaporApi` (people + sessions, ortak http katmanı). Saf fonksiyonlar: oturum süresi, saat yazısı,
