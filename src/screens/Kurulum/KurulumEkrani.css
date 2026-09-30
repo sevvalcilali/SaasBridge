@@ -42,3 +42,17 @@
 @media (max-width: 900px) {
   .kurulum-govde { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* --- 3.2 eşik kaydırıcısı --- */
+.esik { display: flex; flex-direction: column; gap: var(--aralik-3); }
+.esik-ust { display: flex; align-items: baseline; justify-content: space-between; gap: var(--aralik-3); flex-wrap: wrap; }
+.esik-deger { margin: 0; font-size: 3rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.esik-birim { font-size: var(--punto-orta); color: var(--metin-2); font-weight: 600; }
+.esik-baglam { margin: 0; color: var(--metin-2); }
+.esik-kaydirici { display: flex; align-items: center; gap: var(--aralik-3); }
+.esik-kaydirici input[type='range'] { flex: 1; min-width: 0; height: 44px; accent-color: var(--vurgu); cursor: pointer; }
+.esik-adim { min-width: 56px; min-height: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.esik-adim:disabled { opacity: 0.4; cursor: not-allowed; }
+.esik-olcek { display: flex; justify-content: space-between; gap: var(--aralik-3); color: var(--metin-soluk); font-size: var(--punto-kucuk); }
+.esik-kayit { margin: 0; min-height: 1.5em; font-weight: 600; color: var(--metin-2); }
+.esik-kayit--hata { color: var(--ciddi); }

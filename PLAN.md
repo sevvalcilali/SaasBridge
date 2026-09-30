@@ -359,11 +359,12 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** üç ekran arası geçiş; panodaki eşik rozeti Kurulum'u açar.
 - **Yapıldı:** `#/kurulum` + sekme; eşik rozeti bağlandı; `HataBantlari` → `components/` (pano + kurulum ortak); iki sütun, ≤900 px tek sütun.
 
-#### 3.2 ⬜ Eşik kaydırıcısı
+#### 3.2 ✅ Eşik kaydırıcısı
 - -95…-35 dBm, anlık değer büyük yazıyla; bırakınca ~250 ms sonra `POST /control threshold`
   (sürüklerken gönderilmez). Sunucudan gelen `threshold` ile senkron; gönderiliyor/kaydedildi/hata durumu.
 - Klavye ile ±1 dBm (erişilebilirlik).
 - **Doğrulama:** kaydırınca tek istek gider, panodaki eşik değeri değişir; hata olursa eski değere döner.
+- **Yapıldı:** `api/esik.js` (sınır, 250 ms gecikmeli tek gönderim, sunucu reddi `false` da hata) + testleri; `EsikAyari`: büyük değer, ±1, "şu an N çift eşik üstünde", kaydediliyor/kaydedildi/hata. Tarayıcıda: 5 tuş → 1 istek, sürükleme → 1 istek, ağ hatası ve 400'de eski değere dönüş.
 
 #### 3.3 ⬜ Çift tablosu
 - Her duyulan çift (`signals`): iki kişi (renk + rol şekli + ad), `ab` ve `ba` ayrı, `value`, ölçüm sayısı `n`

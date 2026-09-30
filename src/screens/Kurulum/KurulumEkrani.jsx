@@ -3,10 +3,11 @@
 // Veri panoyla aynı kaynaktan (usePano / SSE); dBm burada gösterilebilir, metre yok.
 import { usePano } from '../../api/usePano.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
+import EsikAyari from './EsikAyari.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
-  const { durum, baglandi, hata } = usePano()
+  const { durum, baglandi, hata, baglanti } = usePano()
 
   if (!durum) {
     return (
@@ -28,6 +29,7 @@ export default function KurulumEkrani() {
         <div className="kurulum-ana">
           <section className="kurulum-kutu" aria-labelledby="k-esik" data-test="kutu-esik">
             <h2 id="k-esik" className="kurulum-baslik">Eşik</h2>
+            <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} />
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-grafik" data-test="kutu-grafik">
             <h2 id="k-grafik" className="kurulum-baslik">Canlı sinyal (son {durum.chartSeconds} sn)</h2>
