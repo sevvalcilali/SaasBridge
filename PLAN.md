@@ -279,9 +279,16 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - Kişinin rengiyle "Ayşe Demir → Kart 14" özeti; onayla→`/api/assign`; ekran hemen sıradaki kişiye.
 - **Doğrulama:** onaydan sonra kişi panoda görünür; ekran sıfırlanır; akış hızlı.
 
-#### 2.10 ⬜ İade + son atamayı geri al
+#### 2.10 ✅ İade + son atamayı geri al
 - Kart iadesi (kişi "ayrıldı", kart boşta, **süreler silinmez**); "Geri al" (son atama).
 - **Doğrulama:** iade→pano'dan düşer, rapor süreleri kalır; geri al son atamayı bozar.
+- **Yapıldı (30.09.2026):** Kart Ver ekranında "Kart ver | Kart iadesi" seçimi; `IadePaneli`
+  (kart no/ad/kurum ile ara → tek onay → `/api/unassign`). Son atama şeridi + "Geri al":
+  brief §6 "son birkaç dakika" → `GERI_AL_DK = 5` (masaYardim.js; 2.9'daki 4 sn'lik
+  kendiliğinden kalkma bu yüzden 5 dk oldu). Geri al yalnız kartı boşa çıkarır; eski sahibe/
+  eski karta geri vermez (onlar fiziksel olarak geri alınmıştı). Mock düzeltmesi: "birlikte"
+  olan kart iade edilince sunucu çöküyordu (`tik()` → silinmiş kart) — artık kartın çiftleri
+  kapanır, kenarlar (kim kimle ne kadar) kalır. 107/107 test + tarayıcı uçtan uca.
 
 #### 2.11 ⬜ Kart değişimi + kişi bilgisi düzenleme
 - Kart değişimi (kişi aynı, kart değişir, **süreler kişide birleşir**); ad/kurum/yıldız/rol düzenleme (renk değişmez).
@@ -363,3 +370,18 @@ saasBridge/
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,
       telefon bildirimi vb. kapsam dışı).
+
+**2.10 sırasında fark edilen, kapsam dışı bırakılanlar (onay bekliyor):**
+- [ ] **Masa ekranlarında renk dönüşümü yok:** KisiSecAdim (2.5), onay kartı (2.9) ve
+      IadePaneli (2.10) sunucu rengini ham gösteriyor (`sunucuRengi` yalnız client.js'te).
+      Sonuç: masada yeşil `#199e70` görünebiliyor ve kişinin rengi panodakinden farklı.
+      Öneri: dönüşümü `masaApi.js`'e koymak (tek nokta, tüm masa ekranları düzelir).
+- [ ] **Atama geçmişi mock'ta yok:** 2.1'de "zaman damgalı geçmişe yazılır" denmişti ama
+      yazılmıyor. Geri al şimdilik masanın kendi son atamasıyla (istemci) çalışır.
+      Sunucu tarafı geçmiş → 2.14 `SUNUCUDAN_ISTENENLER.md`.
+- [ ] **"Ayrıldı" ayrı durum değil:** iade edilen kişi "kartsız" görünür. 2.12'deki
+      "kart bekliyor" listesi ayrılanları ayırmalı → model kararı gerekiyor.
+- [ ] **Kenarlar kart no ile anahtarlı:** iade edilen kart başka birine verilirse eski
+      kenar süreleri yeni kişide görünür. 2.11 (süre birleştirme) / Faz 4 raporda ele alınmalı.
+- [ ] **Bildirim akışı yinelenen React anahtarı** (`t-kind`): aynı tikte iki anlaşma aynı
+      zaman damgasını alıyor (hızlandırılmış mock'ta sık). Faz 1'den kalma, 2.10 öncesi de var.

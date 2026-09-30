@@ -154,12 +154,25 @@ function kisiEkle({ ad, rol, kurum, yildiz, not }) {
   return kat
 }
 
+// Kartı sahneden çıkar. Çiftleri kapatılır (eşler serbest kalır, açık görüşme
+// biter) ki benzetim artık olmayan karta dokunmasın; kenarlar (kim kimle ne
+// kadar) rapor için silinmez.
+function kartiCikar(kart) {
+  for (const [key, c] of ciftler) {
+    if (c.a !== kart && c.b !== kart) continue
+    fizikselAyril(c.a, c.b)
+    if (c.together) bitenGorusme++
+    ciftler.delete(key)
+  }
+  kisiler = kisiler.filter((k) => k.id !== kart)
+}
+
 // Kartı simülasyondan çıkar, biriktirdiği süreyi kişiye taşı (rapor için silinmez).
 function iadeKat(kat, kart) {
   const e = kisiBul(kart)
   if (e) { kat.min += e.min || 0; kat.invMin += e.invMin || 0 }
   kat.atananKart = null
-  kisiler = kisiler.filter((k) => k.id !== kart)
+  kartiCikar(kart)
 }
 
 // Kart entry'nin kimlik alanlarını atanan kişiden doldur (/state bunu okur).
@@ -191,7 +204,7 @@ function iade(kart) {
   kart = String(kart)
   const kat = kartKat(kart)
   if (kat) iadeKat(kat, kart)
-  else kisiler = kisiler.filter((k) => k.id !== kart)
+  else kartiCikar(kart)
   return true
 }
 

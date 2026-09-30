@@ -29,6 +29,21 @@ export function kartOner(kartlar, girdi) {
   return kartlar.filter((k) => k.kart.startsWith(q))
 }
 
+// Kart iadesi adayları: şu an kartı olan kişiler, kart numarasına göre sıralı.
+// Arama ad/kurumda ya da kart numarasında (görevli çoğu zaman karttaki no'yu okur).
+export function iadeAdaylari(liste, arama) {
+  const q = tr(arama).trim()
+  return liste
+    .filter((k) => k.atananKart && (!q || tr(`${k.ad} ${k.kurum}`).includes(q) || k.atananKart.startsWith(q)))
+    .sort((a, b) => Number(a.atananKart) - Number(b.atananKart))
+}
+
+// Brief §6 "Yanlış atama düzeltme": son birkaç dakikadaki atama geri alınabilir.
+export const GERI_AL_DK = 5
+export function geriAlinabilir(atama, simdi = Date.now(), pencereDk = GERI_AL_DK) {
+  return Boolean(atama) && simdi - atama.zaman < pencereDk * 60_000
+}
+
 // "Yaklaştır ve tanı": alıcıya yaklaştırılan kart belirgin en güçlüdür.
 // Tek güçlü kart → bulundu; iki+ → "birini uzaklaştırın"; hiç → beklemede.
 export function baskinKart(kartlar, esik = -55) {

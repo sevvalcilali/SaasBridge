@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -61,4 +61,31 @@ test('baskinKart: iki güçlü kart → çoklu (birini uzaklaştır)', () => {
 test('baskinKart: hiç güçlü yok → boş', () => {
   const zayif = KARTLAR.map((k) => ({ ...k, rssiAlici: -78 }))
   assert.deepEqual(baskinKart(zayif), { kart: null, coklu: false })
+})
+
+const KARTLI = [
+  { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', atananKart: '14' },
+  { kisiId: 'k2', ad: 'Cem Erdem', kurum: 'Nova Robotik', atananKart: null },   // kartsız
+  { kisiId: 'k3', ad: 'İrem Korkmaz', kurum: 'Peak Enerji', atananKart: '7' },
+  { kisiId: 'k4', ad: 'Onur Koç', kurum: '', atananKart: '41' },
+]
+
+test('iadeAdaylari: yalnız kartı olanlar, kart no\'ya göre sıralı', () => {
+  assert.deepEqual(idler(iadeAdaylari(KARTLI, '')), ['k3', 'k1', 'k4'])
+})
+
+test('iadeAdaylari: ad/kurumda veya kart numarasında arar', () => {
+  assert.deepEqual(idler(iadeAdaylari(KARTLI, 'atlas')), ['k1'])
+  assert.deepEqual(idler(iadeAdaylari(KARTLI, 'İREM')), ['k3'])
+  assert.deepEqual(idler(iadeAdaylari(KARTLI, '4')), ['k4'])       // 14 değil: ön ek
+  assert.deepEqual(idler(iadeAdaylari(KARTLI, 'nova')), [])        // kartsız kişi aday değil
+})
+
+test('geriAlinabilir: son birkaç dakikadaki atama geri alınabilir, sonrası değil', () => {
+  const t0 = 1_000_000
+  const atama = { kisiId: 'k1', ad: 'Ayşe Demir', kart: '14', zaman: t0 }
+  assert.equal(geriAlinabilir(atama, t0), true)
+  assert.equal(geriAlinabilir(atama, t0 + (GERI_AL_DK * 60_000) - 1), true)
+  assert.equal(geriAlinabilir(atama, t0 + GERI_AL_DK * 60_000), false)
+  assert.equal(geriAlinabilir(null, t0), false)
 })

@@ -238,3 +238,23 @@
   font-weight: 700; font-size: var(--punto-orta);
 }
 .kartsec-etiket { margin-left: auto; font-size: var(--punto-kucuk); color: var(--metin-2); }
+
+/* --- 2.10: işlem seçimi, son atamayı geri al, kart iadesi --- */
+.kartver-mod { margin-bottom: var(--aralik-4); }
+
+/* Son atama şeridi: brief §6 "birkaç dakika" geri alınabilir */
+.kartver-sonatama {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--aralik-3); flex-wrap: wrap; text-align: left;
+}
+.kartver-geri-al { min-height: 44px; font-weight: 700; background: var(--yuzey); }
+.kartver-geri-al:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* İade / geri al sonucu — nötr bilgi (yeşil değil: yeşil = birlikte) */
+.kartver-bilgi {
+  margin: 0 0 var(--aralik-4); text-align: center;
+  padding: var(--aralik-3) var(--aralik-4);
+  background: var(--yuzey-2); color: var(--metin);
+  border: 1px solid var(--cizgi-koyu); border-radius: var(--kose);
+  font-weight: 600;
+}
