@@ -503,7 +503,7 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 
 > Brief §12'nin beş önceliği bitti. Sonraki iş için (gerçek sunucuya bağlanma, açık sorular) Şevval'e sorulacak.
 
-### 🟡 Düzeltme turu — uçtan uca tarama bulguları (onay 30.09.2026: "önerdiğin planla ilerle")
+### ✅ Düzeltme turu — uçtan uca tarama bulguları (TAMAMLANDI 30.09.2026) (onay 30.09.2026: "önerdiğin planla ilerle")
 Tarama: 3 kod incelemesi + tarayıcıda ekran × tema × genişlik + kopma/klavye. Onaylanan kapsam: A (hatalar),
 B (gerçek sunucuya hazırlık), D (erişilebilirlik/kullanım), E (küçükler). **C (brief eksikleri: karşı rol sayısı,
 sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca soluklaşma) karar bekliyor — yapılmaz.**
@@ -518,6 +518,11 @@ sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca s
   dokununca kişiler sekmesi (D16); eşik bırakma güvenceleri (D17); kayıp kart duyurusu (D19); rol şekli (D20);
   kalibrasyon seçimi kaybolmaz; perspektif saklanır; 375 px küçükleri.
 - **T5** Doğrulama (test + tarayıcı + önceki kabul senaryoları), belgeler, PR.
+- **Yapıldı:** T1–T4 dört commit; 202/202 test (yeni: CRLF akış, mock sağlamlığı, kart no, bulunma eki, demo tespiti).
+  Tarayıcıda her düzeltme ayrı doğrulandı; Faz 2 (11/11), 3 (16/16), 4 (13/13), 5 (15/15) kabul senaryoları yeniden geçti.
+  Not: Faz 4 teslim notu raporu "anlık görüntü" diyordu, gerçekte değildi — T2'de düzeltildi. Masa "Kart bekliyor"
+  filtresini kalıcı yapmak denendi, geri alındı: CSV sonrası açık kalınca kartı olan kişi aranamıyordu (Faz 2 gerileme
+  testi yakaladı). Ayrıntı: `docs/duzeltme-turu/NOT.md`.
 
 ---
 
@@ -554,6 +559,12 @@ saasBridge/
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,
       telefon bildirimi vb. kapsam dışı).
+
+**Uçtan uca taramada (30.09.2026) bulunan, karar bekleyen brief eksikleri (C):**
+- [ ] Kişi satırında "kaç karşı rol kişisiyle görüştü" (`invPeers`) gösterilmiyor (brief §7; Faz 1 notunda tamam sanılmış).
+- [ ] Liste sıralama seçeneği ("en uzun görüşen / en yalnız") ve "yalnız kaldı" / "Misafir" filtreleri yok (brief §7).
+- [ ] Bildirim akışı 20'de kesiliyor, eskilere ulaşılamıyor; çok "anlaşma" bildirimi "kart kayboldu"yu aşağı itebilir.
+- [ ] Alıcı koptuğunda (receiverAge > 5) veri soluklaşmıyor; yalnız bant çıkıyor.
 
 **5.4 sırasında fark edilen:**
 - [ ] **"100+ kişi" ile kart no 1–99 çelişiyor** → `SUNUCUDAN_ISTENENLER.md` Soru 6 (Muhittin).

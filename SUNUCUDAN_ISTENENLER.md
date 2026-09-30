@@ -211,3 +211,17 @@ ile aynı olsun.
 etkinlikte ne olacak — kart numara aralığı genişleyecek mi (dinleyiciler başka aralığa mı
 taşınacak), yoksa "100+" kayıtlı kişi sayısı mı (kart iadesiyle aynı kart gün içinde
 birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de kırpıyor.
+
+## 8. Uçtan uca tarama sonrası netleşenler (30.09.2026)
+
+- **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini ("kartı yaklaştır",
+  "çifti tut") yalnız bu uç varsa gösterir; mock'ta var, gerçek sunucuda yoksa düğmeler gizlenir.
+  `/api/yaklastir` ve `/api/demo/tut` de yalnız mock'a ait.
+- **Kart numaraları:** `/api/assign` ve `/api/unassign` gövdesindeki `kart` 1–99 arası, baştaki sıfırsız
+  dize ("7"). Arayüz "007"yi "7"ye çevirir, 0 ve 100+ numaraları göndermez. Sunucu geçersiz numaraya
+  400, bilinmeyen karta 404 dönebilir; arayüz bunu hata olarak gösterir.
+- **`/api/cards` 100+ dinleyici cihazları içerebilir.** Arayüz bunları kişi kartı listelerinden eler.
+- **SSE satır sonu:** `\n` de `\r\n` de kabul ediliyor (Python sunucuları çoğu zaman `\r\n` yollar).
+- **Uçlar henüz yoksa:** Masa "sunucuya bağlanılamıyor" bandı gösterir ve son listeyi korur; kişi paneli
+  "görüşme kayıtları alınamadı" der; rapor "rapor verisi alınamadı" der. Pano, `/state` + `/events` ile
+  her durumda çalışır.

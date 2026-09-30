@@ -3,7 +3,6 @@
 // Kartı olmayanlar "kart bekliyor", iade edilenler "ayrıldı" (2.12); CSV ile toplu yükleme.
 // Dokunmatik-ayakta: büyük hedefler, az yazı, klavye en son çare.
 import { useState } from 'react'
-import { useKalici } from '../../api/useKalici.js'
 import { katilimciAra, duzenlemeFarki, kisiDurumu, kartBekleyenler } from '../../api/masaYardim.js'
 import KisiFormu from './KisiFormu.jsx'
 import CsvYukle from './CsvYukle.jsx'
@@ -13,7 +12,9 @@ const BOS_FORM = { ad: '', rol: 'founder', kurum: '', yildiz: 0, not: '' }
 export default function KisiSecAdim({ api, katilimcilar, kayipKisiIdler, onYenile, onKisiSec, onDuzenlendi }) {
   const [arama, setArama] = useState('')
   const [form, setForm] = useState(null) // null | { yeni: true } | { kisi } | { csv: true }
-  const [sadeceBekleyen, setSadeceBekleyen] = useKalici('masa.sadeceBekleyen', false) // brief §11
+  // Kalıcı DEĞİL: CSV yükleyince kendiliğinden açılır; atamadan sonra "Tümü"ne dönmezse kartı olan
+  // kişi (kart değişimi) aramada bulunamaz. (Tarama turunda denendi, Faz 2 gerileme testi yakaladı.)
+  const [sadeceBekleyen, setSadeceBekleyen] = useState(false)
   const [gonderiliyor, setGonderiliyor] = useState(false)
   const [hata, setHata] = useState(null)
 
