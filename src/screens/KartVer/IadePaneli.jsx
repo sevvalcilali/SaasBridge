@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { iadeAdaylari } from '../../api/masaYardim.js'
 
-export default function IadePaneli({ api, katilimcilar, onIade }) {
+// baslangicKart: kişi ayrıntı panelindeki "Kartı iade al" kısayolu — o kişinin onayıyla açılır.
+export default function IadePaneli({ api, katilimcilar, baslangicKart = null, onIade }) {
   const [arama, setArama] = useState('')
-  const [secili, setSecili] = useState(null)
+  const [secili, setSecili] = useState(() =>
+    (baslangicKart && katilimcilar?.find((k) => k.atananKart === baslangicKart)) || null)
   const [gonderiliyor, setGonderiliyor] = useState(false)
   const [hata, setHata] = useState(null)
 

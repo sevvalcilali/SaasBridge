@@ -13,4 +13,7 @@ export class RaporApi {
 
   // Görüşme kayıtları: [{ a, b, start, end }] — a/b kişi kimliği, etkinlik saniyesi.
   oturumlariGetir() { return jsonIstek(this.adres, '/api/sessions') }
+
+  // Kart bilgisi (pil, son duyulma) — kişi ayrıntı paneli.
+  kartlariGetir() { return jsonIstek(this.adres, '/api/cards') }
 }

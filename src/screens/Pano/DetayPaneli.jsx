@@ -1,13 +1,28 @@
 // Kişi detay paneli: kişi satırına ya da ağ düğümüne tıklayınca sağda açılır.
 // Ad/rol/kurum/yıldız/kart no + "kiminle ne kadar" + kart durumu. Tek panel.
+// Faz 4 (brief §7): görüşme zaman çizelgesi, pil, "kartı değiştir / iade al" kısayolları.
+import { useRef } from 'react'
 import { durumCumlesi, kisiGorusmeleri, gorunenAd } from '../../api/durum.js'
 import { sureYazisi, onceYazisi } from '../../api/format.js'
+import { RaporApi } from '../../api/raporApi.js'
+import { usePanelVerisi } from '../../api/usePanelVerisi.js'
+import { kisiOturumlari } from '../../api/rapor.js'
+import { kartVerAdresi, kartDegistirAdresi, kartIadeAdresi } from '../../api/useRota.js'
+import ZamanCizelgesi from '../../components/ZamanCizelgesi.jsx'
 import './DetayPaneli.css'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
 
 export default function DetayPaneli({ kisi, durum, onKapat }) {
   const gorusmeler = kisiGorusmeleri(kisi.id, durum.edges, durum.people)
+  const apiRef = useRef(null)
+  if (apiRef.current === null) apiRef.current = new RaporApi()
+  const veri = usePanelVerisi(apiRef.current)
+  // Pano kişisi kart no'yu bilir; görüşme kayıtları kişi kimliğiyle — kayıt defterinden eşle.
+  const kayit = veri?.kisiler.find((k) => k.atananKart === kisi.id) ?? null
+  const kimlik = kayit?.kisiId ?? `kart:${kisi.id}`
+  const oturumlar = veri ? kisiOturumlari(kimlik, veri.oturumlar, veri.kisiler, durum.elapsed) : null
+  const kart = veri?.kartlar.find((c) => c.kart === kisi.id)
 
   return (
     <aside className="detay" role="dialog" aria-label={`${kisi.name} ayrıntısı`} data-test="detay">
@@ -28,7 +43,19 @@ export default function DetayPaneli({ kisi, durum, onKapat }) {
           <div><dt>Durum</dt><dd>{durumCumlesi(kisi)}</dd></div>
           <div><dt>Son duyulma</dt><dd>{onceYazisi(kisi.seenAgo)}</dd></div>
           <div><dt>Bugünkü toplam</dt><dd className="sayi">{sureYazisi(kisi.min)}</dd></div>
+          <div><dt>Pil</dt><dd className="sayi" data-test="detay-pil">{kart ? `%${kart.pil}` : '—'}</dd></div>
         </dl>
+
+        <nav className="detay-kisayol" aria-label="Kart işlemleri" data-test="detay-kisayol">
+          {kayit ? (
+            <>
+              <a className="detay-kisayol-bag" href={kartDegistirAdresi(kisi.id)} data-test="kisayol-degistir">Kartı değiştir</a>
+              <a className="detay-kisayol-bag" href={kartIadeAdresi(kisi.id)} data-test="kisayol-iade">Kartı iade al</a>
+            </>
+          ) : veri && (
+            <a className="detay-kisayol-bag" href={kartVerAdresi(kisi.id)} data-test="kisayol-ata">Bu karta kişi ata</a>
+          )}
+        </nav>
 
         <h3 className="detay-baslik">Bugün kiminle</h3>
         {gorusmeler.length === 0 ? (
@@ -44,6 +71,11 @@ export default function DetayPaneli({ kisi, durum, onKapat }) {
             ))}
           </ul>
         )}
+
+        <h3 className="detay-baslik">Görüşme zaman çizelgesi</h3>
+        {oturumlar === null
+          ? <p className="detay-bos">Yükleniyor…</p>
+          : <ZamanCizelgesi oturumlar={oturumlar} simdi={durum.elapsed} saat={durum.clock} />}
     </aside>
   )
 }

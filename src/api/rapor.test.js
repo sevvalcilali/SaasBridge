@@ -1,7 +1,7 @@
 // Rapor: kişi/çift toplamları, girişimci → yatırımcı, en uzunlar, ayrılanlar, saat.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisiDurumYazisi } from './rapor.js'
+import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde } from './rapor.js'
 
 const K = [
   { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', atananKart: '10', ayrildi: false },
@@ -64,7 +64,18 @@ test('etkinlikSaati: şimdiki saat − elapsed + sn; gece yarısını sarar', ()
 test('raporAdi / kisiDurumYazisi', () => {
   assert.equal(raporAdi(K[1]), 'Nova Robotik · Cem Erdem')
   assert.equal(raporAdi(K[0]), 'Ayşe Demir')
+  assert.equal(kisaAd(K[1]), 'Nova Robotik')
+  assert.equal(kisaAd(K[0]), 'Ayşe Demir')
   assert.equal(kisiDurumYazisi(K[0]), 'Kart 10')
   assert.equal(kisiDurumYazisi(K[1]), 'ayrıldı')
   assert.equal(kisiDurumYazisi(K[4]), 'kart almadı')
+})
+
+test('cizelgeAraligi / cizelgeYuzde: ilk görüşme → şimdi; boşta en az 1 dk', () => {
+  const a = cizelgeAraligi(O, SIMDI)
+  assert.deepEqual(a, { bas: 100, son: 1600 })
+  assert.equal(cizelgeYuzde(100, a), 0)
+  assert.equal(cizelgeYuzde(1600, a), 100)
+  assert.equal(cizelgeYuzde(850, a), 50)
+  assert.deepEqual(cizelgeAraligi([], 10), { bas: 0, son: 60 })
 })

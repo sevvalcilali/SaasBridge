@@ -16,6 +16,8 @@ export function kimlikKisisi(kimlik) {
 
 // Görünen ad: girişimcide kurum öne (pano ile aynı kural).
 export const raporAdi = (k) => (k.rol === 'founder' && k.kurum ? `${k.kurum} · ${k.ad}` : k.ad)
+// Dar yerler (zaman çizelgesi) için panodaki kısa ad: girişimcide yalnız kurum.
+export const kisaAd = (k) => (k.rol === 'founder' && k.kurum ? k.kurum : k.ad)
 
 export function kisiDurumYazisi(k) {
   if (k.atananKart) return `Kart ${k.atananKart}`
@@ -114,3 +116,10 @@ export function raporHesapla(kisiler, oturumlar, simdi, { enUzunAdet = 10 } = {}
     enUzun: enUzunAday.sort((p, q) => q.sureSn - p.sureSn).slice(0, enUzunAdet),
   }
 }
+
+// Zaman çizelgesi ekseni: ilk görüşmenin başı → şimdi. Konum yüzdesi [0, 100].
+export function cizelgeAraligi(oturumlar, simdi) {
+  const bas = oturumlar.length ? Math.min(...oturumlar.map((o) => o.start)) : 0
+  return { bas, son: Math.max(simdi, bas + 60) } // en az 1 dk genişlik: tek kısa görüşme ezilmesin
+}
+export const cizelgeYuzde = (sn, aralik) => ((sn - aralik.bas) / (aralik.son - aralik.bas)) * 100

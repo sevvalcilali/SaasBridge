@@ -428,11 +428,12 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Doğrulama:** birim testleri (ayrılan kişi dahil, sürmekte olan görüşme dahil).
 - **Yapıldı:** `api/rapor.js` (raporHesapla, kisiOturumlari, etkinlikSaati, raporAdi…) + 6 test; `api/raporApi.js`; kişi rengi dönüşümü `renkler.katilimciRengiUyarla` (masa + rapor ortak).
 
-#### 4.3 ⬜ Kişi ayrıntı paneli (derin)
+#### 4.3 ✅ Kişi ayrıntı paneli (derin)
 - Faz 1 panelinin altına **görüşme zaman çizelgesi** (bugün, zaman ekseninde çubuklar, karşı kişi etiketi,
   sürmekte olan açık uçlu), **kart bilgisi** (pil vb.) ve **"Kartı değiştir" / "Kartı iade al" kısayolları**
   → masa ekranı o kişi/kart hazır açılır.
 - **Doğrulama:** panelde çizelge görünür; kısayollar masayı doğru adımda açar.
+- **Yapıldı:** `components/ZamanCizelgesi` (ortak eksen, sürmekte olan açık uçlu + yeşil); panelde pil + kısayollar (`#/kart-ver?degistir=N` → kart değişimi 2. adım, `?iade=N` → o kişinin iade onayı, kayıtsız kartta "Bu karta kişi ata"); `usePanelVerisi` (panel açıkken 5 sn yoklama); kişi eşlemesi kart no → kayıt defteri. Faz 1 paneli bozulmadı.
 
 #### 4.4 ⬜ Rapor sayfası
 - `#/rapor`: etkinlik başlığı + özet sayılar; kişi tablosu (toplam süre, kaç kişi, kaç karşı rol,

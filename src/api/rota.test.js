@@ -1,7 +1,7 @@
 // Hash yönlendirme: panodaki "Kişi ata" masayı o kartla açar.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rotaAdi, rotaKart, kartVerAdresi } from './useRota.js'
+import { rotaAdi, rotaKart, kartVerAdresi, rotaParametresi, kartDegistirAdresi, kartIadeAdresi } from './useRota.js'
 
 test('rotaAdi: kart-ver (parametreli ya da değil), kurulum; diğer her şey pano', () => {
   assert.equal(rotaAdi('#/kart-ver'), 'kart-ver')
@@ -22,4 +22,12 @@ test('rotaKart: yalnız sayısal kart no', () => {
 test('kartVerAdresi: gidiş-dönüş', () => {
   assert.equal(rotaKart(kartVerAdresi('14')), '14')
   assert.equal(kartVerAdresi(null), '#/kart-ver')
+})
+
+test('kısayol adresleri: değiştir / iade parametreleri', () => {
+  assert.equal(rotaAdi(kartDegistirAdresi('14')), 'kart-ver')
+  assert.equal(rotaParametresi(kartDegistirAdresi('14'), 'degistir'), '14')
+  assert.equal(rotaParametresi(kartIadeAdresi('7'), 'iade'), '7')
+  assert.equal(rotaParametresi(kartIadeAdresi('7'), 'degistir'), null)
+  assert.equal(rotaKart(kartIadeAdresi('7')), null)
 })

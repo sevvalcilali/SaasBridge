@@ -75,3 +75,14 @@
 .detay-g-renk { width: 12px; height: 12px; border-radius: var(--kose-tam); }
 .detay-g-ad { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .detay-g-sure { color: var(--metin-2); font-size: var(--punto-kucuk); }
+
+/* Faz 4: kart kısayolları (masa ekranını hazır açar) */
+.detay-kisayol { display: flex; gap: var(--aralik-2); flex-wrap: wrap; }
+.detay-kisayol-bag {
+  flex: 1; min-height: 40px; display: grid; place-items: center; text-decoration: none;
+  font-weight: 700; font-size: var(--punto-kucuk); color: var(--metin);
+  border: 1px solid var(--cizgi-koyu); border-radius: var(--kose); background: var(--zemin);
+  padding: 0 var(--aralik-3);
+}
+.detay-kisayol-bag:hover { background: var(--vurgu-zemin); }
+.detay-kisayol-bag:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 2px; }

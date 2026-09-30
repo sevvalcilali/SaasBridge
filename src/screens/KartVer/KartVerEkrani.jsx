@@ -5,7 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
-import { rotaKart, kartVerAdresi } from '../../api/useRota.js'
+import { rotaKart, rotaParametresi, kartVerAdresi } from '../../api/useRota.js'
 import { geriAlinabilir, GERI_AL_DK, kayipKartlar } from '../../api/masaYardim.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
 import KartSecAdim from './KartSecAdim.jsx'
@@ -38,6 +38,13 @@ export default function KartVerEkrani() {
   const [pilDegisti, setPilDegisti] = useState(() => new Set()) // kart no: sinyal bekleniyor
   // Panodaki "Kişi ata"dan gelindiyse kart baştan bellidir: kişi seçilince doğrudan onaya.
   const [hedefKart, setHedefKart] = useState(() => rotaKart(window.location.hash))
+  // Kişi ayrıntı panelinden kısayol (brief §7): ?degistir=N / ?iade=N — kişiler yüklenince uygulanır.
+  const [kisayol, setKisayol] = useState(() => {
+    const h = window.location.hash
+    const degistir = rotaParametresi(h, 'degistir'), iade = rotaParametresi(h, 'iade')
+    return degistir ? { islem: 'degistir', kart: degistir } : iade ? { islem: 'iade', kart: iade } : null
+  })
+  const [iadeKart, setIadeKart] = useState(null)
 
   const kartlar = useKartlar(api)
   const kayiplar = useMemo(
@@ -111,6 +118,19 @@ export default function KartVerEkrani() {
     yukle()
   }
 
+  useEffect(() => {
+    if (!kisayol || !katilimcilar) return
+    const sahip = katilimcilar.find((k) => k.atananKart === kisayol.kart)
+    window.history.replaceState(null, '', kartVerAdresi(null))
+    setKisayol(null)
+    if (!sahip) { setBilgi(`Kart ${kisayol.kart} şu an kimseye atanmış değil.`); return }
+    if (kisayol.islem === 'degistir') {
+      setMod('ver'); setSeciliKisi(sahip); setSeciliKart(null); setAdim(2)
+    } else {
+      setMod('iade'); setIadeKart(kisayol.kart)
+    }
+  }, [kisayol, katilimcilar])
+
   function hedefKartiBirak() {
     setHedefKart(null)
     window.history.replaceState(null, '', kartVerAdresi(null))
@@ -134,6 +154,7 @@ export default function KartVerEkrani() {
 
   function modDegistir(yeni) {
     setMod(yeni)
+    setIadeKart(null)
     setKontrol(null)
     if (hedefKart) hedefKartiBirak()
     sihirbaziSifirla()
@@ -214,7 +235,7 @@ export default function KartVerEkrani() {
             onKapat={() => setKontrol(null)} />
         )}
         {!kontrol && mod === 'iade' && (
-          <IadePaneli api={api} katilimcilar={katilimcilar} onIade={iadeAlindi} />
+          <IadePaneli key={iadeKart ?? 'liste'} api={api} katilimcilar={katilimcilar} baslangicKart={iadeKart} onIade={iadeAlindi} />
         )}
         {!kontrol && mod === 'ver' && adim === 1 && (
           <KisiSecAdim api={api} katilimcilar={katilimcilar} kayipKisiIdler={kayipKisiIdler} onYenile={yukle} onKisiSec={kisiSec}

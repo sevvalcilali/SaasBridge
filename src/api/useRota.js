@@ -2,6 +2,8 @@
 // #/kurulum = Kurulum / eşik ekranı (teknik).
 // Aynı anda birden çok ekran açık olabilir (masa tableti + organizatör laptopu).
 // #/kart-ver?kart=14 → masa "Kart 14 için kişi seçin" ile açılır (panodaki "Kişi ata").
+// #/kart-ver?degistir=14 → Kart 14'ün sahibiyle kart değişimi; ?iade=14 → Kart 14'ün iadesi
+// (kişi ayrıntı panelindeki kısayollar, brief §7).
 import { useEffect, useState } from 'react'
 
 const KART_VER = '#/kart-ver'
@@ -23,11 +25,14 @@ export function rotaAdi(hash) {
   return 'pano'
 }
 
-// #/kart-ver?kart=N → "N" (yoksa null)
-export function rotaKart(hash) {
+// #/kart-ver?<ad>=N → "N" (yalnız sayısal; yoksa null)
+export function rotaParametresi(hash, ad) {
   if (rotaAdi(hash) !== 'kart-ver') return null
-  const kart = new URLSearchParams(hash.split('?')[1] ?? '').get('kart')
-  return kart && /^\d+$/.test(kart) ? kart : null
+  const v = new URLSearchParams(hash.split('?')[1] ?? '').get(ad)
+  return v && /^\d+$/.test(v) ? v : null
 }
+export const rotaKart = (hash) => rotaParametresi(hash, 'kart')
 
 export const kartVerAdresi = (kart) => (kart ? `${KART_VER}?kart=${encodeURIComponent(kart)}` : KART_VER)
+export const kartDegistirAdresi = (kart) => `${KART_VER}?degistir=${encodeURIComponent(kart)}`
+export const kartIadeAdresi = (kart) => `${KART_VER}?iade=${encodeURIComponent(kart)}`
