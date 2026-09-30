@@ -341,16 +341,63 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   düzeltilenler: pano "Kişi ata" köprüsü bağlandı (Faz 1'de boştu), "5–10 cm" metni
   kaldırıldı + koruma testi, `/api/assign` 404 gövdesi. 136/136 test.
 
-### ⬜ Faz 3 — Kurulum / eşik ekranı
+### 🟡 Faz 3 — Kurulum / eşik ekranı (mikro-adımlar · başladı 30.09.2026)
+**Amaç:** Brief §4.3 + §8: teknik kişinin etkinlik öncesi eşiği ayarladığı, sinyalleri ve
+kart sağlığını gördüğü ayrı "Kurulum" sayfası. Veri `/state` (SSE) + `/api/cards`; yeni
+sunucu ucu gerekmez. dBm ve yön farkı burada gösterilebilir; **metre yine yok.** Grafik
+bağımlılıksız SVG (Faz 1 ağ görünümüyle aynı yaklaşım).
 
-> ⚠️ Faz 2 bitti. Faz 3'e başlamadan önce Şevval'e sorulacak; onaydan sonra mikro-adımları yazılacak.
+**Şevval kararları (30.09.2026):** (1) Grafikte eşik üstü bölge **nötr ton** (yeşil değil —
+eşik üstü ≠ birlikte; yeşil yalnız "birlikte"). (2) Kart sağlığında **paket hızı yok** (sözleşme
+değişmez; son duyulma + pil). (3) Faz 3 **sorgulamadan bitirilir**; kararlar PLAN'a not düşülür,
+Faz 4 başlamadan sorulur.
 
-**Kaba adımlar:**
-- 3.a Eşik kaydırıcısı + debounced POST /control.
-- 3.b Canlı sinyal grafiği (SVG/Canvas, son 90 sn).
-- 3.c Çift tablosu (ab/ba, above vs together farkı).
-- 3.d Kalibrasyon sihirbazı (3 adım, görsel anlatım).
-- 3.e Kart sağlığı tablosu.
+#### 3.1 ⬜ Kurulum sayfası iskeleti + yönlendirme
+- `#/kurulum` rotası, üst sekmede "Kurulum". Panodaki eşik rozeti buraya götürür (Faz 1.2 köprüsü).
+- Düzen: üstte eşik, ortada grafik, altta çift tablosu; yanda/altta kart sağlığı. Tablet düzeni.
+- Alıcı bağlı değil / sunucuya bağlanılamıyor bantları (Faz 1 bileşenleri yeniden kullanılır).
+- **Doğrulama:** üç ekran arası geçiş; panodaki eşik rozeti Kurulum'u açar.
+
+#### 3.2 ⬜ Eşik kaydırıcısı
+- -95…-35 dBm, anlık değer büyük yazıyla; bırakınca ~250 ms sonra `POST /control threshold`
+  (sürüklerken gönderilmez). Sunucudan gelen `threshold` ile senkron; gönderiliyor/kaydedildi/hata durumu.
+- Klavye ile ±1 dBm (erişilebilirlik).
+- **Doğrulama:** kaydırınca tek istek gider, panodaki eşik değeri değişir; hata olursa eski değere döner.
+
+#### 3.3 ⬜ Çift tablosu
+- Her duyulan çift (`signals`): iki kişi (renk + rol şekli + ad), `ab` ve `ba` ayrı, `value`, ölçüm sayısı `n`
+  (seyrekse işaret), durum: **birlikte** / **başlıyor…** (above ∧ ¬together) / **bitiyor…** (¬above ∧ together) /
+  eşik altı. Ara durumlar mevcut alanlardan türetilir (§9-7'ye gerek yok).
+- Sakin sıralama (çift sırası zıplamaz); iki yön arasında büyük fark varsa "yön farkı" işareti.
+- **Doğrulama:** mock'ta dört durum da görünür; `ab/ba` null ise "—".
+
+#### 3.4 ⬜ Canlı sinyal grafiği
+- `history` (son 90 sn): her çift bir çizgi (iki kişinin rengi), eşik yatay kesikli çizgi, eşik üstü
+  bölge hafif **nötr** tonlu (yeşil değil), çizgi sonunda doğrudan etiket ("3 · 4"), üzerine gelince değer. Eşik kaydırılırken
+  çizgi anında yer değiştirir. Çok çift varsa en güçlü N çift + "tümü" seçeneği.
+- **Doğrulama:** grafik canlı akar, eşik çizgisi kaydırıcıyla oynar, hover değeri doğru.
+
+#### 3.5 ⬜ Perspektif (kişi seçimi)
+- Bir kişi seçilince grafik ve tablo yalnız onun çiftlerini gösterir ("perspektif" düğmeleri / kişi seçici).
+- **Doğrulama:** seçim yalnız ilgili çiftleri bırakır; temizleyince hepsi döner.
+
+#### 3.6 ⬜ Kalibrasyon sihirbazı
+- Çift seç (tablodan) → 1) iki kart yüz yüze → "Kaydet" (10 sn ortanca) → 2) sırt sırta ya da 2–3 adım
+  uzakta → "Kaydet" → 3) "Eşiği ortaya koy": ikisinin ortası önerilir, onayla → 3.2'deki gönderim.
+- Görsel anlatım: iki insan simgesi yüz yüze / sırt sırta (SVG, gömülü).
+- Mock'a yalnız demo için "çifti yüz yüze / sırt sırta tut" ucu (`/api/yaklastir` gibi, gerçek sunucuda yok).
+- **Doğrulama:** mock'ta iki ölçüm alınır, önerilen eşik ortada, onaylanınca eşik değişir.
+
+#### 3.7 ⬜ Kart sağlığı tablosu
+- Her kart: en son duyulma, pil, "sorunlu" etiketi (duyulmuyor / pil düşük); paket hızı yok (karar 2);
+  atanmışsa kişi adı. Sorunlular üstte, gerisi numaraya göre.
+- **Doğrulama:** kayıp kart senaryosunda kart "sorunlu" olur, düzelince kalkar.
+
+#### 3.8 ⬜ Faz 3 teslimi
+- `SUNUCUDAN_ISTENENLER.md` güncellemesi (3.6 demo ucu yalnız mock), ekran görüntüleri,
+  `docs/faz3/FAZ3_TESLIM.md`.
+- **Kabul ölçütü (Faz 3 tamamı):** eşik kaydırıcı + grafik + tablo + sihirbaz + kart sağlığı mock ile uçtan
+  uca çalışır; §8 maddelerinin hepsi karşılanır; not + ekran görüntüleri teslim edildi.
 
 ### ⬜ Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor
 
