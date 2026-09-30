@@ -738,7 +738,8 @@ async function apiYonlendir(istek, yanit) {
   if (istek.method === 'POST' && yol === '/api/assign') {
     const g = await govdeOku(istek)
     if (!g || !g.kisiId || g.kart == null) { json(yanit, 400, { ok: false }); return true }
-    json(yanit, ata(g.kisiId, g.kart) ? 200 : 404, { ok: true }); return true
+    const oldu = ata(g.kisiId, g.kart)
+    json(yanit, oldu ? 200 : 404, { ok: oldu }); return true
   }
 
   if (istek.method === 'POST' && yol === '/api/unassign') {

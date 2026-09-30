@@ -107,3 +107,9 @@ test('/state şeması Faz 1 ile bozulmadan uyumlu (25 kişi, alanlar aynı)', as
     ])
   }
 })
+
+test('POST /api/assign: olmayan kişi → 404 ve ok:false', async () => {
+  const r = await post(`${B}/api/assign`, { kisiId: 'yok', kart: '50' })
+  assert.equal(r.status, 404)
+  assert.equal((await r.json()).ok, false)
+})

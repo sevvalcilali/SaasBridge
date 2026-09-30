@@ -227,7 +227,7 @@ api/format.js, api/renkler.js. 36/36 test yeşil; tarayıcı kabul testi geçti.
 
 ---
 
-### ⬜ Faz 2 — Kart atama ekranı (karşılama masası) ⭐ (mikro-adımlar)
+### ✅ Faz 2 — Kart atama ekranı (karşılama masası) ⭐ (TAMAMLANDI 30.09.2026)
 **Amaç:** Brief'in en önemli yeni özelliği (§6). Tamamı §9 mock uçlarıyla çalışır;
 gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 
@@ -331,13 +331,19 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   Kararlar (soru sorulmadan, Şevval talimatı): etiket masa ekranında; panoda kişi zaten
   "görünmüyor" + `lost` bildirimiyle görünür. 130/130 test + tarayıcı uçtan uca.
 
-#### 2.14 ⬜ SUNUCUDAN_ISTENENLER.md + Faz 2 teslimi
+#### 2.14 ✅ SUNUCUDAN_ISTENENLER.md + Faz 2 teslimi
 - Netleştirilmiş §9 API listesi (Muhittin'e). Ekran görüntüleri + tasarım gerekçe notu.
 - **Kabul ölçütü (Faz 2 tamamı):** akış mock ile uçtan uca oynanabilir; ekran görüntüleri + not + `SUNUCUDAN_ISTENENLER.md` teslim edildi.
+- **Yapıldı (30.09.2026):** `SUNUCUDAN_ISTENENLER.md` (mock'un gerçek davranışından; kişi≠kart
+  ilkesi, her ucun biçimi, Muhittin'e 4 açık soru). `docs/faz2/FAZ2_TESLIM.md` + 14 ekran
+  görüntüsü — tek bir uçtan uca kabul senaryosundan (pano "Kişi ata" → CSV → yaklaştır →
+  onay → geri al → kart değişimi → düzenle → kayıp kart → iade → stok). Kapanışta
+  düzeltilenler: pano "Kişi ata" köprüsü bağlandı (Faz 1'de boştu), "5–10 cm" metni
+  kaldırıldı + koruma testi, `/api/assign` 404 gövdesi. 136/136 test.
 
 ### ⬜ Faz 3 — Kurulum / eşik ekranı
 
-> ⚠️ Faz 2 bittiğinde mikro-adımları yazılacak.
+> ⚠️ Faz 2 bitti. Faz 3'e başlamadan önce Şevval'e sorulacak; onaydan sonra mikro-adımları yazılacak.
 
 **Kaba adımlar:**
 - 3.a Eşik kaydırıcısı + debounced POST /control.
