@@ -401,10 +401,9 @@ saasBridge/
       telefon bildirimi vb. kapsam dışı).
 
 **2.10 sırasında fark edilen, kapsam dışı bırakılanlar (onay bekliyor):**
-- [ ] **Masa ekranlarında renk dönüşümü yok:** KisiSecAdim (2.5), onay kartı (2.9) ve
-      IadePaneli (2.10) sunucu rengini ham gösteriyor (`sunucuRengi` yalnız client.js'te).
-      Sonuç: masada yeşil `#199e70` görünebiliyor ve kişinin rengi panodakinden farklı.
-      Öneri: dönüşümü `masaApi.js`'e koymak (tek nokta, tüm masa ekranları düzelir).
+- [x] ~~**Masa ekranlarında renk dönüşümü yok**~~ → düzeltildi (Faz 2 bitirme talimatı):
+      `masaApi.js` kişi rengini `sunucuRengi` ile panodakiyle aynı açık palete çevirir;
+      masada yeşil yok, kişi her ekranda aynı renk.
 - [ ] **Atama geçmişi mock'ta yok:** 2.1'de "zaman damgalı geçmişe yazılır" denmişti ama
       yazılmıyor. Geri al şimdilik masanın kendi son atamasıyla (istemci) çalışır.
       Sunucu tarafı geçmiş → 2.14 `SUNUCUDAN_ISTENENLER.md`.

@@ -1,6 +1,11 @@
 // Karşılama masası (§9) uçlarıyla konuşan TEK yer. Ekran bileşenleri doğrudan
 // fetch yapmaz; buradan çağırır. Gerçek sunucu gelince yalnız `adres` değişir
 // (varsayılan: aynı kaynak). client.js ile aynı felsefe.
+import { sunucuRengi } from './renkler.js'
+
+// Kişi rengi panodakiyle aynı açık palete çevrilir (client.js ile aynı eşleme):
+// renk kişiyi takip eder ve yeşil yalnız "birlikte" demektir (brief §10).
+const renkUyarla = (k) => ({ ...k, renk: sunucuRengi(k.renk) })
 
 export class MasaApi {
   constructor({ adres = '' } = {}) {
@@ -20,9 +25,11 @@ export class MasaApi {
   }
 
   // --- kişi kayıt defteri ---
-  kisileriGetir() { return this.#iste('/api/people') }
-  kisiEkle(veri) { return this.#iste('/api/people', 'POST', veri) }
-  kisiGuncelle(kisiId, veri) { return this.#iste(`/api/people/${encodeURIComponent(kisiId)}`, 'PATCH', veri) }
+  async kisileriGetir() { return (await this.#iste('/api/people')).map(renkUyarla) }
+  async kisiEkle(veri) { return renkUyarla(await this.#iste('/api/people', 'POST', veri)) }
+  async kisiGuncelle(kisiId, veri) {
+    return renkUyarla(await this.#iste(`/api/people/${encodeURIComponent(kisiId)}`, 'PATCH', veri))
+  }
   kisiSil(kisiId) { return this.#iste(`/api/people/${encodeURIComponent(kisiId)}`, 'DELETE', {}) }
   // Toplu ön yükleme (§9-5): CSV metni → { eklenen, atlanan: [{ satir, sebep }] }
   iceAktar(csvMetni) { return this.#iste('/api/people/import', 'POST', csvMetni, 'text/csv; charset=utf-8') }

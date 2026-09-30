@@ -73,3 +73,14 @@ test('iceAktar: CSV metni gider, özet döner; iade ayrildi seçeneği', async (
   await api.iade('61')                               // kart iadesi
   assert.equal((await api.kisileriGetir()).find((k) => k.kisiId === nur.kisiId).ayrildi, true)
 })
+
+test('renk: masaya gelen kişi rengi panodakiyle aynı açık palette; yeşil yok', async () => {
+  const { ACIK_PALET } = await import('./renkler.js')
+  const palet = new Set(Object.values(ACIK_PALET))
+  const kisiler = await api.kisileriGetir()
+  assert.ok(kisiler.every((k) => palet.has(k.renk)), 'tüm renkler açık paletten')
+  assert.ok(!kisiler.some((k) => k.renk.toLowerCase() === '#199e70'), 'yeşil (birlikte rengi) kişi rengi olamaz')
+  const yeni = await api.kisiEkle({ ad: 'Renk Deneme', rol: 'guest' })
+  assert.ok(palet.has(yeni.renk))
+  assert.ok(palet.has((await api.kisiGuncelle(yeni.kisiId, { kurum: 'X' })).renk))
+})
