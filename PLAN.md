@@ -386,12 +386,13 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** seçim yalnız ilgili çiftleri bırakır; temizleyince hepsi döner.
 - **Yapıldı:** `PerspektifSecici` (şu an çifti duyulan kişiler) + tablodaki kişi adına tıklama; grafik ve tablo birlikte süzülür, başlık sayısı süzülmüş sayıyı gösterir.
 
-#### 3.6 ⬜ Kalibrasyon sihirbazı
+#### 3.6 ✅ Kalibrasyon sihirbazı
 - Çift seç (tablodan) → 1) iki kart yüz yüze → "Kaydet" (10 sn ortanca) → 2) sırt sırta ya da 2–3 adım
   uzakta → "Kaydet" → 3) "Eşiği ortaya koy": ikisinin ortası önerilir, onayla → 3.2'deki gönderim.
 - Görsel anlatım: iki insan simgesi yüz yüze / sırt sırta (SVG, gömülü).
 - Mock'a yalnız demo için "çifti yüz yüze / sırt sırta tut" ucu (`/api/yaklastir` gibi, gerçek sunucuda yok).
 - **Doğrulama:** mock'ta iki ölçüm alınır, önerilen eşik ortada, onaylanınca eşik değişir.
+- **Yapıldı:** `api/kalibrasyon.js` (ortadaki öneri, fark <6 dB ve ters ölçüm uyarısı, 10 sn geri sayım) + testleri; `KalibrasyonSihirbazi` + gömülü SVG simgeler (yüz yüze / sırt sırta, mesafe ölçüsü yok); ölçek üzerinde sırt sırta / yüz yüze / öneri / şu an işaretleri; onay doğrudan eşik gönderir. Mock: yalnız demo için `POST /api/demo/tut {a,b,mod}` (istek işleyicide rnd() yok). `api/http.js` ortak JSON katmanı (MasaApi + yeni KurulumApi). Tarayıcıda: -53 / -79 → öneri -66 → sunucu eşiği -66.
 
 #### 3.7 ⬜ Kart sağlığı tablosu
 - Her kart: en son duyulma, pil, "sorunlu" etiketi (duyulmuyor / pil düşük); paket hızı yok (karar 2);

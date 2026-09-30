@@ -131,3 +131,43 @@
 .kisi-dugme:hover { background: var(--yuzey-2); }
 .kisi-dugme[aria-pressed='true'] { background: var(--vurgu-zemin); }
 .kisi-dugme:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px; }
+
+/* --- 3.6 kalibrasyon sihirbazı --- */
+.kalib { display: flex; flex-direction: column; gap: var(--aralik-3); }
+.kalib-sec { flex-direction: column; align-items: stretch; }
+.kalib-sec select { max-width: none; }
+.kalib-canli { margin: 0; display: flex; align-items: center; gap: var(--aralik-1); flex-wrap: wrap; font-size: var(--punto-kucuk); }
+.kalib-adimlar { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--aralik-2); }
+.kalib-adim {
+  display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: var(--aralik-3); align-items: start;
+  padding: var(--aralik-3); border: 1px solid var(--cizgi); border-radius: var(--kose); background: var(--zemin);
+}
+.kalib-adim--etkin { border-color: var(--vurgu); box-shadow: inset 3px 0 0 var(--vurgu); }
+.kalib-adim-govde { display: flex; flex-direction: column; gap: var(--aralik-2); min-width: 0; }
+.kalib-adim-baslik { margin: 0; font-weight: 700; }
+.kalib-yonerge { margin: 0; color: var(--metin-2); font-size: var(--punto-kucuk); }
+.kalib-sonuc { margin: 0; display: flex; align-items: center; gap: var(--aralik-2); }
+.kalib-kucuk { min-height: 32px; font-size: var(--punto-kucuk); align-self: flex-start; }
+.kalib-sayac { margin: 0; font-weight: 700; color: var(--vurgu); }
+.kalib-oneri { display: flex; flex-direction: column; gap: var(--aralik-2); padding-top: var(--aralik-2); border-top: 1px solid var(--cizgi); }
+.kalib-oneri p { margin: 0; }
+.kalib-olcek { position: relative; height: 44px; margin: var(--aralik-3) var(--aralik-4) 0; border-top: 2px solid var(--cizgi-koyu); }
+.kalib-isaret {
+  position: absolute; top: -8px; transform: translateX(-50%); white-space: nowrap;
+  font-size: 11px; padding-top: 16px; color: var(--metin-2);
+}
+.kalib-isaret::before { content: ''; position: absolute; left: 50%; top: 0; width: 2px; height: 14px; background: currentColor; }
+.kalib-isaret--yy { color: var(--metin); font-weight: 700; }
+.kalib-isaret--ss { color: var(--metin-soluk); }
+.kalib-isaret--oneri { color: var(--vurgu); font-weight: 700; padding-top: 26px; }
+.kalib-isaret--simdi { color: var(--metin-soluk); top: -24px; padding-top: 0; }
+.kalib-isaret--simdi::before { top: 14px; height: 8px; }
+
+/* çizim */
+.kc { width: 110px; height: auto; display: block; }
+.kc-bas, .kc-govde { fill: var(--yuzey-2); stroke: var(--metin-2); stroke-width: 2; }
+.kc-goz { fill: var(--metin-2); }
+.kc-kart { fill: var(--vurgu); }
+.kc-sinyal { fill: none; stroke: var(--vurgu); stroke-width: 2; }
+.kc-sinyal--zayif { stroke: var(--metin-soluk); stroke-dasharray: 3 4; }
+.kc-yazi { fill: var(--metin-2); font-size: 10px; }

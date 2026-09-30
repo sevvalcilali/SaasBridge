@@ -1,0 +1,16 @@
+// Sunucuya JSON istekleri için ortak alt katman (MasaApi, KurulumApi). Ekranlar
+// bunu doğrudan kullanmaz; yalnız api/ içindeki sarmalayıcılar.
+// Gövde varsayılan JSON; `tur` verilirse (ör. CSV) metin olduğu gibi gider.
+// 2xx dışı yanıt → istisna (çağıran hatayı kullanıcıya anlatır).
+export async function jsonIstek(adres, yol, yontem = 'GET', govde, tur) {
+  const secenek = { method: yontem, headers: {} }
+  if (govde !== undefined) {
+    secenek.headers['Content-Type'] = tur ?? 'application/json'
+    secenek.body = tur ? govde : JSON.stringify(govde)
+  }
+  const yanit = await fetch(adres + yol, secenek)
+  if (!yanit.ok) throw new Error(`${yontem} ${yol} → ${yanit.status}`)
+  return yanit.json()
+}
+
+export const adresTemizle = (adres = '') => adres.replace(/\/$/, '')

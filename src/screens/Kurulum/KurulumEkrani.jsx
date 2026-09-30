@@ -1,20 +1,24 @@
 // Kurulum / eşik ekranı (brief §4.3, §8) — teknik kişi etkinlik öncesi kullanır:
 // eşik ayarı, canlı sinyal grafiği, çift tablosu, kalibrasyon, kart sağlığı.
 // Veri panoyla aynı kaynaktan (usePano / SSE); dBm burada gösterilebilir, metre yok.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { ciftSayisi } from '../../api/sinyal.js'
+import { KurulumApi } from '../../api/kurulumApi.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
 import SinyalGrafigi from './SinyalGrafigi.jsx'
 import PerspektifSecici from './PerspektifSecici.jsx'
+import KalibrasyonSihirbazi from './KalibrasyonSihirbazi.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
   const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
   const [perspektif, setPerspektif] = useState(null)  // seçili kişinin kart no'su ya da null
+  const apiRef = useRef(null)
+  if (apiRef.current === null) apiRef.current = new KurulumApi()
 
   if (!durum) {
     return (
@@ -52,6 +56,8 @@ export default function KurulumEkrani() {
         <div className="kurulum-yan">
           <section className="kurulum-kutu" aria-labelledby="k-kalibrasyon" data-test="kutu-kalibrasyon">
             <h2 id="k-kalibrasyon" className="kurulum-baslik">Kalibrasyon</h2>
+            <KalibrasyonSihirbazi signals={durum.signals} people={durum.people} esik={durum.threshold}
+              api={apiRef.current} onEsikGonder={(v) => baglanti.esikGonder(v)} />
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-saglik" data-test="kutu-saglik">
             <h2 id="k-saglik" className="kurulum-baslik">Kart sağlığı</h2>

@@ -1,7 +1,7 @@
 // Kurulum ekranı: çift durumu, yön farkı, seyrek veri, sabit sıralama.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { ciftDurumu, yonFarki, ciftSatirlari, ciftSayisi, dbmYazisi, perspektifKisileri, YON_FARK_DB } from './sinyal.js'
+import { ciftDurumu, yonFarki, ciftSatirlari, ciftSayisi, dbmYazisi, perspektifKisileri, gorunenAd, YON_FARK_DB } from './sinyal.js'
 
 test('ciftDurumu: dört durum mevcut alanlardan türetilir', () => {
   assert.equal(ciftDurumu({ above: true, together: true }).tur, 'birlikte')
@@ -66,4 +66,10 @@ test('perspektif: ciftSatirlari kişiye göre süzer', () => {
 test('perspektifKisileri: çifti duyulanlar kart no sırasıyla; seçili kişi çiftsiz kalsa da listede', () => {
   assert.deepEqual(perspektifKisileri(SIG, PEOPLE).map((k) => k.id), ['3', '4', '10', '101'])
   assert.ok(perspektifKisileri([], PEOPLE, '10').some((k) => k.id === '10'))
+})
+
+test('gorunenAd: girişimcide kurum, diğerlerinde ad', () => {
+  assert.equal(gorunenAd({ role: 'founder', name: 'Serkan', org: 'Oyun Evreni' }), 'Oyun Evreni')
+  assert.equal(gorunenAd({ role: 'founder', name: 'Serkan', org: '' }), 'Serkan')
+  assert.equal(gorunenAd({ role: 'investor', name: 'Ayşe', org: 'Atlas' }), 'Ayşe')
 })

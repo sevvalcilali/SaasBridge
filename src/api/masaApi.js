@@ -2,6 +2,7 @@
 // fetch yapmaz; buradan çağırır. Gerçek sunucu gelince yalnız `adres` değişir
 // (varsayılan: aynı kaynak). client.js ile aynı felsefe.
 import { sunucuRengi } from './renkler.js'
+import { jsonIstek, adresTemizle } from './http.js'
 
 // Kişi rengi panodakiyle aynı açık palete çevrilir (client.js ile aynı eşleme):
 // renk kişiyi takip eder ve yeşil yalnız "birlikte" demektir (brief §10).
@@ -9,20 +10,10 @@ const renkUyarla = (k) => ({ ...k, renk: sunucuRengi(k.renk) })
 
 export class MasaApi {
   constructor({ adres = '' } = {}) {
-    this.adres = adres.replace(/\/$/, '')
+    this.adres = adresTemizle(adres)
   }
 
-  // Gövde varsayılan JSON; `tur` verilirse (ör. CSV) metin olduğu gibi gider.
-  async #iste(yol, yontem = 'GET', govde, tur) {
-    const secenek = { method: yontem, headers: {} }
-    if (govde !== undefined) {
-      secenek.headers['Content-Type'] = tur ?? 'application/json'
-      secenek.body = tur ? govde : JSON.stringify(govde)
-    }
-    const yanit = await fetch(this.adres + yol, secenek)
-    if (!yanit.ok) throw new Error(`${yontem} ${yol} → ${yanit.status}`)
-    return yanit.json()
-  }
+  #iste(yol, yontem, govde, tur) { return jsonIstek(this.adres, yol, yontem, govde, tur) }
 
   // --- kişi kayıt defteri ---
   async kisileriGetir() { return (await this.#iste('/api/people')).map(renkUyarla) }

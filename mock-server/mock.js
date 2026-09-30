@@ -429,7 +429,10 @@ function tik() {
       }
     }
     // ölçüm üret: yakınken güçlü, ayrıldıktan sonra zayıf
-    const merkez = c.fiziksel ? -52 + c.bias : -84 + c.bias
+    // kalibrasyon demosu (/api/demo/tut) çiftin konumunu zorlayabilir
+    const merkez = c.zorla === 'yuzyuze' ? -54 + c.bias
+      : c.zorla === 'sirtsirta' ? -80 + c.bias
+      : c.fiziksel ? -52 + c.bias : -84 + c.bias
     const ab = rnd() < 0.05 ? null : rndNormal(merkez, 3)
     const ba = rnd() < 0.05 ? null : rndNormal(merkez + rndAralik(-2, 2), 3)
     if (ab !== null || ba !== null) {
@@ -689,6 +692,25 @@ async function apiYonlendir(istek, yanit) {
   if (istek.method === 'GET' && yol === '/api/people') { json(yanit, 200, katilimcilar.map(katDto)); return true }
 
   if (istek.method === 'GET' && yol === '/api/cards') { json(yanit, 200, kartlariListele()); return true }
+
+  // YALNIZ MOCK — kalibrasyon demosu: iki kartı yüz yüze / sırt sırta tutmayı taklit eder
+  // (gerçek sunucuda yok; kartları teknik kişi eliyle tutar). mod: null → bırak.
+  if (istek.method === 'POST' && yol === '/api/demo/tut') {
+    const g = await govdeOku(istek) || {}
+    const [a, b] = [String(g.a), String(g.b)]
+    if (!['yuzyuze', 'sirtsirta', null].includes(g.mod ?? null)) { json(yanit, 400, { ok: false, hata: 'mod' }); return true }
+    if (a === b || !kisiBul(a) || !kisiBul(b)) { json(yanit, 404, { ok: false, hata: 'kart panoda yok' }); return true }
+    const key = anahtar(a, b)
+    let c = ciftler.get(key)
+    if (!c && g.mod) {
+      const [x, y] = key.split('-')
+      c = { a: x, b: y, fiziksel: false, hedefSn: 0, fizikselSn: 0, ustundeSn: 0, altindaSn: 0,
+        together: false, birlikteSn: 0, olcumler: [], sonDuyulma: simSn, bias: 0, anlasmaVerildi: false } // rnd() yok: tohum bozulmasın
+      ciftler.set(key, c)
+    }
+    if (c) c.zorla = g.mod ?? null
+    json(yanit, 200, { ok: true }); return true
+  }
 
   if (istek.method === 'POST' && yol === '/api/yaklastir') {
     const g = await govdeOku(istek) || {}
