@@ -17,7 +17,7 @@
 
 .kurulum-govde {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: var(--aralik-4);
   align-items: start;
 }
@@ -180,10 +180,13 @@
 .saglik-tablo thead th { position: sticky; top: 0; background: var(--yuzey); }
 .saglik-kart { font-weight: 700; }
 .saglik-tablo { table-layout: fixed; }
-.saglik-tablo th:nth-child(1) { width: 3em; }
-.saglik-tablo th:nth-child(2) { width: 7.5em; }
-.saglik-tablo th:nth-child(4) { width: 4.8em; }
-.saglik-tablo th:nth-child(5) { width: 3.5em; }
+/* genişlikler en uzun içeriğe göre: "◌ görünmüyor", "37 sn önce", "%100" */
+.saglik-tablo th:nth-child(1) { width: 3.6em; }
+.saglik-tablo th:nth-child(2) { width: 8.6em; }
+.saglik-tablo th:nth-child(4) { width: 6.2em; }
+.saglik-tablo th:nth-child(5) { width: 4.4em; }
+/* kısalma yalnız kişi adında (tam ad title'da); sayılar ve durum hep tam */
+.saglik-tablo td, .saglik-tablo th { white-space: nowrap; }
 .saglik-kisi { overflow: hidden; }
 .saglik-zaman { white-space: nowrap; }
 .saglik-bos { color: var(--metin-soluk); }

@@ -341,7 +341,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   düzeltilenler: pano "Kişi ata" köprüsü bağlandı (Faz 1'de boştu), "5–10 cm" metni
   kaldırıldı + koruma testi, `/api/assign` 404 gövdesi. 136/136 test.
 
-### 🟡 Faz 3 — Kurulum / eşik ekranı (mikro-adımlar · başladı 30.09.2026)
+### ✅ Faz 3 — Kurulum / eşik ekranı (TAMAMLANDI 30.09.2026)
 **Amaç:** Brief §4.3 + §8: teknik kişinin etkinlik öncesi eşiği ayarladığı, sinyalleri ve
 kart sağlığını gördüğü ayrı "Kurulum" sayfası. Veri `/state` (SSE) + `/api/cards`; yeni
 sunucu ucu gerekmez. dBm ve yön farkı burada gösterilebilir; **metre yine yok.** Grafik
@@ -400,15 +400,16 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** kayıp kart senaryosunda kart "sorunlu" olur, düzelince kalkar.
 - **Yapıldı:** `api/kartSagligi.js` (kayıp ≥60 sn — masadaki ölçütle aynı sabit; görünmüyor >30 sn; pil <%20) + testleri; `KartSagligi` (/api/cards 3 sn yoklama, kişi /state'ten kart no ile; sorunlular üstte; durum sütunu dar ekranda da görünür). Mock: 23'ün katı kartların pili zayıf (demo). `DUSUK_PIL` tek kaynak (Faz 2 şeridi de kullanır). Tarayıcıda: pil düşük üstte, kayıp kart üste çıkıp düzelince kalktı.
 
-#### 3.8 ⬜ Faz 3 teslimi
+#### 3.8 ✅ Faz 3 teslimi
 - `SUNUCUDAN_ISTENENLER.md` güncellemesi (3.6 demo ucu yalnız mock), ekran görüntüleri,
   `docs/faz3/FAZ3_TESLIM.md`.
 - **Kabul ölçütü (Faz 3 tamamı):** eşik kaydırıcı + grafik + tablo + sihirbaz + kart sağlığı mock ile uçtan
   uca çalışır; §8 maddelerinin hepsi karşılanır; not + ekran görüntüleri teslim edildi.
+- **Yapıldı:** `docs/faz3/FAZ3_TESLIM.md` + 10 ekran görüntüsü (tek kabul senaryosundan; 1× sinyal, 10× kayıp kart); `SUNUCUDAN_ISTENENLER.md` §5 (Kurulum: yeni uç gerekmez, `pending` gerekmez, paket hızı yok, Muhittin'e soru 5). Faz 2 kabul senaryosu yeniden koşuldu — gerileme yok. Kapanışta: çift tablosunda durum sütunu öne (telefonda kaydırmadan görünür), kart sağlığında kesilen hücre yok, yan sütun 3:2. 160/160 test.
 
 ### ⬜ Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor
 
-> ⚠️ Faz 3 bittiğinde mikro-adımları yazılacak.
+> ⚠️ Faz 3 bitti. Faz 4'e başlamadan önce Şevval'e sorulacak; onaydan sonra mikro-adımları yazılacak.
 
 **Kaba adımlar:**
 - 4.a Görüşme zaman çizelgesi (`/api/sessions` mock).

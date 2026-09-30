@@ -1,6 +1,6 @@
 # Sunucudan İstenenler — Karşılama Masası (brief §9)
 
-> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı
+> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı, Faz 3 (Kurulum) eklendi
 >
 > Arayüz bu uçlarla **mock sunucuya karşı** uçtan uca çalışıyor
 > (`mock-server/mock.js` — davranışın çalışan referansı). Gerçek sunucu aynı
@@ -132,11 +132,33 @@ her atama/iade/değişimin `{zaman, kisiId, kart, islem}` kaydı tutulmalı. Ön
 4. `DELETE /api/people/{kisiId}` bir kişinin raporlanmış sürelerini de silsin mi?
    (Arayüz silmeyi sunmuyor; iade yeterli.)
 
-## 5. Faz 3–4'te gerekecekler (brief §9, biçim brief'teki gibi)
+## 5. Kurulum / eşik ekranı (Faz 3) — yeni uç gerekmiyor
+
+Kurulum ekranı bugünkü sözleşmeyle çalışıyor; yalnız aşağıdakilerin **aynen** korunması yeterli:
+
+| Alan / uç | Kullanım |
+|---|---|
+| `/state.threshold` | Kaydırıcının ve grafikteki eşik çizgisinin değeri |
+| `/state.signals[]` (`a, b, ab, ba, value, n, above, together`) | Çift tablosu. `value` = **son 10 sn ortancası** olmalı: kalibrasyon "10 sn tut → o anki `value`" ile ölçüyor |
+| `/state.history` (`"a-b": [[saniyeÖnce, dBm], …]`, en eski başta) + `chartSeconds` | Canlı grafik. Anahtar `"küçükNo-büyükNo"` |
+| `POST /control {"cmd":"threshold","value":-68}` | Kaydırıcı (bırakınca ~250 ms sonra tek istek) ve kalibrasyon onayı. 2xx dışı yanıt hata sayılır, ekran eski değere döner |
+| `GET /api/cards` (`seenAgo`, `pil`, `atanan`) | Kart sağlığı: ≥60 sn "duyulmuyor", >30 sn "görünmüyor", pil <%20 "pil düşük" |
+
+- **"Başlıyor… / bitiyor…" için §9-7'deki `pending` alanı gerekmiyor:** `above` ile `together`
+  farkından türetiliyor (above ∧ ¬together = başlıyor, ¬above ∧ together = bitiyor).
+- **Paket hızı istenmiyor** (Şevval kararı): kart sağlığı son duyulma + pil ile yetiniyor.
+- `POST /api/demo/tut {a, b, mod}` **yalnız mock'ta** (kalibrasyonu donanımsız denemek için);
+  gerçek sunucuda gerekmez.
+
+**Soru 5 (Muhittin):** Kalibrasyon genelde masadaki **yedek (atanmamış) kartlarla** yapılır.
+Bu kartların çiftleri `signals` ve `history`'de görünüyor mu? Görünmüyorsa kalibrasyon
+için geçici olarak (ör. Kurulum açıkken) dahil edilmeleri gerekir. Mock'ta şu an yalnız
+panodaki kartların çiftleri var.
+
+## 6. Faz 4'te gerekecekler (brief §9, biçim brief'teki gibi)
 
 | # | Uç | Ne için |
 |---|---|---|
 | 6 | `GET /api/sessions` → `[{a, b, start, end}]` | Görüşme zaman çizelgesi, rapor (Faz 4). `a/b` = `kisiId` olmalı (kart değil) |
-| 7 | `signals[].pending: "enter"/"exit"` | "Başlıyor…/bitiyor…" ara durumu (Faz 3) |
-| 8 | `GET/PATCH /api/event` | Etkinlik bilgisi, anlaşma/yalnız kalma süreleri (Faz 3) |
+| 8 | `GET/PATCH /api/event` | Etkinlik bilgisi, anlaşma/yalnız kalma süreleri (Faz 4 ya da sonrası; Faz 3'te gerekmedi) |
 | 9 | `GET /api/report.csv` | Rapor dışa aktarma (Faz 4); süreler kişi bazlı |

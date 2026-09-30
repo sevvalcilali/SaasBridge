@@ -23,10 +23,10 @@ export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec 
         <thead>
           <tr>
             <th scope="col">Çift</th>
+            <th scope="col">Durum</th>
+            <th scope="col" className="sag" title="Son 10 sn ortancası — eşikle karşılaştırılan değer">Değer</th>
             <th scope="col" className="sag" title="Soldakinin sağdakini duyduğu güç">A → B</th>
             <th scope="col" className="sag" title="Sağdakinin soldakini duyduğu güç">B → A</th>
-            <th scope="col" className="sag" title="Son 10 sn ortancası — eşikle karşılaştırılan değer">Değer</th>
-            <th scope="col">Durum</th>
             <th scope="col" className="sag" title="Son 10 sn'deki ölçüm sayısı">Ölçüm</th>
           </tr>
         </thead>
@@ -36,6 +36,8 @@ export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec 
               <td className="cift-kisiler">
                 {rozet(r.a)} <span className="cift-ayrac" aria-hidden="true">·</span> {rozet(r.b)}
               </td>
+              <td><span className={`cift-durum cift-durum--${r.durum.tur}`}>{r.durum.ikon} {r.durum.etiket}</span></td>
+              <td className="sag sayi cift-deger">{dbmYazisi(r.value)}</td>
               <td className="sag sayi">{dbmYazisi(r.ab)}</td>
               <td className="sag sayi">
                 {dbmYazisi(r.ba)}
@@ -45,8 +47,6 @@ export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec 
                   </span>
                 )}
               </td>
-              <td className="sag sayi cift-deger">{dbmYazisi(r.value)}</td>
-              <td><span className={`cift-durum cift-durum--${r.durum.tur}`}>{r.durum.ikon} {r.durum.etiket}</span></td>
               <td className="sag sayi">
                 {r.n}
                 {r.seyrek && <span className="cift-uyari" title={`Son 10 sn'de ${SEYREK_N}'ten az ölçüm: veri seyrek`}> ⚠ seyrek</span>}
