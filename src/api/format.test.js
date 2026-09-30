@@ -45,3 +45,9 @@ test('onceYazisi: null = kart hiç duyulmadı (brief §5.1 seenAgo)', () => {
   assert.equal(onceYazisi(null), 'hiç duyulmadı')
   assert.equal(onceYazisi(undefined), 'hiç duyulmadı')
 })
+
+test('tarihSaatYazisi: 30.09.2026 14:05 biçimi', async () => {
+  const { tarihSaatYazisi } = await import('./format.js')
+  assert.equal(tarihSaatYazisi(new Date(2026, 8, 30, 14, 5)), '30.09.2026 14:05')
+  assert.equal(tarihSaatYazisi(new Date(2026, 0, 3, 9, 7)), '03.01.2026 09:07')
+})

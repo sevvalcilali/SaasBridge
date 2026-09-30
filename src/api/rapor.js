@@ -79,7 +79,9 @@ export function raporHesapla(kisiler, oturumlar, simdi, { enUzunAdet = 10 } = {}
   }
 
   const bos = { toplamSn: 0, adet: 0, esler: new Set(), karsiEsler: new Map() }
-  const kisiSatirlari = [...harita.values()]
+  // Katılımcı tablosu yalnız kayıtlı kişiler (özetteki sayıyla aynı); kayıtsız kartın
+  // görüşmeleri çift ve "en uzun" tablolarında kalır.
+  const kisiSatirlari = kisiler
     .map((k) => {
       const t = kisiTop.get(k.kisiId) ?? bos
       return { kisi: k, toplamSn: t.toplamSn, gorusmeSayisi: t.adet, kisiSayisi: t.esler.size, karsiRolSayisi: t.karsiEsler.size }

@@ -27,3 +27,9 @@ export function onceYazisi(saniye) {
   if (sn < 3600) return `${Math.floor(sn / 60)} dk önce`
   return `${Math.floor(sn / 3600)} sa önce`
 }
+
+/** Date → "30.09.2026 14:05" (brief §10: tarih 28.09.2026, saat 14:05). */
+export function tarihSaatYazisi(d) {
+  const iki = (n) => String(n).padStart(2, '0')
+  return `${iki(d.getDate())}.${iki(d.getMonth() + 1)}.${d.getFullYear()} ${iki(d.getHours())}:${iki(d.getMinutes())}`
+}

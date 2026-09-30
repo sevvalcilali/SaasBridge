@@ -10,6 +10,7 @@ test('rotaAdi: kart-ver (parametreli ya da değil), kurulum; diğer her şey pan
   assert.equal(rotaAdi(''), 'pano')
   assert.equal(rotaAdi('#/kart-verx'), 'pano')
   assert.equal(rotaAdi('#/kurulum'), 'kurulum')
+  assert.equal(rotaAdi('#/rapor'), 'rapor')
 })
 
 test('rotaKart: yalnız sayısal kart no', () => {

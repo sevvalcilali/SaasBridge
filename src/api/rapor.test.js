@@ -33,7 +33,8 @@ test('raporHesapla: özet; ayrılan kişi raporda; hiç görüşmeyen de listede
   const ayse = r.kisiSatirlari[0]
   assert.equal(ayse.kisi.kisiId, 'k1', 'en uzun toplam üstte'); assert.equal(ayse.toplamSn, 1000)
   assert.equal(r.kisiSatirlari.find((x) => x.kisi.kisiId === 'k5').toplamSn, 0)
-  assert.ok(r.kisiSatirlari.some((x) => x.kisi.ad === 'Kart 14 (kayıtsız)'))
+  assert.equal(r.kisiSatirlari.length, K.length, 'katılımcı tablosu yalnız kayıtlılar (özetle aynı sayı)')
+  assert.ok(r.ciftler.some((c) => c.a.ad === 'Kart 14 (kayıtsız)' || c.b.ad === 'Kart 14 (kayıtsız)'), 'kayıtsız kartın görüşmesi çiftlerde kalır')
 })
 
 test('raporHesapla: çift toplamları yönden bağımsız; girişimci → yatırımcı; en uzunlar', () => {

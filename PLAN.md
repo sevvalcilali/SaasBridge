@@ -435,11 +435,12 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Doğrulama:** panelde çizelge görünür; kısayollar masayı doğru adımda açar.
 - **Yapıldı:** `components/ZamanCizelgesi` (ortak eksen, sürmekte olan açık uçlu + yeşil); panelde pil + kısayollar (`#/kart-ver?degistir=N` → kart değişimi 2. adım, `?iade=N` → o kişinin iade onayı, kayıtsız kartta "Bu karta kişi ata"); `usePanelVerisi` (panel açıkken 5 sn yoklama); kişi eşlemesi kart no → kayıt defteri. Faz 1 paneli bozulmadı.
 
-#### 4.4 ⬜ Rapor sayfası
+#### 4.4 ✅ Rapor sayfası
 - `#/rapor`: etkinlik başlığı + özet sayılar; kişi tablosu (toplam süre, kaç kişi, kaç karşı rol,
   ayrıldı/kartta); girişimci → ulaştığı yatırımcılar (hiç ulaşamayanlar vurgulu); en uzun görüşmeler;
   kim kimle toplam. Yazdırma/PDF dostu (`@media print`, "Yazdır / PDF" düğmesi).
 - **Doğrulama:** ayrılan kişi raporda; sayılar oturumlarla tutarlı; yazdırma görünümü temiz.
+- **Yapıldı:** `#/rapor` + sekme; bölümler `RaporBolumleri.jsx`; rapor anlık görüntü (açılışta + "Yenile"); `@media print` (menü/düğmeler gizli, satır bölünmez, token renkler); Chromium PDF çıktısı üretildi (A4). Katılımcı tablosu yalnız kayıtlılar (özetle aynı sayı); kayıtsız kartın görüşmeleri çift / en uzun tablolarında.
 
 #### 4.5 ⬜ CSV dışa aktarma
 - Rapordan iki dosya: kişiler, görüşmeler. Türkçe Excel uyumlu (UTF-8 BOM, `;`). Tarayıcıda üretilir

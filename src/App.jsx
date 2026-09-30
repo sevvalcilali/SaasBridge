@@ -1,14 +1,16 @@
-// Uygulama kökü + hafif yönlendirme. Pano ↔ Kart Ver ↔ Kurulum.
+// Uygulama kökü + hafif yönlendirme. Pano ↔ Kart Ver ↔ Kurulum ↔ Rapor.
 import { useRota } from './api/useRota.js'
 import PanoEkrani from './screens/Pano/PanoEkrani.jsx'
 import KartVerEkrani from './screens/KartVer/KartVerEkrani.jsx'
 import KurulumEkrani from './screens/Kurulum/KurulumEkrani.jsx'
+import RaporEkrani from './screens/Rapor/RaporEkrani.jsx'
 import './App.css'
 
 const SEKMELER = [
   { rota: 'pano', yol: '#/', etiket: 'Pano' },
   { rota: 'kart-ver', yol: '#/kart-ver', etiket: 'Kart Ver' },
   { rota: 'kurulum', yol: '#/kurulum', etiket: 'Kurulum' },
+  { rota: 'rapor', yol: '#/rapor', etiket: 'Rapor' },
 ]
 
 export default function App() {
@@ -29,6 +31,7 @@ export default function App() {
       </nav>
       {rota === 'kart-ver' && <KartVerEkrani />}
       {rota === 'kurulum' && <KurulumEkrani />}
+      {rota === 'rapor' && <RaporEkrani />}
       {rota === 'pano' && <PanoEkrani />}
     </div>
   )
