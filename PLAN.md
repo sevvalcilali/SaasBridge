@@ -6,6 +6,130 @@
 
 ---
 
+## ⏩ DEVİR NOTU — BURADAN BAŞLA (güncelleme: 30.09.2026)
+
+> Bu bölüm projeyi devralan kişi (ya da Claude oturumu) için. Önce bunu, sonra **Bölüm 0 (çalışma
+> kuralları)** ve `UI_TASARIM_BRIEF.md`'yi oku. Ayrıntı gerekirse ilgili fazın başlığına ve `docs/`'a in.
+
+### Tek cümlede durum
+Brief §12'deki **beş önceliğin hepsi bitti** (Faz 0–5) ve üstüne bir **uçtan uca tarama + düzeltme turu**
+yapıldı. Arayüz **mock sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz
+bağlanmadı. Sıradaki iş iki koldan ilerliyor:
+1. **Karar bekleyen dört brief eksiği** (aşağıda C1–C4),
+2. **gerçek sunucuya geçiş.** Bunun için Muhittin'in cevapları ve `/api/*` uçları gerekiyor.
+
+- **Dal:** `faz-0-altyapi` · **PR:** https://github.com/sevvalcilali/SaasBridge/pull/1 (açık, `main`'e birleşmedi)
+- **Son commit:** `57eab29` "Düzeltme T5" · **Testler:** `npm test` → 202/202 yeşil · **Build:** temiz
+
+### Nasıl çalıştırılır (5 dakika)
+Gereken tek şey Node 22 (ya da 20+). İnternet gerekmez: CDN yok, font indirilmez.
+
+```bash
+npm install
+npm run dev          # mock sunucu (8002) + Vite birlikte → http://localhost:5173
+KISI=97 npm run dev  # kalabalık deneme (kart no 1–99 olduğu için en çok 97 kişi)
+npm test             # birim + mock testleri (node --test, ek bağımlılık yok)
+npm run build        # → dist/  (gerçek sunucu bu klasörü statik verir)
+```
+
+Ekranlar (adres çubuğu):
+
+| Adres | Ekran |
+|---|---|
+| `/#/` | Organizatör panosu |
+| `/#/kart-ver` | Karşılama masası |
+| `/#/kurulum` | Eşik / kalibrasyon / kart sağlığı |
+| `/#/rapor` | Etkinlik sonrası rapor |
+| `/?clean=1` | Salon ekranı (sunum modu); `&isimsiz=1` adsız |
+
+Tema: sağ üstte Açık/Koyu.
+
+Mock seçenekleri:
+
+```
+node mock-server/mock.js --port=8002 --kisi=25 --hizlandir=10 --kopma=1 --tohum=42
+```
+
+`--hizlandir` zamanı hızlandırır. `--kopma=1` alıcı kopmasını taklit eder.
+
+**Gerçek sunucuya bağlanma:** `pano.py`'yi 8002'de çalıştır, **yalnız** `npx vite` başlat (`npm run dev` değil: o mock'u
+da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.config.js`). Üretimde `npm run build` çıktısı
+`dist/`, `pano.py` tarafından aynı adresten verilir. Adres değişecekse **tek yer** `src/api/client.js` →
+`SUNUCU_ADRESI`.
+
+### Ne bitti — nerede anlatılıyor
+
+| Faz | Ne | Teslim notu / görüntüler |
+|---|---|---|
+| 0 | Altyapı, token'lar, gerçek SSE mock, `api/client.js` | aşağıda Faz 0 |
+| 1 | Canlı pano: kişi listesi, ağ, bildirimler, ayrıntı paneli | `docs/faz1/`, kökteki `adim_1_*.png` |
+| 2 | Karşılama masası: kart ver / değiştir / iade / geri al, CSV, kayıp kart | `docs/faz2/` |
+| 3 | Kurulum: eşik, canlı grafik, çift tablosu, kalibrasyon, kart sağlığı | `docs/faz3/FAZ3_TESLIM.md` |
+| 4 | Derin kişi paneli (zaman çizelgesi) + rapor (yazdır/PDF, 2 CSV) | `docs/faz4/FAZ4_TESLIM.md` |
+| 5 | Doğrulanmış palet, koyu tema, sunum modu, 97 kişi performansı | `docs/faz5/FAZ5_TESLIM.md` |
+| Tarama | 3 kod incelemesi + tarayıcı taraması → 20 düzeltme | `docs/duzeltme-turu/NOT.md` |
+
+Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
+
+### Nerede kaldık / sıradaki işler (öncelik sırasıyla)
+
+**1. Karar bekleyen brief eksikleri (C).** Şevval'e sorulacak. Onaysız yapılmaz (Bölüm 0, kural 1–2).
+
+| # | Eksik (brief) | Nereye dokunulur | Not |
+|---|---|---|---|
+| C1 | Kişi satırında "kaç karşı rol kişisiyle görüştü" (§7) | `screens/Pano/KisiSatiri.jsx` | veri hazır: `people[].invPeers` |
+| C2 | Sıralama seçeneği ("en uzun görüşen / en yalnız") + "yalnız kaldı" ve "Misafir" filtreleri (§7) | `api/durum.js siralaKisiler`, `api/filtre.js`, `screens/Pano/FiltreCubugu.jsx` | "sakin hareket" kuralı: sıra her tikte zıplamamalı (`useSakinSiralama.js`) |
+| C3 | Bildirim akışı 20'de kesiliyor, eskilere ulaşılamıyor | `screens/Pano/BildirimAkisi.jsx` | "kart kayboldu" gibi ciddi bildirimler anlaşma bildirimleri altında kaybolmamalı |
+| C4 | Alıcı koptuğunda (`receiverAge > 5`) veri soluklaşmıyor, yalnız bant çıkıyor (§11) | `screens/Pano/PanoEkrani.jsx` (`pano--soluk`) | sunucu kopmasında zaten soluyor |
+
+**2. Gerçek sunucuya geçiş.** Muhittin'e bağlı.
+- `pano.py` bugün yalnız `/`, `/state`, `/events`, `/control` sunuyor. Masa, rapor, kart sağlığı ve kişi panelinin ek
+  verisi için `/api/people`, `/api/assign`, `/api/unassign`, `/api/people/import`, `/api/cards`, `/api/sessions`
+  gerekiyor. Biçimleri `SUNUCUDAN_ISTENENLER.md` §1–3, §6 ve §8'de.
+- Bu uçlar yokken ekranlar çökmüyor. Masa "sunucuya bağlanılamıyor" der, rapor "veri alınamadı" der, pano her
+  durumda çalışır.
+- `GET /api/demo`, `/api/yaklastir` ve `/api/demo/tut` **yalnız mock'a ait**. Gerçek sunucuda olmamalı; arayüz demo
+  düğmelerini ancak `/api/demo` varsa gösterir.
+- Muhittin'e bekleyen sorular: `SUNUCUDAN_ISTENENLER.md` §4 (Soru 1–4), §5 (Soru 5), §7 (Soru 6: "100+ kişi" ile
+  kart no 1–99 çelişkisi).
+- Geçişte kontrol edilecekler:
+  - `/events` alıcı yokken de ~2 Hz yayın yapmalı. Yapmazsa 6 sn sessizlikte "sunucuya bağlanılamıyor" görünür.
+  - `/control` başarıda 2xx dönmeli.
+  - `pano.py` `.js` dosyalarını JavaScript MIME türüyle vermeli. Windows'ta Python bazen `text/plain` verir ve
+    sayfa açılmaz.
+  - Masadaki yedek kartlar panoda "Kart N" hayaleti olmamalı (Soru 1).
+  - Bildirimlerdeki `people` kart no taşıyor. Kart değişiminden sonra eski bildirim yanlış kişiyi vurgulayabilir;
+    sunucu `kisiId` de gönderebilir mi, sorulmalı.
+
+**3. Bilinen küçük konular.** Bölüm 4'te ayrıntılı; hiçbiri engelleyici değil.
+- **Yinelenen anahtar:** Bildirim akışında aynı anahtar (`t-kind`) iki kez kullanılabiliyor. Hızlandırılmış mock'ta
+  konsola uyarı düşer.
+- **Kart değişiminde "Geri al":** Eski kartı geri vermiyor, kişi kartsız kalıyor. Ekranda bu söyleniyor.
+- **Kurulum'da ~500 çift:** 4× yavaşlatılmış işlemcide 2 sn'de bir ~330 ms takılma var.
+- **Atama geçmişi sunucuda yok:** "Geri al" masanın kendi hafızasında; sayfa yenilenince kaybolur.
+
+### Çalışma yöntemi (her iş için)
+1. Bölüm 0'daki kurallar geçerli. En önemlileri:
+   - **onaysız faz / kapsam dışı iş yok**,
+   - `api/` dışında ağ çağrısı yok,
+   - bileşende sabit renk yok (yalnız `theme/tokens.css` token'ları),
+   - yeşil yalnız "şu an birlikte" anlamında,
+   - metre/cm yok,
+   - yeni bağımlılık onaya tabi.
+2. **Mantık `src/api/` altında saf fonksiyonda, yanında `*.test.js`.** Ekran (`screens/`) yalnız gösterir. Mock
+   davranışı `mock-server/*.test.js`'te (her dosya kendi portunda bir mock başlatır).
+3. **Her değişiklik şu sırayla doğrulanır:**
+   - `npm test` tamamen yeşil,
+   - `npm run build` temiz,
+   - tarayıcıda gerçekten denenir (mock ile). Tarayıcı kabul betikleri (Playwright) **repoda değil**; kabul
+     ölçütleri her fazın başlığında ve `docs/faz*/…TESLIM.md`'de yazılı.
+4. **Commit ve not:** Her adım kendi commit'i. Bu dosyada ilgili adım ✅ yapılır ve kısa bir "Yapıldı:" notu düşülür.
+   Faz sonunda `docs/fazN/` altına ekran görüntüsü ve "neyi neden" notu eklenir.
+5. **Süreç kapatırken:** `pkill -f` desenini içeren metin, aynı komutta başka yerde geçmemeli. Yoksa komut kendi
+   kabuğunu öldürür; bu projede birkaç kez oldu.
+
+---
+
 ## 0. ÇALIŞMA KURALLARI (Claude için — pazarlıksız)
 
 ### Onay kuralları
@@ -526,29 +650,40 @@ sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca s
 
 ---
 
-## 3. PROJE YAPISI (hedef)
+## 3. PROJE YAPISI (güncel, 30.09.2026)
 
 ```
-saasBridge/
-├─ UI_TASARIM_BRIEF.md        # gereksinim belgesi (Muhittin)
-├─ PLAN.md                    # bu dosya
-├─ SUNUCUDAN_ISTENENLER.md    # Faz 2 çıktısı: Muhittin'e §9 API istek listesi
+SaasBridge/
+├─ UI_TASARIM_BRIEF.md        # gereksinim belgesi (Muhittin) — her şeyin kaynağı
+├─ PLAN.md                    # bu dosya: kurallar, kararlar, fazlar, devir notu
+├─ SUNUCUDAN_ISTENENLER.md    # Muhittin'e: istenen uçlar, veri biçimleri, açık sorular
+├─ dev.js                     # npm run dev: mock (8002) + Vite birlikte
+├─ vite.config.js             # geliştirmede /state /events /control /api → 8002 proxy
 ├─ mock-server/
-│  └─ mock.js                 # tek dosya, bağımlılıksız Node SSE sunucusu
+│  ├─ mock.js                 # tek dosya, bağımlılıksız Node SSE sunucusu (pano.py ikizi + /api uçları)
+│  └─ *.test.js               # mock davranış testleri (her biri kendi portunda)
 ├─ src/
-│  ├─ api/
-│  │  ├─ client.js            # SSE + durum deposu (sunucuyla konuşan TEK yer)
-│  │  └─ format.js            # birim/metin çevirileri
+│  ├─ main.jsx · App.jsx      # kök; hash yönlendirme, menü, tema; ?clean=1 → sunum modu
+│  ├─ api/                    # sunucuyla konuşan TEK katman + saf yardımcılar (+ *.test.js)
+│  │  ├─ client.js            # SSE + durum deposu; SUNUCU_ADRESI (tek adres)
+│  │  ├─ http.js              # ortak JSON istek katmanı, demo tespiti
+│  │  ├─ masaApi.js · kurulumApi.js · raporApi.js   # ekran başına uç sarmalayıcıları
+│  │  ├─ usePano.js · useKartlar.js · usePanelVerisi.js · useRota.js · useTema.js · useKalici.js · useSeyrek.js · useDemo.js
+│  │  └─ durum · format · filtre · renkler · kartNo · masaYardim · csvOku · csvDisa · sinyal · esik · grafik ·
+│  │     kalibrasyon · kartSagligi · rapor · agYerlesim   # saf hesaplar (JSX'te hesap yok)
 │  ├─ theme/
-│  │  └─ tokens.css           # tüm tasarım token'ları
-│  ├─ components/             # ortak parçalar (RolSekli, KisiRozeti, ...)
+│  │  ├─ tokens.css           # tüm renk/boşluk/yazı token'ları; açık + [data-tema="koyu"]
+│  │  └─ kontrast.test.js · metreYok.test.js · tokenOku.js · renkOlcum.js   # iki tema kontrast/palet denetimi
+│  ├─ components/             # ortak: AgGorunumu, KisiRozeti (+RolSekli), ZamanCizelgesi, HataBantlari, TemaSecici
 │  └─ screens/
-│     ├─ Pano/                # Faz 1
+│     ├─ Pano/                # Faz 1 (+4 ayrıntı paneli)
 │     ├─ KartVer/             # Faz 2
 │     ├─ Kurulum/             # Faz 3
-│     └─ Rapor/               # Faz 4
-├─ index.html · vite.config.js · package.json
-└─ dist/                      # npm run build çıktısı (sunucu bunu statik verir)
+│     ├─ Rapor/               # Faz 4
+│     └─ Sunum/               # Faz 5 (?clean=1)
+├─ docs/faz1..faz5/ · docs/duzeltme-turu/   # teslim notları + ekran görüntüleri + örnek çıktılar
+├─ index.html · package.json
+└─ dist/                      # npm run build çıktısı (git'te yok; sunucu bunu statik verir)
 ```
 
 ---
