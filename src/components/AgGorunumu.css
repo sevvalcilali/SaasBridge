@@ -13,6 +13,7 @@
 
 /* Çizgiler: geçmiş görüşme gri, şu an birlikte yeşil + yavaş akış (sakin). */
 .ag-dugum { cursor: pointer; }
+.ag-dugum--sabit { cursor: default; }
 .ag-dugum:focus-visible { outline: none; }
 .ag-dugum:focus-visible > :not(text) { stroke: var(--vurgu); stroke-width: 3; }
 
@@ -38,6 +39,11 @@
   font-size: 24px;             /* viewBox birimi; ~470px sütunda ≈11px */
   fill: var(--metin-2);
   font-family: var(--yazi);
+  /* Zemin renginde hale: üstünden geçen çizgiler adı bozmasın */
+  paint-order: stroke;
+  stroke: var(--yuzey);
+  stroke-width: 6px;
+  stroke-linejoin: round;
 }
 
 /* Vurgulama (bildirimden): ilgili düğümlerde parlak halka, diğerleri solar.
@@ -65,3 +71,9 @@
   font-size: var(--punto-kucuk);
   text-align: center;
 }
+
+/* Sunum modu (salon ekranı): ağ kalan alanı doldurur ve sığar (viewBox meet);
+   etiketler ana metin renginde, 2–3 metreden okunur. */
+.ag-gorunumu--sunum { flex: 1; min-height: 0; }
+.ag-gorunumu--sunum .ag-svg { flex: 1; min-height: 0; height: 100%; }
+.ag-gorunumu--sunum .ag-etiket { fill: var(--metin); font-weight: 600; stroke: var(--zemin); }

@@ -475,10 +475,15 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
   sıcak koyu kahve yüzeyler, durum renkleri koyu zeminde ≥4.5:1. Tarayıcıda: seçim yenilemede korunuyor; pano, masa,
   kurulum, rapor koyu temada kontrol edildi.
 
-#### 5.3 ⬜ Sunum modu (`?clean=1`)
+#### 5.3 ✅ Sunum modu (`?clean=1`)
 - Salon ekranı: menü, liste, bildirim yok; ağ görünümü tam ekran, 2–3 m'den okunur etiketler,
   saat + birkaç büyük sayı. İsimli / isimsiz (`&isimsiz=1`). Köşede, üzerine gelince beliren sakin araç çubuğu.
 - **Doğrulama:** tarayıcıda 1920×1080 ekran görüntüsü; isimsizde hiçbir ad yok.
+- **Yapıldı:** `screens/Sunum/SunumEkrani` (`?clean=1`, `&isimsiz=1` adreste kalır → salon ekranı yenilense de aynı);
+  `AgGorunumu` ortak bileşene taşındı (`components/`), `sunum` (geniş viewBox 1700, ekrana sığar, tıklanmaz) ve
+  `isimsiz` seçenekleri; etiketlere zemin renginde hale (çizgi üstünde okunur, panoda da). Alt şerit panodaki
+  `ozetKutulari` ile aynı sayılar + şekil/yeşil çizgi anahtarı. Menüde "Sunum modu ↗" (yeni sekme). Tarayıcıda:
+  1920×1080 ve 1280×720'de kaydırma yok, isimsizde sayfa metninde ad yok, yenilemede korunuyor, "Sunumdan çık" panoya döner.
 
 #### 5.4 ⬜ 100+ kişi performansı
 - Mock `--kisi=120` ile ölçüm (render süresi, tik başına iş); darboğazlara hedefli iyileştirme.

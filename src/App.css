@@ -22,4 +22,6 @@
   border-color: var(--cizgi);
   border-bottom-color: var(--yuzey);
 }
-.uyg-nav-sag { margin-left: auto; align-self: center; }
+.uyg-nav-sag { margin-left: auto; align-self: center; display: flex; align-items: center; gap: var(--aralik-3); }
+.uyg-nav-sunum { font-size: var(--punto-kucuk); font-weight: 700; color: var(--metin-2); text-decoration: none; }
+.uyg-nav-sunum:hover { color: var(--metin); text-decoration: underline; }

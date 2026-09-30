@@ -4,6 +4,7 @@
 // #/kart-ver?kart=14 → masa "Kart 14 için kişi seçin" ile açılır (panodaki "Kişi ata").
 // #/kart-ver?degistir=14 → Kart 14'ün sahibiyle kart değişimi; ?iade=14 → Kart 14'ün iadesi
 // (kişi ayrıntı panelindeki kısayollar, brief §7).
+// ?clean=1 → sunum modu (salon ekranı, brief §4.5); &isimsiz=1 → adlar gizli.
 import { useEffect, useState } from 'react'
 
 const KART_VER = '#/kart-ver'
@@ -38,3 +39,9 @@ export const rotaKart = (hash) => rotaParametresi(hash, 'kart')
 export const kartVerAdresi = (kart) => (kart ? `${KART_VER}?kart=${encodeURIComponent(kart)}` : KART_VER)
 export const kartDegistirAdresi = (kart) => `${KART_VER}?degistir=${encodeURIComponent(kart)}`
 export const kartIadeAdresi = (kart) => `${KART_VER}?iade=${encodeURIComponent(kart)}`
+
+// Sunum modu adresin sorgu kısmında (brief §4.5: "?clean=1"); hash'ten bağımsız.
+export const sunumModuMu = (search) => new URLSearchParams(search).get('clean') === '1'
+export const isimsizMi = (search) => new URLSearchParams(search).get('isimsiz') === '1'
+export const sunumAdresi = (isimsiz = false) => `?clean=1${isimsiz ? '&isimsiz=1' : ''}#/`
+export const SUNUMDAN_CIKIS = './#/'

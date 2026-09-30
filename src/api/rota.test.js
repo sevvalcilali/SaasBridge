@@ -1,7 +1,7 @@
 // Hash yönlendirme: panodaki "Kişi ata" masayı o kartla açar.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rotaAdi, rotaKart, kartVerAdresi, rotaParametresi, kartDegistirAdresi, kartIadeAdresi } from './useRota.js'
+import { rotaAdi, rotaKart, kartVerAdresi, rotaParametresi, kartDegistirAdresi, kartIadeAdresi, sunumModuMu, isimsizMi, sunumAdresi } from './useRota.js'
 
 test('rotaAdi: kart-ver (parametreli ya da değil), kurulum; diğer her şey pano', () => {
   assert.equal(rotaAdi('#/kart-ver'), 'kart-ver')
@@ -31,4 +31,15 @@ test('kısayol adresleri: değiştir / iade parametreleri', () => {
   assert.equal(rotaParametresi(kartIadeAdresi('7'), 'iade'), '7')
   assert.equal(rotaParametresi(kartIadeAdresi('7'), 'degistir'), null)
   assert.equal(rotaKart(kartIadeAdresi('7')), null)
+})
+
+test('sunum modu: ?clean=1 (brief §4.5), isimsiz ayrı bayrak; adres hash rotasından bağımsız', () => {
+  assert.equal(sunumModuMu('?clean=1'), true)
+  assert.equal(sunumModuMu('?clean=1&isimsiz=1'), true)
+  assert.equal(sunumModuMu(''), false)
+  assert.equal(sunumModuMu('?clean=0'), false)
+  assert.equal(isimsizMi('?clean=1&isimsiz=1'), true)
+  assert.equal(isimsizMi('?clean=1'), false)
+  assert.equal(sunumAdresi(), '?clean=1#/')
+  assert.equal(sunumAdresi(true), '?clean=1&isimsiz=1#/')
 })

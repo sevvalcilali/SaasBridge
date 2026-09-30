@@ -1,11 +1,13 @@
-// Uygulama kökü + hafif yönlendirme. Pano ↔ Kart Ver ↔ Kurulum ↔ Rapor.
-import { useRota } from './api/useRota.js'
+// Uygulama kökü + hafif yönlendirme. Pano ↔ Kart Ver ↔ Kurulum ↔ Rapor;
+// ?clean=1 → menüsüz sunum modu (salon ekranı, brief §4.5).
+import { useRota, sunumModuMu, sunumAdresi } from './api/useRota.js'
 import { useTema } from './api/useTema.js'
 import TemaSecici from './components/TemaSecici.jsx'
 import PanoEkrani from './screens/Pano/PanoEkrani.jsx'
 import KartVerEkrani from './screens/KartVer/KartVerEkrani.jsx'
 import KurulumEkrani from './screens/Kurulum/KurulumEkrani.jsx'
 import RaporEkrani from './screens/Rapor/RaporEkrani.jsx'
+import SunumEkrani from './screens/Sunum/SunumEkrani.jsx'
 import './App.css'
 
 const SEKMELER = [
@@ -16,6 +18,11 @@ const SEKMELER = [
 ]
 
 export default function App() {
+  if (sunumModuMu(window.location.search)) return <SunumEkrani />
+  return <Uygulama />
+}
+
+function Uygulama() {
   const rota = useRota()
   const [tema, setTema] = useTema()
   return (
@@ -31,7 +38,11 @@ export default function App() {
             {s.etiket}
           </a>
         ))}
-        <span className="uyg-nav-sag"><TemaSecici tema={tema} onDegis={setTema} /></span>
+        <span className="uyg-nav-sag">
+          <a className="uyg-nav-sunum" href={sunumAdresi()} target="_blank" rel="noreferrer"
+            title="Salon ekranı için sade ağ görünümü (yeni sekmede)">Sunum modu ↗</a>
+          <TemaSecici tema={tema} onDegis={setTema} />
+        </span>
       </nav>
       {rota === 'kart-ver' && <KartVerEkrani />}
       {rota === 'kurulum' && <KurulumEkrani />}
