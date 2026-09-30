@@ -53,7 +53,10 @@ const SOYADLAR = ['Demir', 'Kaya', 'Şahin', 'Yılmaz', 'Çelik', 'Arslan', 'Do�
 const FONLAR = ['Atlas Ventures', 'Boğaz Capital', 'Anadolu Fonu', 'Ege Girişim', 'Meridyen VC', 'Kule Yatırım', 'Fener Partners', 'Doruk Capital', 'Liman Ventures', 'Kuzey Fonu', 'Safir Yatırım', 'Çınar Capital']
 const SIRKETLER = ['Nova Robotik', 'Peak Enerji', 'Bitki Teknoloji', 'Akıllı Tarım', 'Veri Köprüsü', 'Sağlık Cebi', 'Hızlı Kargo', 'Temiz Deniz', 'Oyun Evreni', 'Fin Radar', 'Eğitim Yıldızı', 'Şehir Sensör', 'Mutfak Robotu', 'Gök Harita', 'Ses Analiz']
 
-function kisileriUret(adet) {
+function kisileriUret(istenen) {
+  // Kart no 1–99 (brief §3); 1 sistemde, 14 atanmamış senaryosuna ayrılı → en çok 97 kartlı kişi.
+  const adet = Math.min(istenen, 97)
+  if (adet < istenen) console.warn(`uyarı: --kisi=${istenen} kart havuzunu aşıyor (kart no 2–99); ${adet} kişiyle başlıyor`)
   const yatirimciAdet = Math.max(2, Math.round(adet * 0.4))
   const misafirAdet = Math.max(1, Math.round(adet * 0.12))
   const girisimciAdet = adet - yatirimciAdet - misafirAdet
@@ -93,7 +96,7 @@ function kisileriUret(adet) {
 let kisiler = kisileriUret(KISI_SAYISI)
 let katilimcilar = []               // kayıtlı kişiler (kartsız olabilir)
 let kisiIdSayaci = 0
-let renkSayaci = KISI_SAYISI
+let renkSayaci = kisiler.length
 // Başlangıç kadrosu: her kart = bir kayıtlı kişi, o karta atanmış.
 kisiler.forEach((k) => {
   const kat = {
@@ -855,5 +858,5 @@ setInterval(() => {
 }, TIK_MS)
 
 sunucu.listen(PORT, () => {
-  console.log(`mock dinliyor: http://localhost:${PORT}  (kişi=${KISI_SAYISI}, tohum=${TOHUM}, hız=${HIZ}x, kopma=${KOPMA ? 'açık' : 'kapalı'})`)
+  console.log(`mock dinliyor: http://localhost:${PORT}  (kişi=${kisiler.length}, tohum=${TOHUM}, hız=${HIZ}x, kopma=${KOPMA ? 'açık' : 'kapalı'})`)
 })

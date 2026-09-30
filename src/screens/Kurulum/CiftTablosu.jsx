@@ -1,11 +1,13 @@
 // Çift tablosu (brief §8): iki kişi, iki yönün değeri ayrı, ortanca değer,
 // "birlikte sayılır / sayılmaz" + ara durumlar, ölçüm sayısı. Sıra sabit (zıplamaz).
 // Durum renk + ikon + yazı ile; yeşil yalnız "birlikte" / "bitiyor…" (hâlâ birlikte).
+import { memo } from 'react'
 import { ciftSatirlari, dbmYazisi, YON_FARK_DB, SEYREK_N } from '../../api/sinyal.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
 
 // Kişi adına tıklamak o kişinin perspektifine geçirir (onKisiSec).
-export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec }) {
+// memo: kalabalıkta üst bileşen aynı signals referansını verirse yeniden çizilmez (useSeyrek).
+export default memo(function CiftTablosu({ signals, people, kisiId = null, onKisiSec }) {
   const satirlar = ciftSatirlari(signals, people, kisiId)
   if (satirlar.length === 0) {
     return <p className="kartver-iskele">{kisiId ? 'Bu kişinin şu an duyulan çifti yok.' : 'Şu an duyulan çift yok.'}</p>
@@ -61,4 +63,4 @@ export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec 
       </p>
     </div>
   )
-}
+})

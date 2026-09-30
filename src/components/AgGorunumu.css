@@ -34,6 +34,8 @@
 @media (prefers-reduced-motion: reduce) {
   .ag-cizgi--birlikte { animation: none; stroke-dasharray: none; }
 }
+/* Kalabalıkta akış durur, kesikli yeşil sabit kalır (performans; bileşendeki AKIS_EN_COK). */
+.ag-svg[data-kalabalik] .ag-cizgi--birlikte { animation: none; }
 
 .ag-etiket {
   font-size: 24px;             /* viewBox birimi; ~470px sütunda ≈11px */
@@ -77,3 +79,8 @@
 .ag-gorunumu--sunum { flex: 1; min-height: 0; }
 .ag-gorunumu--sunum .ag-svg { flex: 1; min-height: 0; height: 100%; }
 .ag-gorunumu--sunum .ag-etiket { fill: var(--metin); font-weight: 600; stroke: var(--zemin); }
+/* Salonda vurgu "şu an birlikte"de: geçmiş görüşme çizgileri daha soluk (kalabalıkta yumak olmasın). */
+.ag-gorunumu--sunum .ag-cizgi:not(.ag-cizgi--birlikte) { opacity: 0.4; }
+/* Büyük ekranda onlarca çizginin sürekli akışı tüm SVG'yi her karede yeniden boyar
+   (kalabalıkta ucuz cihazda kare düşer). Salonda kesikli yeşil sabit durur — sakin hareket. */
+.ag-gorunumu--sunum .ag-cizgi--birlikte { animation: none; }

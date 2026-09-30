@@ -2,7 +2,7 @@
 // yalnız rol gruplu düzenli bir dağılım (brief §7: düğümler zıplamaz).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { agYerlesimi, agCizgileri, agYukseklik } from './agYerlesim.js'
+import { agYerlesimi, agCizgileri, agYukseklik, agGenislik } from './agYerlesim.js'
 
 const KISILER = [
   { id: '1', role: 'investor', color: '#111', name: 'A', org: 'Fon A' },
@@ -113,4 +113,34 @@ test('agCizgileri: edge\'de olmayan live çift de çizilir (yeni başlayan gör�
 test('agCizgileri: düğümü olmayan çift atlanır (100+ kart)', () => {
   const c = agCizgileri([{ a: '1', b: '99', min: 5 }], [], DUGUMLER)
   assert.equal(c.length, 0)
+})
+
+// Kalabalık (Faz 5.4): sunum modunda kaydırma yok → rol birden çok sütuna bölünür.
+const kalabalik = (yat, gir) => [
+  ...Array.from({ length: yat }, (_, i) => ({ id: String(i + 2), role: 'investor', color: '#111', name: `Y${i}`, org: '' })),
+  ...Array.from({ length: gir }, (_, i) => ({ id: String(i + 50), role: 'founder', color: '#222', name: `G${i}`, org: `Ş${i}` })),
+]
+
+test('kalabalık: sütun başı sınırı verilince rol çok sütuna bölünür, yükseklik sınırlı kalır', () => {
+  const people = kalabalik(39, 46)
+  const h = agYukseklik(people, 11)
+  const w = agGenislik(people, 1700, 11)
+  assert.ok(h <= 11 * 64 + 260, `yükseklik ${h}`)
+  const d = agYerlesimi(people, { w, h, sutunBasi: 11 })
+  const yatX = new Set(d.filter((n) => n.role === 'investor').map((n) => n.x))
+  const girX = new Set(d.filter((n) => n.role === 'founder').map((n) => n.x))
+  assert.equal(yatX.size, 4)
+  assert.equal(girX.size, 5)
+  assert.ok(Math.max(...yatX) < Math.min(...girX) - 600, 'bloklar arasında çizgi alanı kalır')
+  for (const n of d) assert.ok(n.x > 0 && n.x < w && n.y > 0 && n.y < h, `sınır dışı ${n.id}`)
+  // aynı konuma iki düğüm düşmez
+  assert.equal(new Set(d.map((n) => `${n.x},${n.y}`)).size, d.length)
+})
+
+test('kalabalık: sınır verilmezse eski tek sütun düzeni (pano)', () => {
+  const people = kalabalik(39, 46)
+  assert.equal(agYukseklik(people), 46 * 64 + 260)
+  assert.equal(agGenislik(people, 1000), 1000)
+  const d = agYerlesimi(people, { w: 1000, h: agYukseklik(people) })
+  assert.equal(new Set(d.filter((n) => n.role === 'investor').map((n) => n.x)).size, 1)
 })

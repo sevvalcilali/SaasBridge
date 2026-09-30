@@ -2,7 +2,7 @@
 // 2) sırt sırta ya da 2–3 adım uzakta → Kaydet 3) ikisinin ortası eşik önerilir → onayla.
 // Ölçüm: "Kaydet" 10 sn geri sayar; sonunda çiftin `value`'su (son 10 sn ortancası)
 // tam tutulan pencereyi verir.
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { ciftSatirlari, dbmYazisi, gorunenAd } from '../../api/sinyal.js'
 import { onerilenEsik, kalanSaniye, KALIBRASYON_SN } from '../../api/kalibrasyon.js'
 import { ESIK_ALT, ESIK_UST } from '../../api/esik.js'
@@ -13,6 +13,16 @@ const ADIMLAR = [
   { tur: 'yuzyuze', baslik: 'Yüz yüze', yonerge: 'İki kartı iki kişi göğüs hizasında, yüz yüze ve konuşur gibi tutsun.' },
   { tur: 'sirtsirta', baslik: 'Sırt sırta', yonerge: 'Şimdi sırt sırta dursunlar (ya da 2–3 adım uzaklaşsınlar).' },
 ]
+// Çift seçenekleri yalnız çift listesi (ve adlar) değişince yeniden çizilir; değerler her
+// tik değişse de seçenek metni değişmez (kalabalıkta yüzlerce <option>).
+const CiftSecenekleri = memo(
+  ({ satirlar }) => satirlar.map((r) => (
+    <option key={r.anahtar} value={r.anahtar}>{r.a.id} · {r.b.id} — {gorunenAd(r.a)} · {gorunenAd(r.b)}</option>
+  )),
+  (p, n) => p.imza === n.imza,
+)
+const secenekImzasi = (satirlar) => satirlar.map((r) => `${r.anahtar}:${gorunenAd(r.a)}:${gorunenAd(r.b)}`).join('|')
+
 const yuzde = (v) => `${((v - ESIK_ALT) / (ESIK_UST - ESIK_ALT)) * 100}%`
 
 export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsikGonder }) {
@@ -81,7 +91,7 @@ export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsi
         Kalibrasyon kartları
         <select value={cift} onChange={(e) => cifteGec(e.target.value)} data-test="kalib-cift">
           <option value="">— çift seçin —</option>
-          {satirlar.map((r) => <option key={r.anahtar} value={r.anahtar}>{r.a.id} · {r.b.id} — {gorunenAd(r.a)} · {gorunenAd(r.b)}</option>)}
+          <CiftSecenekleri satirlar={satirlar} imza={secenekImzasi(satirlar)} />
         </select>
       </label>
 

@@ -1,6 +1,6 @@
 # Sunucudan İstenenler — Karşılama Masası (brief §9)
 
-> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı; Faz 3 (Kurulum) ve Faz 4 (görüşme kayıtları, rapor) eklendi
+> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı; Faz 3 (Kurulum) ve Faz 4 (görüşme kayıtları, rapor) ve Faz 5 (kalabalık) eklendi
 >
 > Arayüz bu uçlarla **mock sunucuya karşı** uçtan uca çalışıyor
 > (`mock-server/mock.js` — davranışın çalışan referansı). Gerçek sunucu aynı
@@ -191,3 +191,23 @@ ile aynı olsun.
 |---|---|---|
 | 7 | `signals[].pending` | Gerekmiyor — `above`/`together` farkından türetiliyor (Faz 3) |
 | 8 | `GET/PATCH /api/event` | Faz 4'te gerekmedi; etkinlik bilgisi `/state.event`'ten okunuyor. Kural ayarları (anlaşma / yalnız kalma süresi) ekranı istenirse gerekir |
+
+## 7. Kalabalık, sunum modu ve tema (Faz 5) — yeni uç gerekmiyor
+
+- **Sunum modu** (`?clean=1`, isteğe bağlı `&isimsiz=1`) ve **koyu tema** tamamen arayüzde;
+  sunucudan yeni alan beklenmiyor. Sunum adresi `/?clean=1` sunucunun `dist/`'i verdiği aynı
+  adresten açılır.
+- **Kişi rengi:** sunucu `people[].color`'da brief §10 paletini göndermeye devam etsin; arayüz
+  bu değeri temanın doğrulanmış tonuna eşliyor (`#199e70` → petrol). Palet dışı bir renk
+  gelirse aynen gösterilir.
+- **Yük ölçümü (mock, 97 kişi):** `/state` ~33 KB'tan 20 dakikada ~220 KB'a çıkıyor; neredeyse
+  tamamı `signals` + `history` (≈500 çift). Pano bunları kullanmadığı halde her tikte (0,5 sn)
+  ayrıştırıyor. Şimdilik sorun değil (4× yavaşlatılmış işlemcide pano %12 meşgul), ama gerçek
+  salonda çift sayısı daha da büyürse `history`'nin yalnız Kurulum açıkken gönderilmesi
+  düşünülebilir.
+
+**Soru 6 (Muhittin):** Brief §12 "kalabalık (100+ kişi)" diyor, ama kart numaraları 1–99
+(100 ve üstü dinleyici cihaz). Aynı anda en çok ~98 kartlı kişi olabiliyor. 100+ kişilik
+etkinlikte ne olacak — kart numara aralığı genişleyecek mi (dinleyiciler başka aralığa mı
+taşınacak), yoksa "100+" kayıtlı kişi sayısı mı (kart iadesiyle aynı kart gün içinde
+birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de kırpıyor.

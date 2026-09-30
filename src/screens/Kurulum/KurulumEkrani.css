@@ -14,6 +14,7 @@
 
 .kurulum-bas h1 { margin: 0; font-size: var(--punto-dev); }
 .kurulum-alt { margin: var(--aralik-1) 0 0; color: var(--metin-2); }
+.kurulum-not { margin: 0 0 var(--aralik-2); color: var(--metin-2); font-size: var(--punto-kucuk); }
 
 .kurulum-govde {
   display: grid;

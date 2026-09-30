@@ -6,6 +6,7 @@ import { usePano } from '../../api/usePano.js'
 import { ciftSayisi } from '../../api/sinyal.js'
 import { KurulumApi } from '../../api/kurulumApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
+import { useSeyrek } from '../../api/useSeyrek.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
@@ -15,6 +16,11 @@ import KalibrasyonSihirbazi from './KalibrasyonSihirbazi.jsx'
 import KartSagligi from './KartSagligi.jsx'
 import './KurulumEkrani.css'
 
+// Kalabalık (Faz 5.4): 97 kişide ~500 çift duyulur; tablo her tikte (0,5 sn) baştan çizilince
+// ucuz cihazda kare düşer ve yüzlerce değişen satır zaten okunamaz → 2 sn'de bir tazelenir.
+const KALABALIK_CIFT = 100
+const TABLO_TAZELEME_MS = 2000
+
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
   const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
@@ -22,6 +28,8 @@ export default function KurulumEkrani() {
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new KurulumApi()
   const kartlar = useKartlar(apiRef.current)
+  const kalabalik = (durum?.signals.length ?? 0) > KALABALIK_CIFT
+  const tablo = useSeyrek(durum && { signals: durum.signals, people: durum.people }, TABLO_TAZELEME_MS, kalabalik)
 
   if (!durum) {
     return (
@@ -53,7 +61,8 @@ export default function KurulumEkrani() {
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
             <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{ciftSayisi(durum.signals, perspektif)}</span></h2>
-            <CiftTablosu signals={durum.signals} people={durum.people} kisiId={perspektif} onKisiSec={setPerspektif} />
+            {kalabalik && <p className="kurulum-not" data-test="tablo-seyrek">Kalabalık: tablo {TABLO_TAZELEME_MS / 1000} sn'de bir tazelenir. Bir kişiye odaklanmak için adına tıklayın.</p>}
+            <CiftTablosu signals={tablo.signals} people={tablo.people} kisiId={perspektif} onKisiSec={setPerspektif} />
           </section>
         </div>
         <div className="kurulum-yan">

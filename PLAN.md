@@ -485,9 +485,16 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
   `ozetKutulari` ile aynı sayılar + şekil/yeşil çizgi anahtarı. Menüde "Sunum modu ↗" (yeni sekme). Tarayıcıda:
   1920×1080 ve 1280×720'de kaydırma yok, isimsizde sayfa metninde ad yok, yenilemede korunuyor, "Sunumdan çık" panoya döner.
 
-#### 5.4 ⬜ 100+ kişi performansı
+#### 5.4 ✅ 100+ kişi performansı
 - Mock `--kisi=120` ile ölçüm (render süresi, tik başına iş); darboğazlara hedefli iyileştirme.
 - **Doğrulama:** ölçüm önce/sonra; 120 kişide ağ ve liste okunur, taşma yok.
+- **Yapıldı:** Kart no 1–99 sınırı (brief §3) yüzünden aynı anda en çok 97 kartlı kişi → mock `--kisi` 97'de kırpılıyor
+  (önce çöküyordu); "100+" çelişkisi Muhittin'e Soru 6. Ölçüm üretim derlemesinde, 4× yavaşlatılmış işlemciyle
+  (ucuz tablet), 15 sn: pano %15 → %12 meşgul, 39 → 55 fps; sunum 16 → 57 fps; kurulum %27 → %13, 34 → 40 fps.
+  Değişiklikler: sunumda kalabalık rol yan yana sütunlara bölünür (`agGenislik`, `sutunBasi`; etiket 7 → 19 px);
+  >15 çift birlikteyken yeşil akış animasyonu durur (her kare tüm SVG boyanıyordu); sunumda akış hiç yok, geçmiş
+  çizgiler soluk; Kurulum'da >100 çiftte tablo 2 sn'de bir tazelenir (`useSeyrek` + memo), kalibrasyon seçenekleri
+  yalnız çift listesi değişince çizilir. Pano ağı tek sütun kaldı (sayfa kaydırılabiliyor).
 
 #### 5.5 ⬜ Faz 5 teslimi
 - Ekran görüntüleri + `docs/faz5/FAZ5_TESLIM.md`; önceki fazların kabul senaryoları yeniden.
@@ -527,6 +534,11 @@ saasBridge/
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,
       telefon bildirimi vb. kapsam dışı).
+
+**5.4 sırasında fark edilen:**
+- [ ] **"100+ kişi" ile kart no 1–99 çelişiyor** → `SUNUCUDAN_ISTENENLER.md` Soru 6 (Muhittin).
+- [ ] Kurulum'da ~500 çiftte tablo tazelemesi 4× yavaş işlemcide ~330 ms takılıyor (2 sn'de bir). Etkinlik öncesi
+      teknik ekran olduğu için bırakıldı; gerekirse sanal liste (yalnız görünen satırları çizmek) ayrı iş.
 
 **3.4 sırasında fark edilen (onay bekliyor):**
 - [x] ~~**Kişi paleti renk ayrımı doğrulamasından geçmiyor**~~ → Faz 5.1'de iki tema için yeniden adımlandı. (dataviz doğrulayıcısı, OKLab, açık
