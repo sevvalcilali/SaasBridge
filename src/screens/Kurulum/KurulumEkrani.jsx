@@ -4,6 +4,7 @@
 import { usePano } from '../../api/usePano.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
+import CiftTablosu from './CiftTablosu.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
@@ -35,7 +36,8 @@ export default function KurulumEkrani() {
             <h2 id="k-grafik" className="kurulum-baslik">Canlı sinyal (son {durum.chartSeconds} sn)</h2>
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
-            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler</h2>
+            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{durum.signals.length}</span></h2>
+            <CiftTablosu signals={durum.signals} people={durum.people} />
           </section>
         </div>
         <div className="kurulum-yan">

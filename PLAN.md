@@ -366,12 +366,13 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** kaydırınca tek istek gider, panodaki eşik değeri değişir; hata olursa eski değere döner.
 - **Yapıldı:** `api/esik.js` (sınır, 250 ms gecikmeli tek gönderim, sunucu reddi `false` da hata) + testleri; `EsikAyari`: büyük değer, ±1, "şu an N çift eşik üstünde", kaydediliyor/kaydedildi/hata. Tarayıcıda: 5 tuş → 1 istek, sürükleme → 1 istek, ağ hatası ve 400'de eski değere dönüş.
 
-#### 3.3 ⬜ Çift tablosu
+#### 3.3 ✅ Çift tablosu
 - Her duyulan çift (`signals`): iki kişi (renk + rol şekli + ad), `ab` ve `ba` ayrı, `value`, ölçüm sayısı `n`
   (seyrekse işaret), durum: **birlikte** / **başlıyor…** (above ∧ ¬together) / **bitiyor…** (¬above ∧ together) /
   eşik altı. Ara durumlar mevcut alanlardan türetilir (§9-7'ye gerek yok).
 - Sakin sıralama (çift sırası zıplamaz); iki yön arasında büyük fark varsa "yön farkı" işareti.
 - **Doğrulama:** mock'ta dört durum da görünür; `ab/ba` null ise "—".
+- **Yapıldı:** `api/sinyal.js` (durum türetme, yön farkı ≥8 dB ⇄, seyrek n<5, küçük kart no solda — kişiler yer değişince ab/ba da çevrilir) + testleri; ortak `components/KisiRozeti` (renk + rol şekli + ad + kart no). Tarayıcıda dört durum görüldü (1×: birlikte/başlıyor; 10×: bitiyor/eşik altı), sıra hiç bozulmadı.
 
 #### 3.4 ⬜ Canlı sinyal grafiği
 - `history` (son 90 sn): her çift bir çizgi (iki kişinin rengi), eşik yatay kesikli çizgi, eşik üstü

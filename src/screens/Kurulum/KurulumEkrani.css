@@ -56,3 +56,25 @@
 .esik-olcek { display: flex; justify-content: space-between; gap: var(--aralik-3); color: var(--metin-soluk); font-size: var(--punto-kucuk); }
 .esik-kayit { margin: 0; min-height: 1.5em; font-weight: 600; color: var(--metin-2); }
 .esik-kayit--hata { color: var(--ciddi); }
+
+/* --- 3.3 çift tablosu --- */
+.kurulum-baslik .kartsec-sayi { text-transform: none; letter-spacing: 0; margin-left: var(--aralik-1); }
+.cift-kaydir { overflow-x: auto; }
+.cift-tablo { width: 100%; border-collapse: collapse; font-size: var(--punto-kucuk); }
+.cift-tablo th {
+  text-align: left; font-weight: 700; color: var(--metin-2);
+  padding: var(--aralik-2); border-bottom: 1px solid var(--cizgi-koyu); white-space: nowrap;
+}
+.cift-tablo td { padding: var(--aralik-2); border-bottom: 1px solid var(--cizgi); vertical-align: middle; }
+.cift-tablo .sag { text-align: right; white-space: nowrap; }
+.cift-kisiler { display: flex; align-items: center; gap: var(--aralik-1); min-width: 220px; max-width: 360px; }
+.cift-ayrac { color: var(--metin-soluk); }
+.cift-deger { font-weight: 700; }
+.cift-durum { display: inline-block; white-space: nowrap; font-weight: 700; padding: 0 var(--aralik-2); border-radius: var(--kose-tam); }
+/* yeşil yalnız "şu an birlikte": birlikte ve bitiyor… (hâlâ birlikte sayılıyor) */
+.cift-durum--birlikte { background: var(--birlikte-zemin); color: var(--metin); box-shadow: inset 0 0 0 1px var(--birlikte); }
+.cift-durum--bitiyor { background: var(--birlikte-zemin); color: var(--metin-2); box-shadow: inset 0 0 0 1px var(--birlikte); opacity: 0.85; }
+.cift-durum--basliyor { background: var(--vurgu-zemin); color: var(--metin); }
+.cift-durum--alti { color: var(--metin-soluk); font-weight: 400; }
+.cift-uyari { color: var(--uyari); font-weight: 700; white-space: nowrap; }
+.cift-aciklama { margin: var(--aralik-3) 0 0; color: var(--metin-soluk); font-size: var(--punto-kucuk); }
