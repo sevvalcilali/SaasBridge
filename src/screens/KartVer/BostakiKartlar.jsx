@@ -1,8 +1,7 @@
 // "Boştaki kartlar" şeridi (brief §6.4): atanmamış ama açık kartlar — masadaki
 // yedekler, stok takibi. Numaraya göre sabit sıralı; yalnız görüntüler.
 import { bostakiKartlar } from '../../api/masaYardim.js'
-
-const DUSUK_PIL = 20
+import { DUSUK_PIL } from '../../api/kartSagligi.js'
 
 export default function BostakiKartlar({ kartlar }) {
   if (!kartlar) return null

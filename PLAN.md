@@ -394,10 +394,11 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** mock'ta iki ölçüm alınır, önerilen eşik ortada, onaylanınca eşik değişir.
 - **Yapıldı:** `api/kalibrasyon.js` (ortadaki öneri, fark <6 dB ve ters ölçüm uyarısı, 10 sn geri sayım) + testleri; `KalibrasyonSihirbazi` + gömülü SVG simgeler (yüz yüze / sırt sırta, mesafe ölçüsü yok); ölçek üzerinde sırt sırta / yüz yüze / öneri / şu an işaretleri; onay doğrudan eşik gönderir. Mock: yalnız demo için `POST /api/demo/tut {a,b,mod}` (istek işleyicide rnd() yok). `api/http.js` ortak JSON katmanı (MasaApi + yeni KurulumApi). Tarayıcıda: -53 / -79 → öneri -66 → sunucu eşiği -66.
 
-#### 3.7 ⬜ Kart sağlığı tablosu
+#### 3.7 ✅ Kart sağlığı tablosu
 - Her kart: en son duyulma, pil, "sorunlu" etiketi (duyulmuyor / pil düşük); paket hızı yok (karar 2);
   atanmışsa kişi adı. Sorunlular üstte, gerisi numaraya göre.
 - **Doğrulama:** kayıp kart senaryosunda kart "sorunlu" olur, düzelince kalkar.
+- **Yapıldı:** `api/kartSagligi.js` (kayıp ≥60 sn — masadaki ölçütle aynı sabit; görünmüyor >30 sn; pil <%20) + testleri; `KartSagligi` (/api/cards 3 sn yoklama, kişi /state'ten kart no ile; sorunlular üstte; durum sütunu dar ekranda da görünür). Mock: 23'ün katı kartların pili zayıf (demo). `DUSUK_PIL` tek kaynak (Faz 2 şeridi de kullanır). Tarayıcıda: pil düşük üstte, kayıp kart üste çıkıp düzelince kalktı.
 
 #### 3.8 ⬜ Faz 3 teslimi
 - `SUNUCUDAN_ISTENENLER.md` güncellemesi (3.6 demo ucu yalnız mock), ekran görüntüleri,

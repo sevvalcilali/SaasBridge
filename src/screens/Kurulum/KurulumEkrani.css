@@ -171,3 +171,26 @@
 .kc-sinyal { fill: none; stroke: var(--vurgu); stroke-width: 2; }
 .kc-sinyal--zayif { stroke: var(--metin-soluk); stroke-dasharray: 3 4; }
 .kc-yazi { fill: var(--metin-2); font-size: 10px; }
+
+/* --- 3.7 kart sağlığı --- */
+.saglik { display: flex; flex-direction: column; gap: var(--aralik-2); }
+.saglik-ozet { margin: 0; color: var(--metin-2); font-size: var(--punto-kucuk); }
+.saglik-ozet--sorun { color: var(--ciddi); }
+.saglik-kaydir { max-height: 520px; overflow: auto; }
+.saglik-tablo thead th { position: sticky; top: 0; background: var(--yuzey); }
+.saglik-kart { font-weight: 700; }
+.saglik-tablo { table-layout: fixed; }
+.saglik-tablo th:nth-child(1) { width: 3em; }
+.saglik-tablo th:nth-child(2) { width: 7.5em; }
+.saglik-tablo th:nth-child(4) { width: 4.8em; }
+.saglik-tablo th:nth-child(5) { width: 3.5em; }
+.saglik-kisi { overflow: hidden; }
+.saglik-zaman { white-space: nowrap; }
+.saglik-bos { color: var(--metin-soluk); }
+.saglik-satir--sorun { background: var(--ciddi-zemin); }
+.saglik-iyi { color: var(--metin-soluk); }
+.saglik-sorun { display: block; font-weight: 700; white-space: nowrap; }
+.saglik-sorun--kayip { color: var(--ciddi); }
+.saglik-sorun--sessiz { color: var(--metin-2); }
+.saglik-sorun--pil { color: var(--uyari); }
+.saglik-pil--dusuk { color: var(--uyari); font-weight: 700; }

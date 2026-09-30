@@ -5,12 +5,14 @@ import { useRef, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { ciftSayisi } from '../../api/sinyal.js'
 import { KurulumApi } from '../../api/kurulumApi.js'
+import { useKartlar } from '../../api/useKartlar.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
 import SinyalGrafigi from './SinyalGrafigi.jsx'
 import PerspektifSecici from './PerspektifSecici.jsx'
 import KalibrasyonSihirbazi from './KalibrasyonSihirbazi.jsx'
+import KartSagligi from './KartSagligi.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
@@ -19,6 +21,7 @@ export default function KurulumEkrani() {
   const [perspektif, setPerspektif] = useState(null)  // seçili kişinin kart no'su ya da null
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new KurulumApi()
+  const kartlar = useKartlar(apiRef.current)
 
   if (!durum) {
     return (
@@ -61,6 +64,7 @@ export default function KurulumEkrani() {
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-saglik" data-test="kutu-saglik">
             <h2 id="k-saglik" className="kurulum-baslik">Kart sağlığı</h2>
+            <KartSagligi kartlar={kartlar} people={durum.people} />
           </section>
         </div>
       </div>
