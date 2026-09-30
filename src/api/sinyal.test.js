@@ -1,7 +1,7 @@
 // Kurulum ekranı: çift durumu, yön farkı, seyrek veri, sabit sıralama.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { ciftDurumu, yonFarki, ciftSatirlari, dbmYazisi, YON_FARK_DB } from './sinyal.js'
+import { ciftDurumu, yonFarki, ciftSatirlari, ciftSayisi, dbmYazisi, perspektifKisileri, YON_FARK_DB } from './sinyal.js'
 
 test('ciftDurumu: dört durum mevcut alanlardan türetilir', () => {
   assert.equal(ciftDurumu({ above: true, together: true }).tur, 'birlikte')
@@ -47,4 +47,23 @@ test('dbmYazisi', () => {
   assert.equal(dbmYazisi(null), '—')
   assert.equal(dbmYazisi(-46), '-46.0')
   assert.equal(dbmYazisi(-71.26), '-71.3')
+})
+
+const SIG = [
+  { a: '10', b: '3', ab: -50, ba: -52, value: -51, n: 12, above: true, together: true },
+  { a: '4', b: '3', ab: -70, ba: -71, value: -70.5, n: 9, above: false, together: false },
+  { a: '101', b: '4', ab: null, ba: -80, value: -80, n: 9, above: false, together: false },
+]
+
+test('perspektif: ciftSatirlari kişiye göre süzer', () => {
+  assert.deepEqual(ciftSatirlari(SIG, PEOPLE, '3').map((r) => r.anahtar), ['3-4', '3-10'])
+  assert.deepEqual(ciftSatirlari(SIG, PEOPLE, '10').map((r) => r.anahtar), ['3-10'])
+  assert.equal(ciftSatirlari(SIG, PEOPLE, null).length, 3)
+  assert.equal(ciftSayisi(SIG, '3'), 2)
+  assert.equal(ciftSayisi(SIG), 3)
+})
+
+test('perspektifKisileri: çifti duyulanlar kart no sırasıyla; seçili kişi çiftsiz kalsa da listede', () => {
+  assert.deepEqual(perspektifKisileri(SIG, PEOPLE).map((k) => k.id), ['3', '4', '10', '101'])
+  assert.ok(perspektifKisileri([], PEOPLE, '10').some((k) => k.id === '10'))
 })

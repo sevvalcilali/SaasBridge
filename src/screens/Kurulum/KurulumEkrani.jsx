@@ -3,15 +3,18 @@
 // Veri panoyla aynı kaynaktan (usePano / SSE); dBm burada gösterilebilir, metre yok.
 import { useState } from 'react'
 import { usePano } from '../../api/usePano.js'
+import { ciftSayisi } from '../../api/sinyal.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
 import SinyalGrafigi from './SinyalGrafigi.jsx'
+import PerspektifSecici from './PerspektifSecici.jsx'
 import './KurulumEkrani.css'
 
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
   const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
+  const [perspektif, setPerspektif] = useState(null)  // seçili kişinin kart no'su ya da null
 
   if (!durum) {
     return (
@@ -37,11 +40,13 @@ export default function KurulumEkrani() {
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-grafik" data-test="kutu-grafik">
             <h2 id="k-grafik" className="kurulum-baslik">Canlı sinyal (son {durum.chartSeconds} sn)</h2>
-            <SinyalGrafigi history={durum.history} people={durum.people} esik={taslakEsik ?? durum.threshold} pencere={durum.chartSeconds} />
+            <PerspektifSecici signals={durum.signals} people={durum.people} secili={perspektif} onSec={setPerspektif} />
+            <SinyalGrafigi history={durum.history} people={durum.people} esik={taslakEsik ?? durum.threshold}
+              pencere={durum.chartSeconds} kisiId={perspektif} />
           </section>
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
-            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{durum.signals.length}</span></h2>
-            <CiftTablosu signals={durum.signals} people={durum.people} />
+            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{ciftSayisi(durum.signals, perspektif)}</span></h2>
+            <CiftTablosu signals={durum.signals} people={durum.people} kisiId={perspektif} onKisiSec={setPerspektif} />
           </section>
         </div>
         <div className="kurulum-yan">

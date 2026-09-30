@@ -32,9 +32,14 @@ export const kartKisisi = (id) => ({ id, name: `Kart ${id}`, org: '', role: null
 
 // signals + people → tablo satırları. Sıra kart numarasına göre SABİT: durum
 // değişse de satır yer değiştirmez (brief: sakin, zıplamayan arayüz).
-export function ciftSatirlari(signals, people) {
+// kisiId verilirse (perspektif) yalnız o kişinin çiftleri.
+const kisininMi = (kisiId) => (s) => !kisiId || s.a === kisiId || s.b === kisiId
+export const ciftSayisi = (signals, kisiId = null) => signals.filter(kisininMi(kisiId)).length
+
+export function ciftSatirlari(signals, people, kisiId = null) {
   const kisi = new Map(people.map((p) => [p.id, p]))
   return signals
+    .filter(kisininMi(kisiId))
     .map((s) => {
       // Küçük kart no solda; kişiler yer değişirse yönler (ab/ba) de değişir:
       // ab her zaman "soldakinin sağdakini duyduğu güç".
@@ -60,3 +65,12 @@ export function ciftSatirlari(signals, people) {
 
 // dBm yazısı: null → "—", aksi halde tek ondalık.
 export const dbmYazisi = (v) => (v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1))
+
+// Perspektif seçicisi: şu an en az bir çifti duyulan kişiler, kart no'ya göre.
+// Seçili kişinin çifti o an yoksa da listede kalır (seçim kaybolmasın).
+export function perspektifKisileri(signals, people, seciliId = null) {
+  const idler = new Set(signals.flatMap((s) => [s.a, s.b]))
+  if (seciliId) idler.add(seciliId)
+  const kisi = new Map(people.map((p) => [p.id, p]))
+  return [...idler].map((id) => kisi.get(id) ?? kartKisisi(id)).sort((a, b) => Number(a.id) - Number(b.id))
+}

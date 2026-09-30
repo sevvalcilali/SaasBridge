@@ -381,9 +381,10 @@ Faz 4 başlamadan sorulur.
 - **Doğrulama:** grafik canlı akar, eşik çizgisi kaydırıcıyla oynar, hover değeri doğru.
 - **Yapıldı:** `api/grafik.js` (seri seçimi, sabit eksen -95…-35, etiket çakışma önleme, anlık değerler) + testleri; `SinyalGrafigi` bağımlılıksız SVG, kabın gerçek px genişliğinde (ResizeObserver) çizilir — yazılar her ekranda okunur; iki renkli çizgi (iki kişi), nötr eşik bölgesi, "3 · 4" uç etiketleri, çapraz çizgi + ipucu; varsayılan en güçlü 6 çift + "Tümünü göster". Kaydırıcının taslak değeri ekran düzeyine taşındı: eşik çizgisi sürüklerken anında oynar.
 
-#### 3.5 ⬜ Perspektif (kişi seçimi)
+#### 3.5 ✅ Perspektif (kişi seçimi)
 - Bir kişi seçilince grafik ve tablo yalnız onun çiftlerini gösterir ("perspektif" düğmeleri / kişi seçici).
 - **Doğrulama:** seçim yalnız ilgili çiftleri bırakır; temizleyince hepsi döner.
+- **Yapıldı:** `PerspektifSecici` (şu an çifti duyulan kişiler) + tablodaki kişi adına tıklama; grafik ve tablo birlikte süzülür, başlık sayısı süzülmüş sayıyı gösterir.
 
 #### 3.6 ⬜ Kalibrasyon sihirbazı
 - Çift seç (tablodan) → 1) iki kart yüz yüze → "Kaydet" (10 sn ortanca) → 2) sırt sırta ya da 2–3 adım

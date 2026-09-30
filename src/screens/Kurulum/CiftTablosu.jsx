@@ -4,9 +4,18 @@
 import { ciftSatirlari, dbmYazisi, YON_FARK_DB, SEYREK_N } from '../../api/sinyal.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
 
-export default function CiftTablosu({ signals, people }) {
-  const satirlar = ciftSatirlari(signals, people)
-  if (satirlar.length === 0) return <p className="kartver-iskele">Şu an duyulan çift yok.</p>
+// Kişi adına tıklamak o kişinin perspektifine geçirir (onKisiSec).
+export default function CiftTablosu({ signals, people, kisiId = null, onKisiSec }) {
+  const satirlar = ciftSatirlari(signals, people, kisiId)
+  if (satirlar.length === 0) {
+    return <p className="kartver-iskele">{kisiId ? 'Bu kişinin şu an duyulan çifti yok.' : 'Şu an duyulan çift yok.'}</p>
+  }
+  const rozet = (k) => (
+    <button type="button" className="kisi-dugme" onClick={() => onKisiSec?.(k.id)}
+      aria-label={`${k.name}: yalnız bu kişinin çiftlerini göster`} aria-pressed={kisiId === k.id}>
+      <KisiRozeti kisi={k} />
+    </button>
+  )
 
   return (
     <div className="cift-kaydir">
@@ -25,7 +34,7 @@ export default function CiftTablosu({ signals, people }) {
           {satirlar.map((r) => (
             <tr key={r.anahtar} data-test="cift-satir" data-cift={r.anahtar} data-durum={r.durum.tur}>
               <td className="cift-kisiler">
-                <KisiRozeti kisi={r.a} /> <span className="cift-ayrac" aria-hidden="true">·</span> <KisiRozeti kisi={r.b} />
+                {rozet(r.a)} <span className="cift-ayrac" aria-hidden="true">·</span> {rozet(r.b)}
               </td>
               <td className="sag sayi">{dbmYazisi(r.ab)}</td>
               <td className="sag sayi">
