@@ -9,6 +9,11 @@
 // veriyi SİLME) ve aynı kod bağımlılık eklemeden Node testlerinde koşar.
 import { sunucuRengi } from './renkler.js'
 
+// Sunucunun adresi — gerçek sunucuya geçişte değişen TEK değer (PLAN mimari kuralı 5).
+// Boş = aynı kaynak (üretimde pano.py'nin 8002'si, geliştirmede Vite proxy'si).
+// Masa, Kurulum ve Rapor katmanları da bunu kullanır (http.js adresTemizle).
+export const SUNUCU_ADRESI = ''
+
 const ILK_BEKLEME_MS = 500
 const EN_UZUN_BEKLEME_MS = 10000
 
@@ -26,7 +31,7 @@ export function durumIsle(ham) {
 }
 
 export class PanoBaglantisi {
-  constructor({ adres = '', bekleme = null, sessizlikEsigiMs = 6000 } = {}) {
+  constructor({ adres = SUNUCU_ADRESI, bekleme = null, sessizlikEsigiMs = 6000 } = {}) {
     this.adres = adres.replace(/\/$/, '')
     this.beklemeGecersizKil = bekleme
     // Sunucu ~2 Hz yayınlar; bu kadar süre HİÇ mesaj gelmezse bağlantı sessizce
@@ -113,7 +118,10 @@ export class PanoBaglantisi {
       for (;;) {
         const { value, done } = await okuyucu.read()
         if (done) throw new Error('akış kapandı')
-        tampon += cozucu.decode(value, { stream: true })
+        // SSE satır sonu \n, \r\n ya da \r olabilir (EventSource üçünü de kabul eder;
+        // Python sunucuları çoğu zaman \r\n yollar). Tek biçime indir. Parçanın sonundaki
+        // tek \r bekletilir: arkasından \n gelebilir, yoksa sahte olay sınırı doğar.
+        tampon = (tampon + cozucu.decode(value, { stream: true })).replace(/\r\n|\r(?!$)/g, '\n')
         let sinir
         while ((sinir = tampon.indexOf('\n\n')) >= 0) {
           const blok = tampon.slice(0, sinir)

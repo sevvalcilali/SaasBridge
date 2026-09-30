@@ -32,7 +32,8 @@ const ORNEK_DURUM = {
 
 /** Test sunucusu: /state, /events (SSE) ve /control'ü taklit eder. */
 function testSunucusu(secenekler = {}) {
-  const { stateHatasi = false, sseKapat = 0 } = secenekler
+  const { stateHatasi = false, sseKapat = 0, satirSonu = '\n' } = secenekler
+  const olay = (d) => `data: ${JSON.stringify(d)}${satirSonu}${satirSonu}`
   const durum = structuredClone(ORNEK_DURUM)
   const kayit = { stateIstek: 0, eventsIstek: 0, kontrolGovdeleri: [] }
   const istemciler = new Set()
@@ -45,7 +46,7 @@ function testSunucusu(secenekler = {}) {
     } else if (istek.url === '/events') {
       kayit.eventsIstek++
       yanit.writeHead(200, { 'Content-Type': 'text/event-stream' })
-      yanit.write(`data: ${JSON.stringify(durum)}\n\n`)
+      yanit.write(olay(durum))
       istemciler.add(yanit)
       if (kayit.eventsIstek <= sseKapat) setTimeout(() => { istemciler.delete(yanit); yanit.end() }, 60)
     } else if (istek.url === '/control') {
@@ -61,7 +62,7 @@ function testSunucusu(secenekler = {}) {
     kayit,
     yayinla(yamaFn) {
       yamaFn(durum)
-      for (const i of istemciler) i.write(`data: ${JSON.stringify(durum)}\n\n`)
+      for (const i of istemciler) i.write(olay(durum))
     },
     async baslat() {
       await new Promise((c) => sunucu.listen(0, c))
@@ -136,6 +137,40 @@ test('SSE güncellemeleri akar; her mesaj durumun tamamıdır', async () => {
   const anlik = await durumBekle(baglanti, (a) => a.durum.clock === '09:23:10')
   assert.equal(anlik.durum.stats.livePairs, 2)
   baglanti.kapat(); s.kapat()
+})
+
+test('SSE \\r\\n satır sonlarıyla da akar (EventSource gibi; Python sunucuları)', async () => {
+  const s = testSunucusu({ satirSonu: '\r\n', stateHatasi: true })
+  const adres = await s.baslat()
+  const baglanti = new PanoBaglantisi({ adres })
+  baglanti.basla()
+  await durumBekle(baglanti, (a) => a.durum !== null)
+  s.yayinla((d) => { d.clock = '09:23:10' })
+  const anlik = await durumBekle(baglanti, (a) => a.durum.clock === '09:23:10')
+  assert.equal(anlik.durum.clock, '09:23:10')
+  baglanti.kapat(); s.kapat()
+})
+
+test('\\r\\n parçalar arasında bölünse de tek olay sayılır (sahte olay sınırı yok)', async () => {
+  const durum = { people: [], edges: [], alerts: [], clock: '10:00:00' }
+  const govde = `data: ${JSON.stringify(durum)}\r\n\r\n`
+  const bol = govde.indexOf('\r\n') + 1 // ilk \r bir parçada, \n sonrakinde
+  const sunucu = http.createServer((istek, yanit) => {
+    if (istek.url !== '/events') { yanit.writeHead(404); yanit.end(); return }
+    yanit.writeHead(200, { 'Content-Type': 'text/event-stream' })
+    yanit.write(govde.slice(0, bol))
+    setTimeout(() => yanit.write(govde.slice(bol)), 40)
+  })
+  await new Promise((c) => sunucu.listen(0, c))
+  const baglanti = new PanoBaglantisi({ adres: `http://localhost:${sunucu.address().port}` })
+  let bozuk = 0
+  const eski = baglanti.durumAyarla.bind(baglanti)
+  baglanti.durumAyarla = (ham) => { if (!ham || !ham.clock) bozuk++; eski(ham) }
+  baglanti.basla()
+  const anlik = await durumBekle(baglanti, (a) => a.durum !== null)
+  assert.equal(anlik.durum.clock, '10:00:00')
+  assert.equal(bozuk, 0)
+  baglanti.kapat(); sunucu.closeAllConnections(); sunucu.close()
 })
 
 test('bağlantı kopunca hata bildirilir ama son veri silinmez', async () => {

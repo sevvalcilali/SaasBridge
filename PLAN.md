@@ -503,6 +503,22 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 
 > Brief §12'nin beş önceliği bitti. Sonraki iş için (gerçek sunucuya bağlanma, açık sorular) Şevval'e sorulacak.
 
+### 🟡 Düzeltme turu — uçtan uca tarama bulguları (onay 30.09.2026: "önerdiğin planla ilerle")
+Tarama: 3 kod incelemesi + tarayıcıda ekran × tema × genişlik + kopma/klavye. Onaylanan kapsam: A (hatalar),
+B (gerçek sunucuya hazırlık), D (erişilebilirlik/kullanım), E (küçükler). **C (brief eksikleri: karşı rol sayısı,
+sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca soluklaşma) karar bekliyor — yapılmaz.**
+
+- **T1** Akış ve mock sağlamlığı: SSE `\r\n` satır sonları (A1); mock tek hatalı istekte çökmesin, alan tipleri ve
+  kart no (1–99) doğrulansın (A2); sıfırlamada kart 14 ve "yaklaştır" artığı (A6).
+- **T2** Rapor gerçekten anlık görüntü: `elapsed`/`clock` görüntüyle birlikte saklanır (A3); tarihsiz başlık, çift "Kişi" başlığı.
+- **T3** Masa: kopunca bant + son veri korunur (A4); kart no 1–99 doğrulaması (A5); demo düğmeleri yalnız mock'ta (B7);
+  sunucu adresi tek yerde (B8); ≥100 kartlar listelerde yok (B9); "'da" eki; yıldız kontrolü; filtre/mod saklanır;
+  seçili "Kart ver"e tekrar basmak işi silmez.
+- **T4** Pano/Kurulum: panel Escape + odak (D14); ağ düğümleri ekran okuyucuda, Tab yükü yok (D15); telefonda bildirime
+  dokununca kişiler sekmesi (D16); eşik bırakma güvenceleri (D17); kayıp kart duyurusu (D19); rol şekli (D20);
+  kalibrasyon seçimi kaybolmaz; perspektif saklanır; 375 px küçükleri.
+- **T5** Doğrulama (test + tarayıcı + önceki kabul senaryoları), belgeler, PR.
+
 ---
 
 ## 3. PROJE YAPISI (hedef)

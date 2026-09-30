@@ -3,7 +3,7 @@
 import { jsonIstek, adresTemizle } from './http.js'
 
 export class KurulumApi {
-  constructor({ adres = '' } = {}) {
+  constructor({ adres } = {}) {
     this.adres = adresTemizle(adres)
   }
 

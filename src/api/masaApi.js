@@ -5,7 +5,7 @@ import { katilimciRengiUyarla as renkUyarla } from './renkler.js'
 import { jsonIstek, adresTemizle } from './http.js'
 
 export class MasaApi {
-  constructor({ adres = '' } = {}) {
+  constructor({ adres } = {}) {
     this.adres = adresTemizle(adres)
   }
 

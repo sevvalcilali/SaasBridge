@@ -4,7 +4,7 @@ import { jsonIstek, adresTemizle } from './http.js'
 import { katilimciRengiUyarla } from './renkler.js'
 
 export class RaporApi {
-  constructor({ adres = '' } = {}) {
+  constructor({ adres } = {}) {
     this.adres = adresTemizle(adres)
   }
 

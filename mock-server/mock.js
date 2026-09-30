@@ -170,14 +170,24 @@ const katDto = (k) => ({
   yildiz: k.yildiz, not: k.not, renk: k.renk, atananKart: k.atananKart, ayrildi: k.ayrildi,
 })
 
+// Gövdeden gelen metin alanı: dize değilse (sayı, nesne…) yok sayılır — tip hatası sunucuyu düşürmesin.
+const metinAlan = (v) => (typeof v === 'string' ? v : '')
+// Kart no 1–99 (brief §3; 100+ dinleyici cihaz). "007" → "7". Geçersizse null.
+function kartNo(v) {
+  const m = String(v ?? '').trim()
+  if (!/^\d{1,3}$/.test(m)) return null
+  const n = Number(m)
+  return n >= 1 && n <= 99 ? String(n) : null
+}
+
 function kisiEkle({ ad, rol, kurum, yildiz, not }) {
   const kat = {
     kisiId: 'k' + (++kisiIdSayaci),
-    ad: (ad || 'İsimsiz').trim(),
+    ad: metinAlan(ad).trim() || 'İsimsiz',
     rol: ['investor', 'founder', 'guest'].includes(rol) ? rol : 'guest',
-    kurum: kurum || '',
+    kurum: metinAlan(kurum),
     yildiz: rol === 'investor' ? Math.max(0, Math.min(5, yildiz | 0)) : 0,
-    not: not || '', renk: yeniRenk(), atananKart: null, ayrildi: false, min: 0, invMin: 0,
+    not: metinAlan(not), renk: yeniRenk(), atananKart: null, ayrildi: false, min: 0, invMin: 0,
   }
   katilimcilar.push(kat)
   return kat
@@ -391,9 +401,10 @@ function tik() {
   if (!aliciKopuk) sonAliciSn = simSn   // alıcıdan taze satır geldi
 
   // atanmamış kart sahneye girer (sunucu ikizinin kendiliğinden eklemesi)
+  // (Masa kartı 14'ü o zamana kadar birine verdiyse ya da masadaysa ikinci kopya eklenmez.)
   if (!atanmamisGeldi && simSn >= ATANMAMIS_SN) {
     atanmamisGeldi = true
-    kisiler.push({
+    if (!kisiBul('14') && !masadakiKartlar.has('14')) kisiler.push({
       id: '14', role: 'guest', name: 'Kart 14', org: '', tier: 0,
       color: PALET[kisiler.length % PALET.length],
       seenAgo: 0.5, min: 0, invMin: 0, esler: new Set(),
@@ -674,17 +685,20 @@ function sifirla() {
   anlasmalar = new Set()
   bitenGorusme = 0
   yalnizSn = new Map()
-  atanmamisGeldi = false
   kayipKisi = null
+  yakinKartlar = new Map() // "yaklaştır" bitişleri mutlak simSn; simSn 0'a dönünce eskisi kalmasın
   // kartı olmayanların (ayrılan / kart değiştiren) biriken süreleri de sıfırlanır
   for (const kat of katilimcilar) { kat.min = 0; kat.invMin = 0 }
+  // Kart 14 senaryosu yeniden oynar — ama kart bir kişiye verildiyse o kişinin kartıdır, düşürülmez.
+  const kart14Atanmis = !!kartKat('14')
+  atanmamisGeldi = kart14Atanmis
   for (const k of kisiler) {
-    if (k.id === '14') continue
+    if (k.id === '14' && !kart14Atanmis) continue
     k.min = 0; k.invMin = 0; k.esler = new Set()
     k.kayipBildirildi = false; k.yalnizBildirildi = false
     k.seenAgo = rndAralik(0, 2)
   }
-  kisiler = kisiler.filter((k) => k.id !== '14')
+  if (!kart14Atanmis) kisiler = kisiler.filter((k) => k.id !== '14')
 }
 
 // ---------- HTTP + SSE ----------
@@ -720,6 +734,10 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'GET' && yol === '/api/cards') { json(yanit, 200, kartlariListele()); return true }
 
+  // YALNIZ MOCK — arayüz demo düğmelerini (yaklaştır, çifti tut) yalnız bu uç varsa gösterir.
+  // Gerçek sunucu bu ucu SAĞLAMAMALI (404) → üretimde demo düğmesi görünmez.
+  if (istek.method === 'GET' && yol === '/api/demo') { json(yanit, 200, { ok: true, mock: true }); return true }
+
   // YALNIZ MOCK — kalibrasyon demosu: iki kartı yüz yüze / sırt sırta tutmayı taklit eder
   // (gerçek sunucuda yok; kartları teknik kişi eliyle tutar). mod: null → bırak.
   if (istek.method === 'POST' && yol === '/api/demo/tut') {
@@ -750,7 +768,7 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'POST' && yol === '/api/people') {
     const g = await govdeOku(istek)
-    if (!g || !g.ad) { json(yanit, 400, { ok: false, hata: 'ad gerekli' }); return true }
+    if (!g || !metinAlan(g.ad).trim()) { json(yanit, 400, { ok: false, hata: 'ad gerekli' }); return true }
     json(yanit, 200, katDto(kisiEkle(g))); return true
   }
 
@@ -786,15 +804,19 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'POST' && yol === '/api/assign') {
     const g = await govdeOku(istek)
-    if (!g || !g.kisiId || g.kart == null) { json(yanit, 400, { ok: false }); return true }
-    const oldu = ata(g.kisiId, g.kart)
+    const kart = kartNo(g?.kart)
+    if (!g || !g.kisiId || !kart) { json(yanit, 400, { ok: false, hata: 'kart no 1–99 olmalı' }); return true }
+    const oldu = ata(g.kisiId, kart)
     json(yanit, oldu ? 200 : 404, { ok: oldu }); return true
   }
 
   if (istek.method === 'POST' && yol === '/api/unassign') {
     const g = await govdeOku(istek)
-    if (!g || g.kart == null) { json(yanit, 400, { ok: false }); return true }
-    iade(g.kart, g.ayrildi !== false); json(yanit, 200, { ok: true }); return true
+    const kart = kartNo(g?.kart)
+    if (!g || !kart) { json(yanit, 400, { ok: false, hata: 'kart no 1–99 olmalı' }); return true }
+    // Ne kişisi ne sahnede ne masada olan kart: bilinmiyor (masaya hayalet kart eklenmesin).
+    if (!kartKat(kart) && !kisiBul(kart) && !masadakiKartlar.has(kart)) { json(yanit, 404, { ok: false, hata: 'kart bilinmiyor' }); return true }
+    iade(kart, g.ayrildi !== false); json(yanit, 200, { ok: true }); return true
   }
 
   return false
@@ -804,6 +826,11 @@ const sunucu = http.createServer((istek, yanit) => {
   if (istek.url.startsWith('/api/')) {
     apiYonlendir(istek, yanit).then((esles) => {
       if (!esles) json(yanit, 404, { ok: false, hata: 'bilinmeyen uç' })
+    }).catch((hata) => {
+      // Tek bir hatalı istek süreci (ve bütün SSE istemcilerini) düşürmesin.
+      console.error('api hatası:', istek.method, istek.url, hata)
+      if (!yanit.headersSent) json(yanit, 500, { ok: false, hata: 'sunucu hatası' })
+      else yanit.end()
     })
     return
   }

@@ -2,6 +2,8 @@
 // bunu doğrudan kullanmaz; yalnız api/ içindeki sarmalayıcılar.
 // Gövde varsayılan JSON; `tur` verilirse (ör. CSV) metin olduğu gibi gider.
 // 2xx dışı yanıt → istisna (çağıran hatayı kullanıcıya anlatır).
+import { SUNUCU_ADRESI } from './client.js'
+
 export async function jsonIstek(adres, yol, yontem = 'GET', govde, tur) {
   const secenek = { method: yontem, headers: {} }
   if (govde !== undefined) {
@@ -13,4 +15,5 @@ export async function jsonIstek(adres, yol, yontem = 'GET', govde, tur) {
   return yanit.json()
 }
 
-export const adresTemizle = (adres = '') => adres.replace(/\/$/, '')
+// Adres verilmezse client.js'teki tek sunucu adresi kullanılır.
+export const adresTemizle = (adres = SUNUCU_ADRESI) => adres.replace(/\/$/, '')
