@@ -42,7 +42,8 @@ export default function EsikAyari({ esik, signals, onGonder, onTaslak }) {
   }
   function birak(v) {
     const deger = esikSinirla(v)
-    if (deger === esik && taslak === null) return
+    if (deger === esik && (taslak === null || kayit === 'kaydedildi')) return
+    if (deger === taslak && kayit === 'kaydediliyor') return
     setTaslak(deger)
     setKayit('kaydediliyor')
     gondericiRef.current.planla(deger)
@@ -69,6 +70,8 @@ export default function EsikAyari({ esik, signals, onGonder, onTaslak }) {
           onChange={(e) => kaydir(e.target.value)}
           onPointerUp={(e) => birak(e.currentTarget.value)}
           onKeyUp={(e) => birak(e.currentTarget.value)}
+          onPointerCancel={(e) => birak(e.currentTarget.value)}
+          onBlur={(e) => birak(e.currentTarget.value)}
           data-test="esik-kaydirici"
         />
         <button type="button" className="kartver-geri esik-adim" aria-label="Eşiği 1 dBm yükselt"

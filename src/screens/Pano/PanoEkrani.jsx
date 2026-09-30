@@ -36,12 +36,14 @@ export default function PanoEkrani() {
   }, [])
 
   const bildirimTikla = useCallback((bildirim) => {
+    // Telefonda (≤600px) tek bölge görünür: vurgulanan kişiler görünsün diye Kişiler'e geç.
+    if (window.matchMedia?.('(max-width: 600px)').matches) setSekme('kisiler')
     setVurgulanan((onceki) =>
       onceki.length === bildirim.people.length && onceki.every((x, i) => x === bildirim.people[i])
         ? [] // aynı bildirime tekrar tıkla → vurguyu kaldır
         : bildirim.people,
     )
-  }, [])
+  }, [setSekme])
 
   // Atanmamış kart ("Kart N") → karşılama masası o kartla açılır, kişi seçilir.
   const kisiAta = useCallback((kisi) => { window.location.hash = kartVerAdresi(kisi.id) }, [])

@@ -6,6 +6,11 @@ import './KisiRozeti.css'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
 
+// Yalnız rol şekli (○ □ ◇) — rozetin tamamı sığmayan dar listeler için (panel, zaman çizelgesi).
+export function RolSekli({ rol }) {
+  return rol ? <span className={`kisi-rozeti-rol kisi-rozeti-rol--${rol}`} aria-hidden="true" /> : null
+}
+
 export default function KisiRozeti({ kisi, kartNo = true }) {
   const ad = gorunenAd(kisi)
   // Kayıtsız kart zaten "Kart 14" adını taşır; numarayı ikinci kez yazma.
@@ -14,7 +19,7 @@ export default function KisiRozeti({ kisi, kartNo = true }) {
   return (
     <span className="kisi-rozeti" title={baslik}>
       <span className="kisi-rozeti-renk" style={kisi.color ? { background: kisi.color } : undefined} aria-hidden="true" />
-      {kisi.role && <span className={`kisi-rozeti-rol kisi-rozeti-rol--${kisi.role}`} aria-hidden="true" />}
+      <RolSekli rol={kisi.role} />
       <span className="kisi-rozeti-ad">{ad}</span>
       {noGoster && <>{' '}<span className="kisi-rozeti-kart sayi">{kisi.id}</span></>}
     </span>

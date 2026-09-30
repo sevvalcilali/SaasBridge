@@ -5,15 +5,19 @@ import { onceYazisi } from '../../api/format.js'
 
 export function KayipUyarilari({ kayiplar, pilDegisti, onKontrol }) {
   if (!kayiplar.length) return null
+  const bekleyen = kayiplar.filter((k) => !pilDegisti.has(k.kart)).length
+  // Her satırın "son duyulma" metni değiştikçe yeniden okunmasın: yalnız sayı duyurulur.
   return (
+    <>
+    <p className="gorunmez" role="status">{bekleyen ? `${bekleyen} kart kontrol bekliyor` : ''}</p>
     <ul className="kayip-liste" aria-label="Kartı kontrol edilecek kişiler" data-test="kayip-uyarilari">
       {kayiplar.map((k) => (
         pilDegisti.has(k.kart) ? (
-          <li key={k.kart} className="kayip kayip--bekleniyor" role="status">
+          <li key={k.kart} className="kayip kayip--bekleniyor">
             <span>↻ <strong>{k.kisi.ad}</strong> · Kart {k.kart}: pil değiştirildi, sinyal bekleniyor.</span>
           </li>
         ) : (
-          <li key={k.kart} className="kayip" role="alert" data-test="kayip-uyari">
+          <li key={k.kart} className="kayip" data-test="kayip-uyari">
             <span>⚠ <strong>Kartı kontrol et:</strong> {k.kisi.ad} · Kart {k.kart} · son duyulma {onceYazisi(k.seenAgo)}</span>
             <button type="button" className="kartver-geri kayip-dugme" data-test="kayip-kontrol" onClick={() => onKontrol(k)}>
               Kontrol et
@@ -22,6 +26,7 @@ export function KayipUyarilari({ kayiplar, pilDegisti, onKontrol }) {
         )
       ))}
     </ul>
+    </>
   )
 }
 

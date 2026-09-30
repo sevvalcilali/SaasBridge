@@ -2,6 +2,7 @@
 // çubuk; karşı kişi adı, saat aralığı ve süre yazılı. Sürmekte olan görüşme açık
 // uçlu ve "birlikte" renginde (yeşil yalnız şu an birlikte olan için). Sıra
 // başlangıca göre sabit — yeni görüşme alta eklenir, satırlar zıplamaz.
+import { RolSekli } from './KisiRozeti.jsx'
 import { cizelgeAraligi, cizelgeYuzde, etkinlikSaati, raporAdi, kisaAd } from '../api/rapor.js'
 import { sureYazisi } from '../api/format.js'
 import './ZamanCizelgesi.css'
@@ -23,6 +24,7 @@ export default function ZamanCizelgesi({ oturumlar, simdi, saat }) {
             <li key={`${o.start}-${i}`} className="zc-satir" data-test="zc-satir" data-suruyor={o.suruyor || undefined}>
               <span className="zc-ad" title={raporAdi(o.karsi)}>
                 <span className="zc-renk" style={o.karsi.renk ? { background: o.karsi.renk } : undefined} aria-hidden="true" />
+                <RolSekli rol={o.karsi.rol} />
                 {kisaAd(o.karsi)}
               </span>
               <span className="zc-yol" aria-hidden="true">

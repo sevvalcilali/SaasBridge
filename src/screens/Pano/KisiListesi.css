@@ -194,3 +194,8 @@
   font-size: var(--punto-kucuk);
   white-space: nowrap;
 }
+
+/* Dar telefon (≤420px): durum cümlesi kesilmesin, ikinci satıra insin. */
+@media (max-width: 420px) {
+  .kisi-durum { white-space: normal; align-items: flex-start; }
+}

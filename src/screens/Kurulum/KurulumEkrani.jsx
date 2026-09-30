@@ -7,6 +7,7 @@ import { ciftSayisi } from '../../api/sinyal.js'
 import { KurulumApi } from '../../api/kurulumApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
 import { useSeyrek } from '../../api/useSeyrek.js'
+import { useKalici } from '../../api/useKalici.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
 import CiftTablosu from './CiftTablosu.jsx'
@@ -24,7 +25,7 @@ const TABLO_TAZELEME_MS = 2000
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
   const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
-  const [perspektif, setPerspektif] = useState(null)  // seçili kişinin kart no'su ya da null
+  const [perspektif, setPerspektif] = useKalici('kurulum.perspektif', null) // seçili kişinin kart no'su; yenilemede korunur
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new KurulumApi()
   const { kartlar } = useKartlar(apiRef.current)

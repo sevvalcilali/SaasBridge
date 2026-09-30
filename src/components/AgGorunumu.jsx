@@ -29,7 +29,8 @@ function Dugum({ n, vurgulu, secili, isimsiz, onSec }) {
   // Tıklanabilir yalnız seçim işlevi verilmişse (sunum modunda değil).
   const etkilesim = onSec
     ? {
-        role: 'button', tabIndex: 0, 'aria-label': n.name,
+        // Tab durağı değil (97 kişide 97 durak olurdu); klavyeyle aynı iş kişi listesinden yapılır.
+        role: 'button', tabIndex: -1, 'aria-label': n.name,
         onClick: () => onSec(n.id),
         onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSec(n.id) } },
       }
@@ -76,7 +77,7 @@ export default function AgGorunumu({
         viewBox={`0 0 ${vbW} ${vbH}`}
         style={sunum ? undefined : { aspectRatio: `${VB_W} / ${vbH}` }}
         preserveAspectRatio="xMidYMid meet"
-        role="img"
+        role={onKisiSec ? 'group' : 'img'}
         aria-label={`Kişi ağı${isimsiz ? ' (isimsiz)' : ''} — kim kiminle vakit geçirdi`}
       >
         <g className="ag-cizgiler">

@@ -72,5 +72,5 @@
 
 @media (max-width: 900px) {
   .sunum { padding: var(--aralik-4); }
-  .sunum-araclar { position: static; justify-content: flex-end; opacity: 1; }
+  .sunum-araclar { position: static; justify-content: flex-end; flex-wrap: wrap; opacity: 1; }
 }

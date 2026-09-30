@@ -42,7 +42,7 @@
   background: var(--yuzey);
   color: var(--metin-2);
   border-radius: var(--kose-tam);
-  width: 30px; height: 30px;
+  width: 40px; height: 40px; /* dokunmatik hedef */
   line-height: 1;
 }
 .detay-kapat:hover { background: var(--yuzey-2); }
