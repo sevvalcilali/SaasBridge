@@ -9,7 +9,7 @@ import CsvYukle from './CsvYukle.jsx'
 
 const BOS_FORM = { ad: '', rol: 'founder', kurum: '', yildiz: 0, not: '' }
 
-export default function KisiSecAdim({ api, katilimcilar, onYenile, onKisiSec, onDuzenlendi }) {
+export default function KisiSecAdim({ api, katilimcilar, kayipKisiIdler, onYenile, onKisiSec, onDuzenlendi }) {
   const [arama, setArama] = useState('')
   const [form, setForm] = useState(null) // null | { yeni: true } | { kisi } | { csv: true }
   const [sadeceBekleyen, setSadeceBekleyen] = useState(false)
@@ -103,7 +103,7 @@ export default function KisiSecAdim({ api, katilimcilar, onYenile, onKisiSec, on
 
       <ul className="kisisec-liste" data-test="kisisec-liste">
         {liste.map((k) => {
-          const durum = kisiDurumu(k)
+          const durum = kisiDurumu(k, kayipKisiIdler?.has(k.kisiId))
           return (
             <li key={k.kisiId} className="kisisec-satir">
               <button type="button" className="kisisec-oge" data-test="kisisec-oge" onClick={() => onKisiSec(k)}>

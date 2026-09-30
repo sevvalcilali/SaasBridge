@@ -297,3 +297,34 @@
 }
 .csv-sonuc p { margin: 0 0 var(--aralik-1); }
 .csv-atlanan { margin: 0; padding-left: var(--aralik-5); color: var(--uyari); font-weight: 600; }
+
+/* --- 2.13: kayıp kart uyarısı + boştaki kartlar şeridi --- */
+/* Kayıp = ciddi (brief lost: serious): renk + ⚠ ikon + yazı birlikte */
+.kisisec-etiket-durum--kayip { color: var(--ciddi); }
+.kayip-liste { list-style: none; margin: 0 0 var(--aralik-4); padding: 0; display: flex; flex-direction: column; gap: var(--aralik-2); }
+.kayip {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--aralik-3); flex-wrap: wrap;
+  padding: var(--aralik-2) var(--aralik-4);
+  background: var(--ciddi-zemin); color: var(--metin);
+  border: 2px solid var(--ciddi); border-radius: var(--kose);
+}
+.kayip--bekleniyor { background: var(--yuzey-2); border: 1px dashed var(--cizgi-koyu); color: var(--metin-2); }
+.kayip-dugme { min-height: 44px; font-weight: 700; background: var(--yuzey); }
+.kayip-secenek { display: grid; grid-template-columns: 1fr 1fr; gap: var(--aralik-3); }
+@media (max-width: 480px) { .kayip-secenek { grid-template-columns: 1fr; } }
+.kayip-secenek .kisisec-yeni { display: flex; flex-direction: column; gap: var(--aralik-1); min-height: 88px; }
+.kayip-aciklama { font-weight: 400; font-size: var(--punto-kucuk); color: var(--metin-2); }
+
+.stok {
+  margin-top: var(--aralik-5); padding: var(--aralik-4);
+  background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: var(--kose-buyuk);
+}
+.stok .kontrol-baslik { display: flex; align-items: center; gap: var(--aralik-2); margin-bottom: var(--aralik-3); }
+.stok-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--aralik-2); }
+.stok-kart {
+  display: flex; align-items: center; gap: var(--aralik-2);
+  padding: var(--aralik-2) var(--aralik-3);
+  background: var(--zemin); border: 1px solid var(--cizgi); border-radius: var(--kose);
+}
+.stok-pil { font-size: var(--punto-kucuk); color: var(--metin-2); font-variant-numeric: tabular-nums; }
+.stok-pil--dusuk { color: var(--uyari); font-weight: 700; }

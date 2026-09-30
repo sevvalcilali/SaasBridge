@@ -10,7 +10,9 @@ export function katilimciAra(liste, arama) {
 }
 
 // Kişinin masadaki durumu (brief §6.3): kartı var / "kart bekliyor" / "ayrıldı".
-export function kisiDurumu(k) {
+// Kartı kayıpsa (brief §6.3 "Kayıp kart") satırda "Kartı kontrol et" görünür.
+export function kisiDurumu(k, kayip = false) {
+  if (k.atananKart && kayip) return { tur: 'kayip', etiket: `Kart ${k.atananKart} · Kartı kontrol et` }
   if (k.atananKart) return { tur: 'kartli', etiket: `Kart ${k.atananKart}` }
   if (k.ayrildi) return { tur: 'ayrildi', etiket: 'ayrıldı' }
   return { tur: 'bekliyor', etiket: 'kart bekliyor' }
@@ -63,6 +65,25 @@ export function iadeAdaylari(liste, arama) {
 export const GERI_AL_DK = 5
 export function geriAlinabilir(atama, simdi = Date.now(), pencereDk = GERI_AL_DK) {
   return Boolean(atama) && simdi - atama.zaman < pencereDk * 60_000
+}
+
+// Boştaki kartlar (brief §6.4): açık (yakın zamanda duyulan) ama kimseye atanmamış
+// kartlar — masadaki yedekler, stok takibi. Numaraya göre sıralı (zıplamaz).
+export function bostakiKartlar(kartlar, esikSn = 8) {
+  return kartlar
+    .filter((k) => !k.atanan && k.seenAgo != null && k.seenAgo <= esikSn)
+    .sort((a, b) => Number(a.kart) - Number(b.kart))
+}
+
+// Kayıp kart: kişiye atanmış ve `lost` bildirimiyle aynı ölçüte göre (brief §5.2:
+// 60 sn duyulmuyor) susmuş kartlar. En uzun susan üstte.
+export const KAYIP_SN = 60
+export function kayipKartlar(kartlar, katilimcilar) {
+  const kisi = new Map(katilimcilar.map((k) => [k.kisiId, k]))
+  return kartlar
+    .filter((k) => k.atanan && kisi.has(k.atanan) && k.seenAgo >= KAYIP_SN)
+    .map((k) => ({ kisi: kisi.get(k.atanan), kart: k.kart, seenAgo: k.seenAgo }))
+    .sort((a, b) => b.seenAgo - a.seenAgo)
 }
 
 // "Yaklaştır ve tanı": alıcıya yaklaştırılan kart belirgin en güçlüdür.

@@ -1,13 +1,17 @@
 // Karşılama masası — kart atama sihirbazı (brief §6). Adımlar: 1 Kişi → 2 Kart
 // → 3 Onay. Ayrıca kart iadesi ve son atamayı geri alma (§6 "Yanlış atama
-// düzeltme"). Sunucuyla masaApi üzerinden konuşulur.
-import { useCallback, useEffect, useRef, useState } from 'react'
+// düzeltme"). Boştaki kartlar şeridi ve kayıp kart uyarısı (2.13) /api/cards
+// yoklamasından beslenir. Sunucuyla masaApi üzerinden konuşulur.
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
-import { geriAlinabilir, GERI_AL_DK } from '../../api/masaYardim.js'
+import { useKartlar } from '../../api/useKartlar.js'
+import { geriAlinabilir, GERI_AL_DK, kayipKartlar } from '../../api/masaYardim.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
 import KartSecAdim from './KartSecAdim.jsx'
 import KontrolOnayAdim from './KontrolOnayAdim.jsx'
 import IadePaneli from './IadePaneli.jsx'
+import BostakiKartlar from './BostakiKartlar.jsx'
+import { KayipUyarilari, KartKontrol } from './KayipKartlar.jsx'
 import './KartVerEkrani.css'
 
 const ADIMLAR = [
@@ -29,6 +33,25 @@ export default function KartVerEkrani() {
   const [sonAtama, setSonAtama] = useState(null) // { ad, kart, zaman } — geri alınabilir
   const [geriAliniyor, setGeriAliniyor] = useState(false)
   const [bilgi, setBilgi] = useState(null)       // kısa sonuç mesajı (iade / geri al)
+  const [kontrol, setKontrol] = useState(null)   // "Kartı kontrol et" paneli açık kayıp
+  const [pilDegisti, setPilDegisti] = useState(() => new Set()) // kart no: sinyal bekleniyor
+
+  const kartlar = useKartlar(api)
+  const kayiplar = useMemo(
+    () => (kartlar && katilimcilar ? kayipKartlar(kartlar, katilimcilar) : []),
+    [kartlar, katilimcilar],
+  )
+  const kayipKisiIdler = useMemo(() => new Set(kayiplar.map((k) => k.kisi.kisiId)), [kayiplar])
+
+  // Sinyali geri gelen kartın "pil değiştirildi" işareti düşer (tekrar susarsa yeniden uyarır).
+  const kayipAnahtar = kayiplar.map((k) => k.kart).join(',')
+  useEffect(() => {
+    const hala = new Set(kayipAnahtar ? kayipAnahtar.split(',') : [])
+    setPilDegisti((onceki) => {
+      const kalan = [...onceki].filter((k) => hala.has(k))
+      return kalan.length === onceki.size ? onceki : new Set(kalan)
+    })
+  }, [kayipAnahtar])
 
   const yukle = useCallback(() => api.kisileriGetir().then(setKatilimcilar).catch(() => setKatilimcilar([])), [api])
   useEffect(() => { yukle() }, [yukle])
@@ -97,7 +120,23 @@ export default function KartVerEkrani() {
 
   function modDegistir(yeni) {
     setMod(yeni)
+    setKontrol(null)
     sihirbaziSifirla()
+  }
+
+  function pilDegistirildi({ kisi, kart }) {
+    setPilDegisti((onceki) => new Set(onceki).add(kart))
+    setKontrol(null)
+    setBilgi(`↻ Kart ${kart} (${kisi.ad}): pil değiştirildi. Sinyal gelince uyarı kendiliğinden kalkar.`)
+  }
+
+  // Kart değiştirildi → sihirbaz bu kişiyle Adım 2'den açılır (kart değişimi, 2.11).
+  function kartDegistirildi({ kisi }) {
+    setKontrol(null)
+    setMod('ver')
+    setSeciliKisi(kisi)
+    setSeciliKart(null)
+    setAdim(2)
   }
 
   return (
@@ -134,7 +173,9 @@ export default function KartVerEkrani() {
 
       {bilgi && <p className="kartver-bilgi" role="status" data-test="bilgi">{bilgi}</p>}
 
-      {mod === 'ver' && (
+      <KayipUyarilari kayiplar={kayiplar} pilDegisti={pilDegisti} onKontrol={setKontrol} />
+
+      {mod === 'ver' && !kontrol && (
         <ol className="kartver-adimlar" aria-label="Adımlar">
           {ADIMLAR.map((a) => (
             <li key={a.no} className={`kartver-adim ${adim === a.no ? 'kartver-adim--etkin' : ''} ${adim > a.no ? 'kartver-adim--bitti' : ''}`}>
@@ -146,25 +187,31 @@ export default function KartVerEkrani() {
       )}
 
       <section className="kartver-govde" data-test="kartver-govde">
-        {mod === 'iade' && (
+        {kontrol && (
+          <KartKontrol kayip={kontrol} onPilDegisti={pilDegistirildi} onKartDegisti={kartDegistirildi}
+            onKapat={() => setKontrol(null)} />
+        )}
+        {!kontrol && mod === 'iade' && (
           <IadePaneli api={api} katilimcilar={katilimcilar} onIade={iadeAlindi} />
         )}
-        {mod === 'ver' && adim === 1 && (
-          <KisiSecAdim api={api} katilimcilar={katilimcilar} onYenile={yukle} onKisiSec={kisiSec}
+        {!kontrol && mod === 'ver' && adim === 1 && (
+          <KisiSecAdim api={api} katilimcilar={katilimcilar} kayipKisiIdler={kayipKisiIdler} onYenile={yukle} onKisiSec={kisiSec}
             onDuzenlendi={(k) => setBilgi(`✓ ${k.ad} bilgileri güncellendi.`)} />
         )}
-        {mod === 'ver' && adim === 2 && (
+        {!kontrol && mod === 'ver' && adim === 2 && (
           <div className="kartver-yer" data-test="adim-2">
             <KartSecAdim api={api} seciliKisi={seciliKisi} onKartSec={kartSec} onGeri={() => setAdim(1)} />
           </div>
         )}
-        {mod === 'ver' && adim === 3 && (
+        {!kontrol && mod === 'ver' && adim === 3 && (
           <div className="kartver-yer" data-test="adim-3">
             <KontrolOnayAdim api={api} seciliKisi={seciliKisi} seciliKart={seciliKart}
               katilimcilar={katilimcilar} onTamam={tamamla} onGeri={() => setAdim(2)} />
           </div>
         )}
       </section>
+
+      <BostakiKartlar kartlar={kartlar} />
     </main>
   )
 }

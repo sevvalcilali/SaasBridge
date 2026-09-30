@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki, kisiDurumu, kartBekleyenler } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki, kisiDurumu, kartBekleyenler, bostakiKartlar, kayipKartlar, KAYIP_SN } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -115,4 +115,29 @@ test('kartBekleyenler: ayrılanlar ve kartlılar dışarıda', () => {
     { kisiId: 'c', atananKart: null, ayrildi: true },
   ]
   assert.deepEqual(idler(kartBekleyenler(l)), ['b'])
+})
+
+test('kisiDurumu: kartı kayıpsa "Kartı kontrol et"', () => {
+  assert.deepEqual(kisiDurumu({ atananKart: '14' }, true), { tur: 'kayip', etiket: 'Kart 14 · Kartı kontrol et' })
+  assert.equal(kisiDurumu({ atananKart: null, ayrildi: false }, true).tur, 'bekliyor', 'kartsız kişi kayıp olamaz')
+})
+
+const MASA = [
+  { kart: '40', atanan: null, seenAgo: 0.3, pil: 90 },
+  { kart: '7', atanan: null, seenAgo: 1.2, pil: 80 },
+  { kart: '9', atanan: null, seenAgo: 30, pil: 70 },     // duyulmuyor: stok sayılmaz
+  { kart: '12', atanan: 'k1', seenAgo: 0.5, pil: 60 },   // atanmış
+  { kart: '15', atanan: 'k2', seenAgo: 75, pil: 5 },     // kayıp
+  { kart: '16', atanan: 'k3', seenAgo: KAYIP_SN, pil: 50 },
+  { kart: '17', atanan: 'yok', seenAgo: 90, pil: 50 },   // kaydı olmayan atanmış
+]
+
+test('bostakiKartlar: açık ve atanmamış, numaraya göre', () => {
+  assert.deepEqual(bostakiKartlar(MASA).map((k) => k.kart), ['7', '40'])
+})
+
+test('kayipKartlar: atanmış ve ≥60 sn duyulmayan, en uzun susan üstte', () => {
+  const kisiler = [{ kisiId: 'k1', ad: 'A' }, { kisiId: 'k2', ad: 'B' }, { kisiId: 'k3', ad: 'C' }]
+  const l = kayipKartlar(MASA, kisiler)
+  assert.deepEqual(l.map((x) => [x.kart, x.kisi.ad]), [['15', 'B'], ['16', 'C']])
 })

@@ -317,9 +317,19 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   Excel (.xlsx) desteği yok — bağımlılık gerektirir, istenirse onaya sunulur.
   123/123 test + tarayıcı uçtan uca.
 
-#### 2.13 ⬜ "Boştaki kartlar" şeridi + kayıp kart etiketi
+#### 2.13 ✅ "Boştaki kartlar" şeridi + kayıp kart etiketi
 - Atanmamış ama açık kartlar ayrı şeritte (stok takibi); `lost` bildirimli kişide "Kartı kontrol et" → pil/kart değişimi.
 - **Doğrulama:** boştaki kartlar görünür; kayıp kart etiketi ve düzeltme akışı.
+- **Yapıldı (30.09.2026):** Kart Ver ekranı `/api/cards`'ı 3 sn'de bir yoklar (`useKartlar`).
+  Alttaki "Boştaki kartlar" şeridi: açık + atanmamış kartlar, numaraya göre sabit, pil
+  %20 altı ⚠. Mock'a masadaki yedekler eklendi (6 kart; iade edilen kart da masaya döner):
+  alıcı duyar, `/state`'te kişi olarak görünmez. Kayıp kart = atanmış kart ≥60 sn duyulmuyor
+  (`lost` ile aynı ölçüt; masa SSE dinlemeden `/api/cards`'tan türetir): üstte ciddi renkli
+  "⚠ Kartı kontrol et" şeridi + kişinin satırında etiket. "Kontrol et" → "Pil değiştirildi"
+  (uyarı "sinyal bekleniyor"a döner, sinyal gelince kalkar) ya da "Kart değiştirildi"
+  (sihirbaz o kişiyle Adım 2'den açılır → kart değişimi, süreler birleşir).
+  Kararlar (soru sorulmadan, Şevval talimatı): etiket masa ekranında; panoda kişi zaten
+  "görünmüyor" + `lost` bildirimiyle görünür. 130/130 test + tarayıcı uçtan uca.
 
 #### 2.14 ⬜ SUNUCUDAN_ISTENENLER.md + Faz 2 teslimi
 - Netleştirilmiş §9 API listesi (Muhittin'e). Ekran görüntüleri + tasarım gerekçe notu.

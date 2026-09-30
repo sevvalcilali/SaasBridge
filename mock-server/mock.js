@@ -105,6 +105,15 @@ kisiler.forEach((k) => {
   katilimcilar.push(kat)
 })
 
+// Masadaki yedek kartlar (brief §6.4 "boştaki kartlar"): açık, alıcı duyar,
+// kimseye atanmamış; panoda kişi olarak görünmez. İade edilen kart da buraya döner.
+const YEDEK_ADET = 6
+const masadakiKartlar = new Set()
+for (let n = 2; n < 100 && masadakiKartlar.size < YEDEK_ADET; n++) {
+  const kart = String(n)
+  if (kart !== '14' && !kisiler.some((k) => k.id === kart)) masadakiKartlar.add(kart)
+}
+
 let simSn = 0                       // benzetim saniyesi (elapsed)
 let ciftler = new Map()             // "a-b" → çift kaydı
 let kenarlar = new Map()            // "a-b" → toplam dakika
@@ -196,6 +205,7 @@ function ata(kisiId, kart) {
   if (kat.atananKart && kat.atananKart !== kart) iadeKat(kat, kat.atananKart) // kişinin eski kartını bırak
   kat.atananKart = kart
   kat.ayrildi = false
+  masadakiKartlar.delete(kart)
   let e = kisiBul(kart)
   if (!e) {
     e = { id: kart, esler: new Set(), seenAgo: 0, min: 0, invMin: 0, bias: rndAralik(-3, 3) }
@@ -229,6 +239,7 @@ function iade(kart, ayrildi = true) {
   const kat = kartKat(kart)
   if (kat) { iadeKat(kat, kart); kat.ayrildi = ayrildi }
   else kartiCikar(kart)
+  masadakiKartlar.add(kart) // kart masaya (stoğa) döner
   return true
 }
 
@@ -325,6 +336,7 @@ const kartDto = (kart, e) => ({
 function kartlariListele() {
   const harita = new Map()
   for (const k of kisiler) harita.set(k.id, kartDto(k.id, k))
+  for (const kart of masadakiKartlar) if (!harita.has(kart)) harita.set(kart, kartDto(kart, null))
   for (const [kart, bitis] of yakinKartlar) {
     if (bitis < simSn) { yakinKartlar.delete(kart); continue }
     if (!harita.has(kart)) harita.set(kart, kartDto(kart, null))
