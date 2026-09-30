@@ -74,11 +74,11 @@ test('iceAktar: CSV metni gider, özet döner; iade ayrildi seçeneği', async (
   assert.equal((await api.kisileriGetir()).find((k) => k.kisiId === nur.kisiId).ayrildi, true)
 })
 
-test('renk: masaya gelen kişi rengi panodakiyle aynı açık palette; yeşil yok', async () => {
-  const { ACIK_PALET } = await import('./renkler.js')
-  const palet = new Set(Object.values(ACIK_PALET))
+test('renk: masaya gelen kişi rengi panodakiyle aynı tema paletinde; yeşil yok', async () => {
+  const { PALET } = await import('./renkler.js')
+  const palet = new Set(Object.values(PALET))
   const kisiler = await api.kisileriGetir()
-  assert.ok(kisiler.every((k) => palet.has(k.renk)), 'tüm renkler açık paletten')
+  assert.ok(kisiler.every((k) => palet.has(k.renk)), 'tüm renkler tema paletinden')
   assert.ok(!kisiler.some((k) => k.renk.toLowerCase() === '#199e70'), 'yeşil (birlikte rengi) kişi rengi olamaz')
   const yeni = await api.kisiEkle({ ad: 'Renk Deneme', rol: 'guest' })
   assert.ok(palet.has(yeni.renk))
@@ -87,10 +87,10 @@ test('renk: masaya gelen kişi rengi panodakiyle aynı açık palette; yeşil yo
 
 test('RaporApi: kayıt defteri (renk uyarlanmış) + görüşme kayıtları', async () => {
   const { RaporApi } = await import('./raporApi.js')
-  const { ACIK_PALET } = await import('./renkler.js')
+  const { PALET } = await import('./renkler.js')
   const r = new RaporApi({ adres: 'http://localhost:8114' })
   const kisiler = await r.kisileriGetir()
-  assert.ok(kisiler.length > 0 && kisiler.every((k) => Object.values(ACIK_PALET).includes(k.renk)))
+  assert.ok(kisiler.length > 0 && kisiler.every((k) => Object.values(PALET).includes(k.renk)))
   const o = await r.oturumlariGetir()
   assert.ok(Array.isArray(o))
 })

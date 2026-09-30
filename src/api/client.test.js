@@ -7,7 +7,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import http from 'node:http'
 import { PanoBaglantisi } from './client.js'
-import { ACIK_PALET } from './renkler.js'
+import { PALET } from './renkler.js'
 
 const ORNEK_DURUM = {
   people: [
@@ -110,9 +110,9 @@ test('kişi renkleri açık temaya eşlenir, ham renk saklanır', async () => {
   const baglanti = new PanoBaglantisi({ adres })
   baglanti.basla()
   const { durum } = await durumBekle(baglanti, (a) => a.durum !== null)
-  assert.equal(durum.people[0].color, ACIK_PALET.mavi)
+  assert.equal(durum.people[0].color, PALET.mavi)
   assert.equal(durum.people[0].sunucuColor, '#3987e5')
-  assert.equal(durum.people[1].color, ACIK_PALET.petrol, '#199e70 petrole eşlenmeli')
+  assert.equal(durum.people[1].color, PALET.petrol, '#199e70 petrole eşlenmeli')
   baglanti.kapat(); s.kapat()
 })
 

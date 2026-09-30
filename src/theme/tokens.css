@@ -1,5 +1,5 @@
 /* ============================================================
-   SICAK KARŞILAMA — açık tema token seti
+   SICAK KARŞILAMA — token setleri (açık varsayılan + koyu)
    Krem zemin, pastel vurgular, yuvarlak hatlar. (PLAN Bölüm 1 kararı;
    Golden Hour / Desert Rose temalarının sıcaklığı temel alındı.)
    Kurallar (brief §10):
@@ -7,7 +7,9 @@
    - Kişi renkleri kimliği tek başına taşımaz; yanında ad + rol şekli olur.
    - Kişi paleti brief'in koyu paletinin açık zeminde doğrulanmış
      uyarlamasıdır; #199e70 çıkarıldı (yeşil "birlikte"ye ayrıldı).
-   - Tüm değerler kontrast testiyle denetlenir: kontrast.test.js
+   - Koyu tema (Faz 5): <html data-tema="koyu">; aynı token adları, koyu
+     yüzeyde doğrulanmış değerler. Yazdırma her zaman açık temayla olur.
+   - Tüm değerler kontrast testiyle denetlenir: kontrast.test.js (iki tema)
    ============================================================ */
 
 :root {
@@ -40,15 +42,17 @@
   --pasif: #6d675e;            /* görünmüyor/boşta gri */
   --pasif-zemin: #eeeae1;
 
-  /* --- Kişi paleti (açık zeminde ≥3:1; sıra sunucu paletiyle eş) --- */
-  --kisi-mavi: #2f6fc0;
-  --kisi-turuncu: #c25022;
-  --kisi-hardal: #9a6b00;
-  --kisi-pembe: #bb3b68;
-  --kisi-mor: #6a5cd0;
-  --kisi-mercan: #bf4545;
-  --kisi-petrol: #0f7b8a; /* sunucudan #199e70 gelirse buna eşlenir */
-  --kisi-gri: #6d675e;
+  /* --- Kişi paleti (Faz 5: dataviz doğrulayıcısıyla yeniden adımlandı; sıra sunucu paletiyle eş)
+         Açık yüzeyde: her renk ≥3:1; normal görüşte tüm çiftler OKLab ΔE ≥15;
+         renk körlüğünde (protan/deutan) sıra komşuları ≥8. kontrast.test.js denetler. --- */
+  --kisi-mavi: #1245af;
+  --kisi-turuncu: #854412;
+  --kisi-hardal: #968403;
+  --kisi-pembe: #920f6d;
+  --kisi-mor: #895cd2;
+  --kisi-mercan: #cc646f;
+  --kisi-petrol: #248fb2; /* sunucudan #199e70 gelirse buna eşlenir */
+  --kisi-gri: #302f2e;
 
   /* --- Yazı (çevrimdışı kural: yalnız sistem fontları) --- */
   --yazi: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -70,10 +74,63 @@
   --kose-buyuk: 20px;
   --kose-tam: 999px;
   --golge: 0 1px 3px rgba(59, 51, 44, 0.08), 0 4px 16px rgba(59, 51, 44, 0.06);
+  --golge-panel: -8px 0 24px rgba(59, 51, 44, 0.12);
+  --yari-saydam: rgba(255, 255, 255, 0.35);
 
   /* --- Sakin hareket (brief: zıplama yok, yumuşak geçiş) --- */
   --gecis: 300ms ease;
   --gecis-yavas: 600ms ease;
+}
+
+/* ============================================================
+   KOYU TEMA — salonda / laptopta uzun süre açık kalan ekran (brief §10).
+   Sıcak koyu kahve yüzeyler; yeşil yine yalnız "birlikte".
+   Yalnız ekranda: yazdırma/PDF her zaman açık temayla basılır.
+   ============================================================ */
+@media screen {
+  :root[data-tema="koyu"] {
+    color-scheme: dark;
+
+    --zemin: #181614;
+    --yuzey: #221f1b;
+    --yuzey-2: #2c2823;
+    --cizgi: #3a342d;
+    --cizgi-koyu: #51493f;
+
+    --metin: #f2ebe0;
+    --metin-2: #c5b9a8;
+    --metin-soluk: #968b7c;
+    --metin-ters: #181614;
+
+    --vurgu: #e2a852;
+    --vurgu-zemin: #3b2f1c;
+
+    --birlikte: #4cc38a;
+    --birlikte-zemin: #16301f;
+    --olumlu: #dcb54a;
+    --olumlu-zemin: #352b12;
+    --uyari: #f08c52;
+    --uyari-zemin: #3d2316;
+    --ciddi: #f2726a;
+    --ciddi-zemin: #3f1c1a;
+    --pasif: #a69c8f;
+    --pasif-zemin: #2d2925;
+
+    /* Kişi paleti koyu yüzeyde: her renk ≥3:1; normal görüşte tüm çiftler ΔE ≥15;
+       renk körlüğünde sıra komşuları ≥8. */
+    --kisi-mavi: #3f65ee;
+    --kisi-turuncu: #d8772c;
+    --kisi-hardal: #827205;
+    --kisi-pembe: #a15b88;
+    --kisi-mor: #ad74ee;
+    --kisi-mercan: #ea2052;
+    --kisi-petrol: #3397be;
+    --kisi-gri: #c2aea5;
+
+    --golge: 0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3);
+    --golge-panel: -8px 0 24px rgba(0, 0, 0, 0.5);
+    --yari-saydam: rgba(0, 0, 0, 0.25);
+  }
 }
 
 /* --- Temel --- */

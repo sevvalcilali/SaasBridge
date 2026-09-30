@@ -32,7 +32,7 @@
 .kartver-adim-no {
   display: grid; place-items: center;
   width: 28px; height: 28px; border-radius: var(--kose-tam);
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--yari-saydam);
   font-size: var(--punto-kucuk);
 }
 .kartver-adim:not(.kartver-adim--etkin) .kartver-adim-no { background: var(--yuzey); }

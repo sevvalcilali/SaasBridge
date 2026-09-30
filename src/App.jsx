@@ -1,5 +1,7 @@
 // Uygulama kökü + hafif yönlendirme. Pano ↔ Kart Ver ↔ Kurulum ↔ Rapor.
 import { useRota } from './api/useRota.js'
+import { useTema } from './api/useTema.js'
+import TemaSecici from './components/TemaSecici.jsx'
 import PanoEkrani from './screens/Pano/PanoEkrani.jsx'
 import KartVerEkrani from './screens/KartVer/KartVerEkrani.jsx'
 import KurulumEkrani from './screens/Kurulum/KurulumEkrani.jsx'
@@ -15,6 +17,7 @@ const SEKMELER = [
 
 export default function App() {
   const rota = useRota()
+  const [tema, setTema] = useTema()
   return (
     <div className="uygulama">
       <nav className="uyg-nav" aria-label="Ekranlar">
@@ -28,6 +31,7 @@ export default function App() {
             {s.etiket}
           </a>
         ))}
+        <span className="uyg-nav-sag"><TemaSecici tema={tema} onDegis={setTema} /></span>
       </nav>
       {rota === 'kart-ver' && <KartVerEkrani />}
       {rota === 'kurulum' && <KurulumEkrani />}

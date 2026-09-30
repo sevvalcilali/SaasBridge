@@ -453,14 +453,39 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Kabul ölçütü:** panel çizelgesi + kısayollar + rapor + yazdırma + CSV mock ile uçtan uca; not + görüntüler.
 - **Yapıldı:** `docs/faz4/FAZ4_TESLIM.md` + 6 ekran görüntüsü + `ornek_rapor.pdf` + 2 örnek CSV (tek kabul senaryosundan); `SUNUCUDAN_ISTENENLER.md` §6 (sessions biçimi kesin; report.csv isteğe bağlı). Faz 2 ve Faz 3 kabul senaryoları yeniden koşuldu — gerileme yok. 179/179 test.
 
-### ⬜ Faz 5 — Cilalar (isteğe bağlı, ayrıca onaylanır)
+### 🟡 Faz 5 — Cilalar (onaylandı 30.09.2026: "faz 5 devam et bitince haber ver")
+**Amaç:** Brief §4.5 (sunum modu), §10 (koyu/açık tema, doğrulanmış palet), §12-5 (100+ kişi).
+Şevval talimatı: **sorgulamadan bitir, bitince haber ver.** Kararlar PLAN'a not düşülür.
 
-> ⚠️ Faz 4 bitti. Faz 5 isteğe bağlı; başlamadan önce Şevval'e sorulacak.
+#### 5.1 ✅ Kişi renkleri token'a bağlı + palet yeniden adımlama
+- `sunucuRengi` hex yerine `var(--kisi-*)` döner → kişi rengi temayla birlikte değişir, kişiyi takip eder.
+- Palet dataviz doğrulayıcısıyla yeniden adımlanır (PLAN §4 bulgusu): açık ve koyu yüzey ayrı.
+- **Doğrulama:** `kontrast.test.js` iki tema için: tüm çiftler normal görüşte OKLab ΔE ≥15, renk
+  körlüğünde sıra komşuları ≥8, yüzeyde ≥3:1, kroma ≥0.10, "birlikte" yeşilinden ≥15.
+- **Yapıldı:** `renkler.js` → `PALET` (token adları), `KISI_RENK_ADLARI`; yeni palet açık: en kötü çift normal ΔE 17.5,
+  renk körlüğünde tüm çiftler ≥8.1 (doğrulayıcı `--pairs all` bile geçiyor); koyu: normal ΔE ≥15.5, komşular ≥13.6
+  (tüm çiftlerde 6.8 — uyarı bandı, kimlik zaten şekil + ad ile). Gri de ölçüme dahil. Test yardımcıları
+  `theme/tokenOku.js`, `theme/renkOlcum.js`. Kalan sabit renkler (`rgba`) token'a çevrildi.
 
-**Kaba adımlar:**
-- 5.a Sunum modu (`?clean=1`).
-- 5.b Koyu tema (token değer seti ekleme).
-- 5.c 100+ kişi performans iyileştirmeleri.
+#### 5.2 ✅ Koyu tema + tema seçici
+- `tokens.css`: `:root[data-tema="koyu"]` değer seti (yalnız ekranda; yazdırma her zaman açık).
+- Menüde "Açık / Koyu" seçici; seçim cihazda saklanır, ilk boyamadan önce uygulanır. Varsayılan açık (PLAN §1).
+- **Doğrulama:** tüm ekranlar koyu temada ekran görüntüsüyle; kontrast testleri iki temada yeşil.
+- **Yapıldı:** `api/useTema.js` (`uyg.tema`, `kayitliTemayiUygula` main.jsx'te render'dan önce), `components/TemaSecici`;
+  sıcak koyu kahve yüzeyler, durum renkleri koyu zeminde ≥4.5:1. Tarayıcıda: seçim yenilemede korunuyor; pano, masa,
+  kurulum, rapor koyu temada kontrol edildi.
+
+#### 5.3 ⬜ Sunum modu (`?clean=1`)
+- Salon ekranı: menü, liste, bildirim yok; ağ görünümü tam ekran, 2–3 m'den okunur etiketler,
+  saat + birkaç büyük sayı. İsimli / isimsiz (`&isimsiz=1`). Köşede, üzerine gelince beliren sakin araç çubuğu.
+- **Doğrulama:** tarayıcıda 1920×1080 ekran görüntüsü; isimsizde hiçbir ad yok.
+
+#### 5.4 ⬜ 100+ kişi performansı
+- Mock `--kisi=120` ile ölçüm (render süresi, tik başına iş); darboğazlara hedefli iyileştirme.
+- **Doğrulama:** ölçüm önce/sonra; 120 kişide ağ ve liste okunur, taşma yok.
+
+#### 5.5 ⬜ Faz 5 teslimi
+- Ekran görüntüleri + `docs/faz5/FAZ5_TESLIM.md`; önceki fazların kabul senaryoları yeniden.
 
 ---
 
@@ -499,7 +524,7 @@ saasBridge/
       telefon bildirimi vb. kapsam dışı).
 
 **3.4 sırasında fark edilen (onay bekliyor):**
-- [ ] **Kişi paleti renk ayrımı doğrulamasından geçmiyor** (dataviz doğrulayıcısı, OKLab, açık
+- [x] ~~**Kişi paleti renk ayrımı doğrulamasından geçmiyor**~~ → Faz 5.1'de iki tema için yeniden adımlandı. (dataviz doğrulayıcısı, OKLab, açık
       zemin `#fffdf8`): mercan `#bf4545` ↔ turuncu `#c25022` normal görüşte bile ΔE 4.8 (<15);
       hardal ↔ turuncu renk körlüğünde ΔE 1.7; petrol ve gri düşük canlılık. Faz 1'deki test
       CIELAB ölçütüyle geçiyordu. Etkisi sınırlı: 7 renk 25+ kişiye dağıldığı için kimlik her

@@ -2,6 +2,8 @@
 
 .uyg-nav {
   display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
   gap: var(--aralik-1);
   padding: var(--aralik-2) var(--aralik-4) 0;
 }
@@ -20,3 +22,4 @@
   border-color: var(--cizgi);
   border-bottom-color: var(--yuzey);
 }
+.uyg-nav-sag { margin-left: auto; align-self: center; }

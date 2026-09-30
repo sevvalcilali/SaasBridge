@@ -11,7 +11,7 @@
   overflow: auto;
   background: var(--yuzey);
   border-left: 1px solid var(--cizgi);
-  box-shadow: -8px 0 24px rgba(59, 51, 44, 0.12);
+  box-shadow: var(--golge-panel);
   padding: var(--aralik-4);
   display: flex;
   flex-direction: column;
