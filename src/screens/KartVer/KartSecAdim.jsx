@@ -65,7 +65,7 @@ export default function KartSecAdim({ api, seciliKisi, onKartSec, onGeri }) {
           {!baskin.kart && !baskin.coklu && (
             <p className="yaklastir-bekle" data-test="yaklastir-bekle">
               <span className="yaklastir-halka" aria-hidden="true" />
-              Kartı alıcıya 5–10 cm yaklaştırın…
+              Kartı alıcıya yaklaştırın…
             </p>
           )}
 
