@@ -442,10 +442,11 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Doğrulama:** ayrılan kişi raporda; sayılar oturumlarla tutarlı; yazdırma görünümü temiz.
 - **Yapıldı:** `#/rapor` + sekme; bölümler `RaporBolumleri.jsx`; rapor anlık görüntü (açılışta + "Yenile"); `@media print` (menü/düğmeler gizli, satır bölünmez, token renkler); Chromium PDF çıktısı üretildi (A4). Katılımcı tablosu yalnız kayıtlılar (özetle aynı sayı); kayıtsız kartın görüşmeleri çift / en uzun tablolarında.
 
-#### 4.5 ⬜ CSV dışa aktarma
+#### 4.5 ✅ CSV dışa aktarma
 - Rapordan iki dosya: kişiler, görüşmeler. Türkçe Excel uyumlu (UTF-8 BOM, `;`). Tarayıcıda üretilir
   (sunucu beklenmez); `GET /api/report.csv` SUNUCUDAN_ISTENENLER'de isteğe bağlı kalır.
 - **Doğrulama:** indirilen dosya Excel ayrıştırmasıyla doğru sütunları verir; Türkçe harfler bozulmaz.
+- **Yapıldı:** `api/csvDisa.js` (BOM, `;`, CRLF, tırnak, virgüllü dakika, dosya adında tarih) + geri okuma testleri; rapor sayfasında "Katılımcılar (CSV)" ve "Görüşmeler (CSV)". Tarayıcıda gerçek indirme: 25 kişi = kayıt defteri, 78 görüşme = sunucu.
 
 #### 4.6 ⬜ Faz 4 teslimi
 - `SUNUCUDAN_ISTENENLER.md` güncellemesi (sessions biçimi), ekran görüntüleri, `docs/faz4/FAZ4_TESLIM.md`.

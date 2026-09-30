@@ -7,6 +7,7 @@ import { usePano } from '../../api/usePano.js'
 import { RaporApi } from '../../api/raporApi.js'
 import { raporHesapla } from '../../api/rapor.js'
 import { tarihSaatYazisi } from '../../api/format.js'
+import { katilimcilarCsv, gorusmelerCsv, csvIndir, dosyaAdi } from '../../api/csvDisa.js'
 import { Ozet, Girisimciler, EnUzun, Kisiler, Ciftler } from './RaporBolumleri.jsx'
 import './RaporEkrani.css'
 
@@ -46,6 +47,10 @@ export default function RaporEkrani() {
         </div>
         <div className="rp-araclar" data-test="rapor-araclar">
           <button type="button" className="kisisec-ekle" onClick={() => window.print()} data-test="rapor-yazdir">Yazdır / PDF</button>
+          <button type="button" className="kartver-geri" data-test="csv-katilimcilar"
+            onClick={() => csvIndir(dosyaAdi('katilimcilar', veri.zaman), katilimcilarCsv(r))}>⇩ Katılımcılar (CSV)</button>
+          <button type="button" className="kartver-geri" data-test="csv-gorusmeler"
+            onClick={() => csvIndir(dosyaAdi('gorusmeler', veri.zaman), gorusmelerCsv(veri.oturumlar, veri.kisiler, simdi, durum.clock))}>⇩ Görüşmeler (CSV)</button>
           <button type="button" className="kartver-geri" onClick={yukle} data-test="rapor-yenile">Yenile</button>
         </div>
       </header>
