@@ -407,7 +407,7 @@ Faz 4 başlamadan sorulur.
   uca çalışır; §8 maddelerinin hepsi karşılanır; not + ekran görüntüleri teslim edildi.
 - **Yapıldı:** `docs/faz3/FAZ3_TESLIM.md` + 10 ekran görüntüsü (tek kabul senaryosundan; 1× sinyal, 10× kayıp kart); `SUNUCUDAN_ISTENENLER.md` §5 (Kurulum: yeni uç gerekmez, `pending` gerekmez, paket hızı yok, Muhittin'e soru 5). Faz 2 kabul senaryosu yeniden koşuldu — gerileme yok. Kapanışta: çift tablosunda durum sütunu öne (telefonda kaydırmadan görünür), kart sağlığında kesilen hücre yok, yan sütun 3:2. 160/160 test.
 
-### 🟡 Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor (başladı 30.09.2026)
+### ✅ Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor (TAMAMLANDI 30.09.2026)
 **Amaç:** Brief §4.4 (rapor), §7 (kişi ayrıntı paneli), §9-6/§9-9. Şevval talimatı: **sorgulamadan
 bitir, bitince haber ver.** Kararlar PLAN'a not düşülür.
 
@@ -448,13 +448,14 @@ görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saa
 - **Doğrulama:** indirilen dosya Excel ayrıştırmasıyla doğru sütunları verir; Türkçe harfler bozulmaz.
 - **Yapıldı:** `api/csvDisa.js` (BOM, `;`, CRLF, tırnak, virgüllü dakika, dosya adında tarih) + geri okuma testleri; rapor sayfasında "Katılımcılar (CSV)" ve "Görüşmeler (CSV)". Tarayıcıda gerçek indirme: 25 kişi = kayıt defteri, 78 görüşme = sunucu.
 
-#### 4.6 ⬜ Faz 4 teslimi
+#### 4.6 ✅ Faz 4 teslimi
 - `SUNUCUDAN_ISTENENLER.md` güncellemesi (sessions biçimi), ekran görüntüleri, `docs/faz4/FAZ4_TESLIM.md`.
 - **Kabul ölçütü:** panel çizelgesi + kısayollar + rapor + yazdırma + CSV mock ile uçtan uca; not + görüntüler.
+- **Yapıldı:** `docs/faz4/FAZ4_TESLIM.md` + 6 ekran görüntüsü + `ornek_rapor.pdf` + 2 örnek CSV (tek kabul senaryosundan); `SUNUCUDAN_ISTENENLER.md` §6 (sessions biçimi kesin; report.csv isteğe bağlı). Faz 2 ve Faz 3 kabul senaryoları yeniden koşuldu — gerileme yok. 179/179 test.
 
 ### ⬜ Faz 5 — Cilalar (isteğe bağlı, ayrıca onaylanır)
 
-> ⚠️ Faz 4 bittiğinde mikro-adımları yazılacak.
+> ⚠️ Faz 4 bitti. Faz 5 isteğe bağlı; başlamadan önce Şevval'e sorulacak.
 
 **Kaba adımlar:**
 - 5.a Sunum modu (`?clean=1`).

@@ -1,6 +1,6 @@
 # Sunucudan İstenenler — Karşılama Masası (brief §9)
 
-> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı, Faz 3 (Kurulum) eklendi
+> Muhittin'e · Hazırlayan: Şevval (arayüz) · 30.09.2026 · Faz 2 çıktısı; Faz 3 (Kurulum) ve Faz 4 (görüşme kayıtları, rapor) eklendi
 >
 > Arayüz bu uçlarla **mock sunucuya karşı** uçtan uca çalışıyor
 > (`mock-server/mock.js` — davranışın çalışan referansı). Gerçek sunucu aynı
@@ -155,10 +155,39 @@ Bu kartların çiftleri `signals` ve `history`'de görünüyor mu? Görünmüyor
 için geçici olarak (ör. Kurulum açıkken) dahil edilmeleri gerekir. Mock'ta şu an yalnız
 panodaki kartların çiftleri var.
 
-## 6. Faz 4'te gerekecekler (brief §9, biçim brief'teki gibi)
+## 6. Görüşme kayıtları ve rapor (Faz 4)
 
-| # | Uç | Ne için |
+### `GET /api/sessions` → görüşme kayıtları (brief §9-6)
+
+```json
+[{"a": "k12", "b": "k7", "start": 1840.5, "end": 2310.0},
+ {"a": "k3", "b": "kart:14", "start": 2400.0, "end": null}]
+```
+
+| Alan | Anlamı |
+|---|---|
+| `a`, `b` | **Kişi kimliği** (`kisiId`), kart değil — kart değişse de aynı kişi. Kişiye atanmamış kart için `"kart:N"`; o karta sonradan kişi atanırsa kayıtları o kişiye geçer |
+| `start`, `end` | **Etkinlik saniyesi** (`/state.elapsed` ile aynı ölçek). Sürmekte olan görüşmede `end: null` |
+
+- Kayıt, çift "birlikte" olunca açılır, birlikte bitince kapanır (5 sn giriş / 15 sn çıkış
+  gecikmeleri dahil, `/state` ile aynı karar). Kart iade edilince ya da değişince açık kayıt kapanır.
+- **Kayıtlar silinmez:** kartı iade edilen (ayrılan) kişinin kayıtları raporda kalır. Yalnız
+  `POST /control reset` temizler.
+- Çift başına kayıt süreleri toplamı `/state.edges[].min` ile tutarlı olmalı (mock'ta testle kilitli;
+  başladığı tik de süreye sayılır).
+- Arayüz saati "şimdiki saat − `elapsed` + `start`" diye hesaplıyor; bu yüzden `/state.clock` ve
+  `/state.elapsed` aynı andan olmalı.
+- Kullanım: kişi ayrıntı panelindeki zaman çizelgesi (5 sn'de bir), rapor sayfası (açılışta +
+  "Yenile"), CSV dışa aktarma.
+
+### Rapor dışa aktarma — sunucudan **beklenmiyor**
+Rapor ve iki CSV dosyası (katılımcılar, görüşmeler) **tarayıcıda** `/api/people` + `/api/sessions`
+verisinden üretiliyor (Türkçe Excel uyumlu: UTF-8 BOM, `;`, ondalıkta virgül). Brief §9-9'daki
+`GET /api/report.csv` bu yüzden isteğe bağlı: sunucuda da istenirse biçim `docs/faz4/ornek_*.csv`
+ile aynı olsun.
+
+### Hâlâ gerekmeyen / sonraya kalanlar
+| # | Uç | Durum |
 |---|---|---|
-| 6 | `GET /api/sessions` → `[{a, b, start, end}]` | Görüşme zaman çizelgesi, rapor (Faz 4). `a/b` = `kisiId` olmalı (kart değil) |
-| 8 | `GET/PATCH /api/event` | Etkinlik bilgisi, anlaşma/yalnız kalma süreleri (Faz 4 ya da sonrası; Faz 3'te gerekmedi) |
-| 9 | `GET /api/report.csv` | Rapor dışa aktarma (Faz 4); süreler kişi bazlı |
+| 7 | `signals[].pending` | Gerekmiyor — `above`/`together` farkından türetiliyor (Faz 3) |
+| 8 | `GET/PATCH /api/event` | Faz 4'te gerekmedi; etkinlik bilgisi `/state.event`'ten okunuyor. Kural ayarları (anlaşma / yalnız kalma süresi) ekranı istenirse gerekir |
