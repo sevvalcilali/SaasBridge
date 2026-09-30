@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -88,4 +88,16 @@ test('geriAlinabilir: son birkaç dakikadaki atama geri alınabilir, sonrası de
   assert.equal(geriAlinabilir(atama, t0 + (GERI_AL_DK * 60_000) - 1), true)
   assert.equal(geriAlinabilir(atama, t0 + GERI_AL_DK * 60_000), false)
   assert.equal(geriAlinabilir(null, t0), false)
+})
+
+test('duzenlemeFarki: yalnız değişen alanlar; renk hiç yok', () => {
+  const kisi = { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', yildiz: 3, not: '', renk: '#3987e5' }
+  const form = { ad: 'Ayşe Demir ', rol: 'investor', kurum: 'Atlas', yildiz: 4, not: '', renk: '#000000' }
+  assert.deepEqual(duzenlemeFarki(kisi, form), { yildiz: 4 })
+  assert.deepEqual(duzenlemeFarki(kisi, { ...kisi }), {})
+})
+
+test('duzenlemeFarki: yatırımcılıktan çıkınca yıldız 0 olur', () => {
+  const kisi = { ad: 'Ayşe', rol: 'investor', kurum: '', yildiz: 3, not: '' }
+  assert.deepEqual(duzenlemeFarki(kisi, { ...kisi, rol: 'founder' }), { rol: 'founder', yildiz: 0 })
 })

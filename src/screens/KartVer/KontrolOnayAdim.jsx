@@ -30,7 +30,7 @@ export default function KontrolOnayAdim({ api, seciliKisi, seciliKart, katilimci
     setHata(null)
     try {
       await api.ata(seciliKisi.kisiId, seciliKart)
-      onTamam({ ad: seciliKisi.ad, kart: seciliKart })
+      onTamam({ ad: seciliKisi.ad, kart: seciliKart, eskiKart })
     } catch {
       setHata('Atama yapılamadı — sunucuya ulaşılamıyor. Tekrar deneyin.')
       setGonderiliyor(false)
@@ -67,7 +67,10 @@ export default function KontrolOnayAdim({ api, seciliKisi, seciliKart, katilimci
       )}
 
       {eskiKart && (
-        <p className="kontrol-not">Kişinin önceki kartı (Kart {eskiKart}) bırakılacak.</p>
+        <p className="kontrol-not" data-test="kart-degisimi">
+          <strong>Kart değişimi:</strong> Kart {eskiKart} bırakılır, Kart {seciliKart} verilir.
+          Kişinin bugünkü süreleri yeni kartta birleşir.
+        </p>
       )}
 
       <div className="onay-kart" style={{ '--kisi-renk': seciliKisi.renk }} data-test="onay-kart">

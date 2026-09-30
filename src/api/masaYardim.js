@@ -14,6 +14,19 @@ export function formGecerli(form) {
   return Boolean(form?.ad?.trim()) && ['investor', 'founder', 'guest'].includes(form?.rol)
 }
 
+// Kişi düzenleme (brief §6): yalnız değişen alanlar gönderilir; renk hiç
+// gönderilmez (değişmez). Yatırımcı değilse yıldız 0'dır.
+export function duzenlemeFarki(kisi, form) {
+  const yeni = {
+    ad: form.ad.trim(),
+    rol: form.rol,
+    kurum: form.kurum.trim(),
+    yildiz: form.rol === 'investor' ? form.yildiz : 0,
+    not: form.not,
+  }
+  return Object.fromEntries(Object.entries(yeni).filter(([alan, deger]) => deger !== (kisi[alan] ?? '')))
+}
+
 // "Şu an açık" kartlar: yakın zamanda duyulanlar (brief §6.2 "yeşil nokta = açık"),
 // güce göre azalan (yaklaştırılan/en güçlü üstte).
 export function acikKartlar(kartlar, esikSn = 8) {

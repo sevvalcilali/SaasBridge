@@ -290,9 +290,18 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
   olan kart iade edilince sunucu çöküyordu (`tik()` → silinmiş kart) — artık kartın çiftleri
   kapanır, kenarlar (kim kimle ne kadar) kalır. 107/107 test + tarayıcı uçtan uca.
 
-#### 2.11 ⬜ Kart değişimi + kişi bilgisi düzenleme
+#### 2.11 ✅ Kart değişimi + kişi bilgisi düzenleme
 - Kart değişimi (kişi aynı, kart değişir, **süreler kişide birleşir**); ad/kurum/yıldız/rol düzenleme (renk değişmez).
 - **Doğrulama:** kart değişince eski+yeni süre birleşir; düzenleme `/api/people`'a gider.
+- **Yapıldı (30.09.2026):** Mock'ta kenarlar (kim kimle ne kadar) artık **kişiye** bağlı
+  (Şevval onayı); `/state` çıktısı Faz 1 ile aynı (kenarlar güncel kart no ile). Kart
+  değişiminde kişinin süresi ve kenarları yeni kartta birleşir; iade edilen kart başkasına
+  verilince eski sahibin süreleri devredilmez; kartsız kişinin süreleri silinmez, panoda
+  görünmez, yeni kart alınca geri gelir. Kart değişimi mevcut sihirbazla yapılır (kartı olan
+  kişi seçilir); onayda "Kart değişimi … süreler birleşir" açıklaması. Kişi düzenleme:
+  Adım 1 listesinde "Düzenle"; form yeni-kişi formuyla ortak (`KisiFormu.jsx`), yalnız
+  değişen alanlar PATCH edilir (`duzenlemeFarki`), renk gösterilir ama değiştirilemez.
+  Mock PATCH: geçersiz rol/boş ad yok sayılır, yıldız 0–5. 113/113 test + tarayıcı uçtan uca.
 
 #### 2.12 ⬜ CSV toplu ön yükleme + "kart bekliyor" listesi
 - CSV (ad, soyad, rol, kurum, yıldız) yükle → `/api/people/import`; kartsız kişiler "kart bekliyor".
@@ -381,7 +390,8 @@ saasBridge/
       Sunucu tarafı geçmiş → 2.14 `SUNUCUDAN_ISTENENLER.md`.
 - [ ] **"Ayrıldı" ayrı durum değil:** iade edilen kişi "kartsız" görünür. 2.12'deki
       "kart bekliyor" listesi ayrılanları ayırmalı → model kararı gerekiyor.
-- [ ] **Kenarlar kart no ile anahtarlı:** iade edilen kart başka birine verilirse eski
-      kenar süreleri yeni kişide görünür. 2.11 (süre birleştirme) / Faz 4 raporda ele alınmalı.
+- [x] ~~**Kenarlar kart no ile anahtarlı**~~ → 2.11'de düzeltildi (kenarlar kişiye bağlı).
+- [ ] **Kart değişiminde "Geri al"** yeni kartı boşa çıkarır, eski kartı geri vermez;
+      kişi kartsız kalır (ekranda bu söylenir). Eski kartı geri vermek istenirse ayrıca karar.
 - [ ] **Bildirim akışı yinelenen React anahtarı** (`t-kind`): aynı tikte iki anlaşma aynı
       zaman damgasını alıyor (hızlandırılmış mock'ta sık). Faz 1'den kalma, 2.10 öncesi de var.

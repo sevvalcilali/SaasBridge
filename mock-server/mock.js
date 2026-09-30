@@ -129,6 +129,11 @@ const kopmaPenceresi = (t) => KOPMA &&
   ((t >= 120 && t < 120 + KOPMA_SURESI) || (t >= 480 && (t - 480) % 360 < KOPMA_SURESI))
 
 const anahtar = (a, b) => (Number(a) < Number(b) ? `${a}-${b}` : `${b}-${a}`)
+// Kenarlar (kim kimle ne kadar) KİŞİYE bağlıdır, karta değil: kart değişse de
+// süreler kişide birleşir, iade edilen kart başkasına verilince devredilmez
+// (brief §6). Kişisi olmayan (atanmamış) kart kendi adıyla tutulur.
+const kimlik = (e) => e.kisiId ?? `kart:${e.id}`
+const kenarAnahtari = (x, y) => (x < y ? `${x}|${y}` : `${y}|${x}`)
 const kisiBul = (id) => kisiler.find((k) => k.id === id)
 const gorunenAd = (k) => (k.role === 'founder' && k.org ? k.org : k.name)
 
@@ -194,10 +199,26 @@ function ata(kisiId, kart) {
   if (!e) {
     e = { id: kart, esler: new Set(), seenAgo: 0, min: 0, invMin: 0, bias: rndAralik(-3, 3) }
     kisiler.push(e)
+  } else if (!e.kisiId) {
+    kenarlariTasi(kimlik(e), kat.kisiId) // atanmamış kartla geçen süre artık bu kişinin
   }
+  // Kart değişimi / yeniden kart: önceki kartlardan biriken süre yeni kartta birleşir.
+  e.min += kat.min; e.invMin += kat.invMin
+  kat.min = 0; kat.invMin = 0
   kimlikYaz(e, kat)
   e.seenAgo = Math.min(e.seenAgo, 1)
   return true
+}
+
+// Bir kimliğin kenarlarını başka kimliğe aktar (aynı çift varsa süreler toplanır).
+function kenarlariTasi(eski, yeni) {
+  for (const [key, dk] of [...kenarlar]) {
+    const [x, y] = key.split('|')
+    if (x !== eski && y !== eski) continue
+    kenarlar.delete(key)
+    const kk = kenarAnahtari(x === eski ? yeni : x, y === eski ? yeni : y)
+    kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + dk)
+  }
 }
 
 function iade(kart) {
@@ -351,8 +372,9 @@ function tik() {
     }
     if (c.together) {
       c.birlikteSn += DT
-      kenarlar.set(key, (kenarlar.get(key) ?? 0) + DT / 60)
       const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
+      const kk = kenarAnahtari(kimlik(ka), kimlik(kb))
+      kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + DT / 60)
       ka.min += DT / 60; kb.min += DT / 60
       if (karsiRol(ka, kb)) { ka.invMin += DT / 60; kb.invMin += DT / 60 }
       if (!c.anlasmaVerildi && c.birlikteSn >= anlasmaSuresiSn(c)) {
@@ -451,6 +473,16 @@ function durumUret() {
     if (seri.length) gecmis[key] = seri
   }
 
+  // Kişi bazlı kenarlar → şu an sahnede olan kartlar (Faz 1 sözleşmesi kart no ile).
+  // Kartı olmayan (ayrılmış) kişinin süreleri silinmez, yalnız panoda görünmez.
+  const sahnede = new Map(kisiler.map((k) => [kimlik(k), k]))
+  const kenarCiftleri = []
+  for (const [key, dk] of kenarlar) {
+    const [x, y] = key.split('|')
+    const [a, b] = [sahnede.get(x), sahnede.get(y)]
+    if (a && b && dk > 0) kenarCiftleri.push([a, b, dk])
+  }
+
   const people = kisiler.map((k) => {
     const aktifCiftler = [...k.esler]
       .map((esId) => ciftler.get(anahtar(k.id, esId)))
@@ -465,12 +497,10 @@ function durumUret() {
       .filter(Boolean).map(gorunenAd).join(', ')
 
     const karsiKisiler = new Set()
-    for (const [key, dk] of kenarlar) {
-      if (dk <= 0) continue
-      const [a, b] = key.split('-')
-      if (a !== k.id && b !== k.id) continue
-      const es = kisiBul(a === k.id ? b : a)
-      if (es && karsiRol(k, es)) karsiKisiler.add(es.id)
+    for (const [a, b] of kenarCiftleri) {
+      if (a !== k && b !== k) continue
+      const es = a === k ? b : a
+      if (karsiRol(k, es)) karsiKisiler.add(es.id)
     }
 
     return {
@@ -486,22 +516,14 @@ function durumUret() {
     }
   })
 
-  const edges = [...kenarlar.entries()].map(([key, dk]) => {
-    const [a, b] = key.split('-')
-    return { a, b, min: Math.round(dk * 100) / 100 }
-  })
+  const edges = kenarCiftleri.map(([a, b, dk]) => ({ a: a.id, b: b.id, min: Math.round(dk * 100) / 100 }))
 
   const girisimciler = kisiler.filter((k) => k.role === 'founder')
   const ulasan = new Set()
-  for (const [key, dk] of kenarlar) {
-    if (dk <= 0) continue
-    const [a, b] = key.split('-').map(kisiBul)
-    if (a && b && karsiRol(a, b)) ulasan.add((a.role === 'founder' ? a : b).id)
+  for (const [a, b] of kenarCiftleri) {
+    if (karsiRol(a, b)) ulasan.add((a.role === 'founder' ? a : b).id)
   }
-  const karmaDk = [...kenarlar.entries()].reduce((toplam, [key, dk]) => {
-    const [a, b] = key.split('-').map(kisiBul)
-    return a && b && karsiRol(a, b) ? toplam + dk : toplam
-  }, 0)
+  const karmaDk = kenarCiftleri.reduce((toplam, [a, b, dk]) => (karsiRol(a, b) ? toplam + dk : toplam), 0)
 
   return {
     people,
@@ -548,6 +570,8 @@ function sifirla() {
   yalnizSn = new Map()
   atanmamisGeldi = false
   kayipKisi = null
+  // kartı olmayanların (ayrılan / kart değiştiren) biriken süreleri de sıfırlanır
+  for (const kat of katilimcilar) { kat.min = 0; kat.invMin = 0 }
   for (const k of kisiler) {
     if (k.id === '14') continue
     k.min = 0; k.invMin = 0; k.esler = new Set()
@@ -600,10 +624,12 @@ async function apiYonlendir(istek, yanit) {
     if (!kat) { json(yanit, 404, { ok: false }); return true }
     if (istek.method === 'PATCH') {
       const g = await govdeOku(istek) || {}
-      for (const alan of ['ad', 'rol', 'kurum', 'yildiz', 'not']) {
-        if (g[alan] !== undefined) kat[alan] = g[alan] // renk/kisiId değişmez
-      }
-      if (kat.rol !== 'investor') kat.yildiz = 0
+      // renk/kisiId değişmez; geçersiz rol ve boş ad yok sayılır
+      if (typeof g.ad === 'string' && g.ad.trim()) kat.ad = g.ad.trim()
+      if (['investor', 'founder', 'guest'].includes(g.rol)) kat.rol = g.rol
+      for (const alan of ['kurum', 'not']) if (typeof g[alan] === 'string') kat[alan] = g[alan]
+      if (g.yildiz !== undefined) kat.yildiz = g.yildiz | 0
+      kat.yildiz = kat.rol === 'investor' ? Math.max(0, Math.min(5, kat.yildiz)) : 0
       const e = kat.atananKart && kisiBul(kat.atananKart)
       if (e) kimlikYaz(e, kat)
       json(yanit, 200, katDto(kat)); return true

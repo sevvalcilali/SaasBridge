@@ -47,13 +47,19 @@ test('birlikte olan kart iade edilir: sunucu ayakta, pano\'dan düşer, süreler
   assert.ok(!sonra.people.some((p) => p.id === hedef.a), 'iade edilen kart pano\'dan düşmeli')
   assert.ok(!sonra.live.some((c) => c.a === hedef.a || c.b === hedef.a), 'açık görüşme kapanmalı')
 
-  const kenarSonra = sonra.edges.find((e) => cift(e) === cift(hedef))
-  assert.ok(kenarSonra, 'kim-kimle-ne-kadar kenarı silinmemeli')
-  assert.ok(kenarSonra.min >= kenarOnce.min, 'biriken süre azalmamalı')
-
   const kayit = (await getj(`${B}/api/people`)).find((k) => k.kisiId === kisi.kisiId)
   assert.ok(kayit, 'kişi kayıtta kalmalı')
   assert.equal(kayit.atananKart, null, 'kart boşa çıkmalı')
+
+  // Kenarlar kişiye bağlı (2.11): kartsız kişi panoda görünmez ama süresi silinmez —
+  // yeni kart alınca kim-kimle kenarı aynı süreyle geri gelir.
+  const dolu = new Set((await getj(`${B}/api/people`)).map((k) => k.atananKart))
+  const yeniKart = ['99', '98', '97', '96', '95'].find((n) => !dolu.has(n))
+  await post(`${B}/api/assign`, { kisiId: kisi.kisiId, kart: yeniKart })
+  const geri = await getj(`${B}/state`)
+  const kenarGeri = geri.edges.find((e) => cift(e) === cift({ a: yeniKart, b: hedef.b }))
+  assert.ok(kenarGeri, 'kim-kimle-ne-kadar kenarı silinmemeli')
+  assert.ok(kenarGeri.min >= kenarOnce.min, `biriken süre azalmamalı (${kenarOnce.min} → ${kenarGeri.min})`)
 })
 
 test('iade edilen kartın eşi yeniden eşleşebilir (esler temizlenir)', async () => {

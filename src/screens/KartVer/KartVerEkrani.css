@@ -95,7 +95,7 @@
 .kisisec-ekle:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Form */
-.kisisec-form { display: flex; flex-direction: column; gap: var(--aralik-3); }
+.kisisec-form { width: 100%; display: flex; flex-direction: column; gap: var(--aralik-3); }
 .kisisec-etiket { font-weight: 700; color: var(--metin-2); font-size: var(--punto-kucuk); display: flex; flex-direction: column; gap: var(--aralik-1); }
 .kisisec-girdi {
   font: inherit; font-size: var(--punto-orta);
@@ -257,4 +257,13 @@
   background: var(--yuzey-2); color: var(--metin);
   border: 1px solid var(--cizgi-koyu); border-radius: var(--kose);
   font-weight: 600;
+}
+
+/* --- 2.11: kişi düzenleme --- */
+.kisisec-satir { display: flex; gap: var(--aralik-2); align-items: stretch; }
+.kisisec-satir .kisisec-oge { flex: 1; min-width: 0; }
+.kisisec-duzenle { flex: none; min-width: 96px; font-weight: 700; border-radius: var(--kose); }
+.kisiform-renk {
+  margin: 0; display: flex; align-items: center; gap: var(--aralik-2);
+  color: var(--metin-2); font-size: var(--punto-kucuk);
 }

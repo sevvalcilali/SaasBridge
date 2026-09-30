@@ -66,7 +66,9 @@ export default function KartVerEkrani() {
     setGeriAliniyor(true)
     try {
       await api.iade(sonAtama.kart)
-      setBilgi(`↶ Geri alındı: ${sonAtama.ad} → Kart ${sonAtama.kart} ataması kaldırıldı, kart boşta.`)
+      // Kart değişiminde eski kart geri verilmez (bırakılmıştı); kişi kartsız kalır.
+      const ek = sonAtama.eskiKart ? ` ${sonAtama.ad} şu an kartsız.` : ''
+      setBilgi(`↶ Geri alındı: ${sonAtama.ad} → Kart ${sonAtama.kart} ataması kaldırıldı, kart boşta.${ek}`)
       setSonAtama(null)
       yukle()
     } catch {
@@ -120,7 +122,9 @@ export default function KartVerEkrani() {
 
       {sonAtama && (
         <div className="kartver-verildi kartver-sonatama" role="status" data-test="verildi">
-          <span>✓ {sonAtama.ad} → Kart {sonAtama.kart} verildi.</span>
+          <span>
+            ✓ {sonAtama.ad} → Kart {sonAtama.kart} verildi{sonAtama.eskiKart ? ` (Kart ${sonAtama.eskiKart} yerine)` : ''}.
+          </span>
           <button type="button" className="kartver-geri kartver-geri-al" data-test="geri-al"
             disabled={geriAliniyor} onClick={geriAl}>
             {geriAliniyor ? 'Geri alınıyor…' : '↶ Geri al'}
@@ -146,7 +150,8 @@ export default function KartVerEkrani() {
           <IadePaneli api={api} katilimcilar={katilimcilar} onIade={iadeAlindi} />
         )}
         {mod === 'ver' && adim === 1 && (
-          <KisiSecAdim api={api} katilimcilar={katilimcilar} onYenile={yukle} onKisiSec={kisiSec} />
+          <KisiSecAdim api={api} katilimcilar={katilimcilar} onYenile={yukle} onKisiSec={kisiSec}
+            onDuzenlendi={(k) => setBilgi(`✓ ${k.ad} bilgileri güncellendi.`)} />
         )}
         {mod === 'ver' && adim === 2 && (
           <div className="kartver-yer" data-test="adim-2">
