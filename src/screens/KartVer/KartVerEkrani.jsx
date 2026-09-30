@@ -1,6 +1,8 @@
-// Karşılama masası — kart atama ekranı (brief §6). Dokunmatik-ayakta kullanım:
-// büyük hedefler, az yazı. Sihirbaz adımları 2.5–2.9'da doldurulur; bu iskelet
-// yalnız düzeni ve adım göstergesini kurar.
+// Karşılama masası — kart atama sihirbazı (brief §6). Adımlar: 1 Kişi → 2 Kart
+// → 3 Onay. Sunucuyla masaApi üzerinden konuşulur. 2.6–2.9'da kart+onay dolacak.
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { MasaApi } from '../../api/masaApi.js'
+import KisiSecAdim from './KisiSecAdim.jsx'
 import './KartVerEkrani.css'
 
 const ADIMLAR = [
@@ -10,6 +12,22 @@ const ADIMLAR = [
 ]
 
 export default function KartVerEkrani() {
+  const apiRef = useRef(null)
+  if (apiRef.current === null) apiRef.current = new MasaApi()
+  const api = apiRef.current
+
+  const [adim, setAdim] = useState(1)
+  const [seciliKisi, setSeciliKisi] = useState(null)
+  const [katilimcilar, setKatilimcilar] = useState(null)
+
+  const yukle = useCallback(() => api.kisileriGetir().then(setKatilimcilar).catch(() => setKatilimcilar([])), [api])
+  useEffect(() => { yukle() }, [yukle])
+
+  function kisiSec(kisi) {
+    setSeciliKisi(kisi)
+    setAdim(2)
+  }
+
   return (
     <main className="kartver">
       <header className="kartver-bas">
@@ -18,8 +36,8 @@ export default function KartVerEkrani() {
       </header>
 
       <ol className="kartver-adimlar" aria-label="Adımlar">
-        {ADIMLAR.map((a, i) => (
-          <li key={a.no} className={`kartver-adim ${i === 0 ? 'kartver-adim--etkin' : ''}`}>
+        {ADIMLAR.map((a) => (
+          <li key={a.no} className={`kartver-adim ${adim === a.no ? 'kartver-adim--etkin' : ''} ${adim > a.no ? 'kartver-adim--bitti' : ''}`}>
             <span className="kartver-adim-no">{a.no}</span>
             <span className="kartver-adim-ad">{a.ad}</span>
           </li>
@@ -27,7 +45,16 @@ export default function KartVerEkrani() {
       </ol>
 
       <section className="kartver-govde" data-test="kartver-govde">
-        <p className="kartver-iskele">Adım içerikleri sıradaki adımlarda gelecek.</p>
+        {adim === 1 && (
+          <KisiSecAdim api={api} katilimcilar={katilimcilar} onYenile={yukle} onKisiSec={kisiSec} />
+        )}
+        {adim === 2 && (
+          <div className="kartver-yer" data-test="adim-2">
+            <p className="kartver-secili">Seçilen kişi: <strong>{seciliKisi?.ad}</strong></p>
+            <p className="kartver-iskele">Kart seçimi 2.6–2.7'de gelecek.</p>
+            <button type="button" className="kartver-geri" onClick={() => setAdim(1)}>← Kişi adımına dön</button>
+          </div>
+        )}
       </section>
     </main>
   )

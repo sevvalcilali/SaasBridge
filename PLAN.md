@@ -257,7 +257,7 @@ gerçek sunucu gelince yalnız `api/masaApi.js` değişir.
 - Dokunmatik-ayakta düzen iskeleti (büyük hedefler, az yazı).
 - **Doğrulama:** iki ekran arası geçiş; iskelet tabette okunur.
 
-#### 2.5 ⬜ Adım 1 — Kişi seç / yeni kişi oluştur
+#### 2.5 ✅ Adım 1 — Kişi seç / yeni kişi oluştur
 - Kayıtlı listede ada göre arama; yoksa hızlı form: **Ad**, **Rol** (büyük düğmeler),
   **Kurum**, yatırımcıysa **Yıldız (1–5)**, **Not**. Kişi rengi atama anında belirir.
 - **Doğrulama:** arama + yeni kişi oluşturma `/api/people`'a gider; büyük dokunma hedefleri.
