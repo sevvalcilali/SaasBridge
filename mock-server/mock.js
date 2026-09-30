@@ -692,7 +692,8 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'POST' && yol === '/api/yaklastir') {
     const g = await govdeOku(istek) || {}
-    const sure = 8 // benzetim sn: yaklaştırma penceresi
+    // Kart elde tutulur: pencere hızlandırmada da en az ~3 tik sürsün (ekran 1 sn'de yoklar)
+    const sure = Math.max(8, DT * 6)
     if (g.kart != null) yakinKartlar.set(String(g.kart), simSn + sure)
     if (g.kart2 != null) yakinKartlar.set(String(g.kart2), simSn + sure)
     json(yanit, 200, { ok: true }); return true

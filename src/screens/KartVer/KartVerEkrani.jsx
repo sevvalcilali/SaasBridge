@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MasaApi } from '../../api/masaApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
+import { rotaKart, kartVerAdresi } from '../../api/useRota.js'
 import { geriAlinabilir, GERI_AL_DK, kayipKartlar } from '../../api/masaYardim.js'
 import KisiSecAdim from './KisiSecAdim.jsx'
 import KartSecAdim from './KartSecAdim.jsx'
@@ -35,6 +36,8 @@ export default function KartVerEkrani() {
   const [bilgi, setBilgi] = useState(null)       // kısa sonuç mesajı (iade / geri al)
   const [kontrol, setKontrol] = useState(null)   // "Kartı kontrol et" paneli açık kayıp
   const [pilDegisti, setPilDegisti] = useState(() => new Set()) // kart no: sinyal bekleniyor
+  // Panodaki "Kişi ata"dan gelindiyse kart baştan bellidir: kişi seçilince doğrudan onaya.
+  const [hedefKart, setHedefKart] = useState(() => rotaKart(window.location.hash))
 
   const kartlar = useKartlar(api)
   const kayiplar = useMemo(
@@ -108,9 +111,20 @@ export default function KartVerEkrani() {
     yukle()
   }
 
+  function hedefKartiBirak() {
+    setHedefKart(null)
+    window.history.replaceState(null, '', kartVerAdresi(null))
+  }
+
   function kisiSec(kisi) {
     setSeciliKisi(kisi)
-    setAdim(2)
+    if (hedefKart) {
+      setSeciliKart(hedefKart)
+      setAdim(3)
+      hedefKartiBirak()
+    } else {
+      setAdim(2)
+    }
   }
 
   function kartSec(kart) {
@@ -121,6 +135,7 @@ export default function KartVerEkrani() {
   function modDegistir(yeni) {
     setMod(yeni)
     setKontrol(null)
+    if (hedefKart) hedefKartiBirak()
     sihirbaziSifirla()
   }
 
@@ -174,6 +189,13 @@ export default function KartVerEkrani() {
       {bilgi && <p className="kartver-bilgi" role="status" data-test="bilgi">{bilgi}</p>}
 
       <KayipUyarilari kayiplar={kayiplar} pilDegisti={pilDegisti} onKontrol={setKontrol} />
+
+      {hedefKart && mod === 'ver' && (
+        <div className="kartver-verildi kartver-sonatama kartver-hedef" role="status" data-test="hedef-kart">
+          <span>Kart {hedefKart} için kişi seçin — seçince doğrudan onaya geçilir.</span>
+          <button type="button" className="kartver-geri kartver-geri-al" onClick={hedefKartiBirak}>Vazgeç</button>
+        </div>
+      )}
 
       {mod === 'ver' && !kontrol && (
         <ol className="kartver-adimlar" aria-label="Adımlar">

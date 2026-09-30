@@ -12,6 +12,7 @@ import HataBantlari from './HataBantlari.jsx'
 import AgGorunumu from './AgGorunumu.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
 import './PanoEkrani.css'
+import { kartVerAdresi } from '../../api/useRota.js'
 
 export default function PanoEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano()
@@ -42,7 +43,8 @@ export default function PanoEkrani() {
     )
   }, [])
 
-  const kisiAta = useCallback(() => {}, []) // Faz 2'de bağlanacak
+  // Atanmamış kart ("Kart N") → karşılama masası o kartla açılır, kişi seçilir.
+  const kisiAta = useCallback((kisi) => { window.location.hash = kartVerAdresi(kisi.id) }, [])
 
   const seciliKisi = durum?.people.find((k) => k.id === seciliId)
 
