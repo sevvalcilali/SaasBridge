@@ -78,7 +78,7 @@ export function Kisiler({ satirlar }) {
     <table className="rp-tablo" data-test="rapor-kisiler">
       <thead>
         <tr><th>Kişi</th><th>Rol</th><th className="sag">Toplam</th><th className="sag">Görüşme</th>
-          <th className="sag">Kişi</th><th className="sag" title="Yatırımcı için girişimci, girişimci için yatırımcı">Karşı rol</th><th>Kart</th></tr>
+          <th className="sag" title="Bugün görüştüğü farklı kişi sayısı">Kişi sayısı</th><th className="sag" title="Yatırımcı için girişimci, girişimci için yatırımcı">Karşı rol</th><th>Kart</th></tr>
       </thead>
       <tbody>
         {satirlar.map((r) => (

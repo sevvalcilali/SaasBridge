@@ -1,8 +1,8 @@
 // Etkinlik sonrası rapor (brief §4.4): kim kimle toplam kaç dakika, hangi girişimci
 // kaç yatırımcıya ulaştı, en uzun görüşmeler. Yazdırılabilir / PDF'e uygun.
 // Kaynak: kayıt defteri + görüşme kayıtları (ayrılanlar dahil) — /state yalnız etkinlik
-// başlığı, saat ve "potansiyel anlaşma" sayısı için.
-import { useCallback, useEffect, useRef, useState } from 'react'
+// başlığı, saat ve "potansiyel anlaşma" sayısı için (görüntü alındığı andaki değerleri).
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { RaporApi } from '../../api/raporApi.js'
 import { raporHesapla } from '../../api/rapor.js'
@@ -12,51 +12,61 @@ import { Ozet, Girisimciler, EnUzun, Kisiler, Ciftler } from './RaporBolumleri.j
 import './RaporEkrani.css'
 
 export default function RaporEkrani() {
-  const { durum } = usePano()
+  const { durum, hata: akisHatasi } = usePano()
+  const durumRef = useRef(durum)
+  durumRef.current = durum
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new RaporApi()
-  const [veri, setVeri] = useState(null) // { kisiler, oturumlar, zaman }
+  const [veri, setVeri] = useState(null) // anlık görüntü: kayıtlar + o anki saat/geçen süre/başlık
   const [hata, setHata] = useState(null)
 
   // Rapor bir anlık görüntüdür (yazdırırken değişmesin): açılışta ve "Yenile" ile alınır.
+  // Kayıtlarla birlikte o anki etkinlik saniyesi, saat, başlık ve anlaşma sayısı da donar;
+  // yoksa süren görüşmelerin süresi canlı saatle büyümeye devam ederdi.
   const yukle = useCallback(async () => {
     setHata(null)
     try {
       const [kisiler, oturumlar] = await Promise.all([apiRef.current.kisileriGetir(), apiRef.current.oturumlariGetir()])
-      setVeri({ kisiler, oturumlar, zaman: new Date() })
+      const d = durumRef.current
+      setVeri({
+        kisiler, oturumlar, zaman: new Date(),
+        simdi: d.elapsed, saat: d.clock, etkinlik: d.event ?? {}, anlasma: d.stats?.deals ?? 0,
+      })
     } catch {
       setHata('Rapor verisi alınamadı — sunucuya ulaşılamıyor.')
     }
   }, [])
-  useEffect(() => { yukle() }, [yukle])
+  const durumVar = durum != null
+  useEffect(() => { if (durumVar) yukle() }, [durumVar, yukle])
+  const r = useMemo(() => veri && raporHesapla(veri.kisiler, veri.oturumlar, veri.simdi), [veri])
 
-  if (!veri || !durum) {
-    return <main className="rapor"><p className="rp-bos">{hata ?? 'Rapor hazırlanıyor…'}</p></main>
+  if (!veri) {
+    const bekleme = hata ?? (akisHatasi && !durumVar ? 'Sunucuya bağlanılamıyor, yeniden deneniyor…' : 'Rapor hazırlanıyor…')
+    return <main className="rapor"><p className="rp-bos">{bekleme}</p></main>
   }
 
-  const simdi = durum.elapsed
-  const r = raporHesapla(veri.kisiler, veri.oturumlar, simdi)
+  const { simdi, saat, etkinlik } = veri
 
   return (
     <main className="rapor" data-test="rapor">
       <header className="rp-bas">
         <div>
           <p className="rp-ust">Etkinlik raporu</p>
-          <h1>{durum.event?.name ?? 'Etkinlik'}</h1>
-          <p className="rp-alt">{durum.event?.date} · Hazırlanma: {tarihSaatYazisi(veri.zaman)}</p>
+          <h1>{etkinlik.name ?? 'Etkinlik'}</h1>
+          <p className="rp-alt">{[etkinlik.date, `Hazırlanma: ${tarihSaatYazisi(veri.zaman)}`].filter(Boolean).join(' · ')}</p>
         </div>
         <div className="rp-araclar" data-test="rapor-araclar">
           <button type="button" className="kisisec-ekle" onClick={() => window.print()} data-test="rapor-yazdir">Yazdır / PDF</button>
           <button type="button" className="kartver-geri" data-test="csv-katilimcilar"
             onClick={() => csvIndir(dosyaAdi('katilimcilar', veri.zaman), katilimcilarCsv(r))}>⇩ Katılımcılar (CSV)</button>
           <button type="button" className="kartver-geri" data-test="csv-gorusmeler"
-            onClick={() => csvIndir(dosyaAdi('gorusmeler', veri.zaman), gorusmelerCsv(veri.oturumlar, veri.kisiler, simdi, durum.clock))}>⇩ Görüşmeler (CSV)</button>
+            onClick={() => csvIndir(dosyaAdi('gorusmeler', veri.zaman), gorusmelerCsv(veri.oturumlar, veri.kisiler, simdi, saat))}>⇩ Görüşmeler (CSV)</button>
           <button type="button" className="kartver-geri" onClick={yukle} data-test="rapor-yenile">Yenile</button>
         </div>
       </header>
       {hata && <p className="kartsec-uyari" role="alert">{hata}</p>}
 
-      <Ozet ozet={r.ozet} anlasma={durum.stats?.deals ?? 0} />
+      <Ozet ozet={r.ozet} anlasma={veri.anlasma} />
 
       <section className="rp-bolum">
         <h2>Girişimciler ve ulaştıkları yatırımcılar</h2>
@@ -64,7 +74,7 @@ export default function RaporEkrani() {
       </section>
       <section className="rp-bolum">
         <h2>En uzun görüşmeler</h2>
-        <EnUzun enUzun={r.enUzun} saat={durum.clock} simdi={simdi} />
+        <EnUzun enUzun={r.enUzun} saat={saat} simdi={simdi} />
       </section>
       <section className="rp-bolum">
         <h2>Katılımcılar <span className="rp-sayi">{r.kisiSatirlari.length}</span></h2>
