@@ -407,14 +407,45 @@ Faz 4 başlamadan sorulur.
   uca çalışır; §8 maddelerinin hepsi karşılanır; not + ekran görüntüleri teslim edildi.
 - **Yapıldı:** `docs/faz3/FAZ3_TESLIM.md` + 10 ekran görüntüsü (tek kabul senaryosundan; 1× sinyal, 10× kayıp kart); `SUNUCUDAN_ISTENENLER.md` §5 (Kurulum: yeni uç gerekmez, `pending` gerekmez, paket hızı yok, Muhittin'e soru 5). Faz 2 kabul senaryosu yeniden koşuldu — gerileme yok. Kapanışta: çift tablosunda durum sütunu öne (telefonda kaydırmadan görünür), kart sağlığında kesilen hücre yok, yan sütun 3:2. 160/160 test.
 
-### ⬜ Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor
+### 🟡 Faz 4 — Kişi detay paneli (derin) + etkinlik sonrası rapor (başladı 30.09.2026)
+**Amaç:** Brief §4.4 (rapor), §7 (kişi ayrıntı paneli), §9-6/§9-9. Şevval talimatı: **sorgulamadan
+bitir, bitince haber ver.** Kararlar PLAN'a not düşülür.
 
-> ⚠️ Faz 3 bitti. Faz 4'e başlamadan önce Şevval'e sorulacak; onaydan sonra mikro-adımları yazılacak.
+**Ana karar:** Rapor `/state`'ten değil **görüşme kayıtlarından** (`/api/sessions`, kişi bazlı) ve kayıt
+defterinden (`/api/people`) üretilir — kartı iade edilip ayrılanlar da raporda kalır (Faz 2 sözü).
+`start/end` etkinlik saniyesi (`/state.elapsed` ile aynı ölçek), `a/b` = `kisiId`, sürmekte olan
+görüşmede `end: null`. Saat gösterimi: etkinlik başlangıcı = şimdiki saat − `elapsed`.
 
-**Kaba adımlar:**
-- 4.a Görüşme zaman çizelgesi (`/api/sessions` mock).
-- 4.b Rapor sayfası (kim kimle toplam kaç dk, yazdırma/PDF dostu).
-- 4.c CSV dışa aktarma.
+#### 4.1 ⬜ Mock: `GET /api/sessions`
+- Birlikte başlayınca kayıt açılır, bitince (ya da kart iade/değişiminde) kapanır; kişi bazlı
+  (kart değişse de aynı kişi), atanmamış kartın kayıtları kişi atanınca ona geçer; sıfırla temizler.
+- **Doğrulama:** mock testi — kayıt açılır/kapanır, iade sonrası kalır, çift toplamı kenar süresiyle tutarlı.
+
+#### 4.2 ⬜ api: oturum/rapor yardımcıları + RaporApi
+- `RaporApi` (people + sessions, ortak http katmanı). Saf fonksiyonlar: oturum süresi, saat yazısı,
+  kişi toplamları, çift toplamları, girişimci → ulaştığı yatırımcılar, en uzun görüşmeler.
+- **Doğrulama:** birim testleri (ayrılan kişi dahil, sürmekte olan görüşme dahil).
+
+#### 4.3 ⬜ Kişi ayrıntı paneli (derin)
+- Faz 1 panelinin altına **görüşme zaman çizelgesi** (bugün, zaman ekseninde çubuklar, karşı kişi etiketi,
+  sürmekte olan açık uçlu), **kart bilgisi** (pil vb.) ve **"Kartı değiştir" / "Kartı iade al" kısayolları**
+  → masa ekranı o kişi/kart hazır açılır.
+- **Doğrulama:** panelde çizelge görünür; kısayollar masayı doğru adımda açar.
+
+#### 4.4 ⬜ Rapor sayfası
+- `#/rapor`: etkinlik başlığı + özet sayılar; kişi tablosu (toplam süre, kaç kişi, kaç karşı rol,
+  ayrıldı/kartta); girişimci → ulaştığı yatırımcılar (hiç ulaşamayanlar vurgulu); en uzun görüşmeler;
+  kim kimle toplam. Yazdırma/PDF dostu (`@media print`, "Yazdır / PDF" düğmesi).
+- **Doğrulama:** ayrılan kişi raporda; sayılar oturumlarla tutarlı; yazdırma görünümü temiz.
+
+#### 4.5 ⬜ CSV dışa aktarma
+- Rapordan iki dosya: kişiler, görüşmeler. Türkçe Excel uyumlu (UTF-8 BOM, `;`). Tarayıcıda üretilir
+  (sunucu beklenmez); `GET /api/report.csv` SUNUCUDAN_ISTENENLER'de isteğe bağlı kalır.
+- **Doğrulama:** indirilen dosya Excel ayrıştırmasıyla doğru sütunları verir; Türkçe harfler bozulmaz.
+
+#### 4.6 ⬜ Faz 4 teslimi
+- `SUNUCUDAN_ISTENENLER.md` güncellemesi (sessions biçimi), ekran görüntüleri, `docs/faz4/FAZ4_TESLIM.md`.
+- **Kabul ölçütü:** panel çizelgesi + kısayollar + rapor + yazdırma + CSV mock ile uçtan uca; not + görüntüler.
 
 ### ⬜ Faz 5 — Cilalar (isteğe bağlı, ayrıca onaylanır)
 
