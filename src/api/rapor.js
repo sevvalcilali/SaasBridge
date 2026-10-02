@@ -3,6 +3,8 @@
 // Oturum: { a, b, start, end } — a/b kişi kimliği (kisiId ya da kayıtsız "kart:N"),
 // start/end etkinlik saniyesi, sürmekte olanda end = null.
 
+import { tamAd, kisaAd } from './ad.js'
+
 const KARSI = { investor: 'founder', founder: 'investor' }
 const karsiRolMu = (x, y) => KARSI[x?.rol] === y?.rol
 
@@ -14,10 +16,9 @@ export function kimlikKisisi(kimlik) {
   return { kisiId: kimlik, ad: `Kart ${no} (kayıtsız)`, rol: null, kurum: '', renk: null, atananKart: null, ayrildi: false }
 }
 
-// Görünen ad: girişimcide kurum öne (pano ile aynı kural).
-export const raporAdi = (k) => (k.rol === 'founder' && k.kurum ? `${k.kurum} · ${k.ad}` : k.ad)
-// Dar yerler (zaman çizelgesi) için panodaki kısa ad: girişimcide yalnız kurum.
-export const kisaAd = (k) => (k.rol === 'founder' && k.kurum ? k.kurum : k.ad)
+// Görünen ad kuralı tek yerde (api/ad.js); rapor tarafındaki adlar korunur.
+export const raporAdi = tamAd
+export { kisaAd }
 
 export function kisiDurumYazisi(k) {
   if (k.atananKart) return `Kart ${k.atananKart}`

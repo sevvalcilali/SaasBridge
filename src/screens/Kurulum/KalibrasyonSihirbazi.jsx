@@ -3,7 +3,8 @@
 // Ölçüm: "Kaydet" 10 sn geri sayar; sonunda çiftin `value`'su (son 10 sn ortancası)
 // tam tutulan pencereyi verir.
 import { memo, useEffect, useRef, useState } from 'react'
-import { ciftSatirlari, dbmYazisi, gorunenAd } from '../../api/sinyal.js'
+import { ciftSatirlari, dbmYazisi } from '../../api/sinyal.js'
+import { kisaAd } from '../../api/ad.js'
 import { onerilenEsik, kalanSaniye, KALIBRASYON_SN } from '../../api/kalibrasyon.js'
 import { ESIK_ALT, ESIK_UST } from '../../api/esik.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
@@ -18,11 +19,11 @@ const ADIMLAR = [
 // tik değişse de seçenek metni değişmez (kalabalıkta yüzlerce <option>).
 const CiftSecenekleri = memo(
   ({ satirlar }) => satirlar.map((r) => (
-    <option key={r.anahtar} value={r.anahtar}>{r.a.id} · {r.b.id} — {gorunenAd(r.a)} · {gorunenAd(r.b)}</option>
+    <option key={r.anahtar} value={r.anahtar}>{r.a.id} · {r.b.id} — {kisaAd(r.a)} · {kisaAd(r.b)}</option>
   )),
   (p, n) => p.imza === n.imza,
 )
-const secenekImzasi = (satirlar) => satirlar.map((r) => `${r.anahtar}:${gorunenAd(r.a)}:${gorunenAd(r.b)}`).join('|')
+const secenekImzasi = (satirlar) => satirlar.map((r) => `${r.anahtar}:${kisaAd(r.a)}:${kisaAd(r.b)}`).join('|')
 
 const yuzde = (v) => `${((v - ESIK_ALT) / (ESIK_UST - ESIK_ALT)) * 100}%`
 

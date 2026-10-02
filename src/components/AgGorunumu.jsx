@@ -4,6 +4,7 @@
 // Konum FİZİKSEL konum DEĞİLDİR; bu SVG altında belirtilir.
 import { memo, useMemo, useRef } from 'react'
 import { agYerlesimi, agCizgileri, agYukseklik, agGenislik } from '../api/agYerlesim.js'
+import { kisaAd } from '../api/ad.js'
 import './AgGorunumu.css'
 
 const VB_W = 1000
@@ -14,9 +15,9 @@ const SUNUM_SUTUN_BASI = 11 // sunumda kaydırma yok: kalabalık rol yan yana s�
 const AKIS_EN_COK = 15
 const R = 17 // düğüm yarıçapı (viewBox birimi)
 
-// Kısa etiket: girişimcide kurum, diğerinde ad.
+// Kısa etiket (api/ad.js kuralı), uzunsa kısaltılır.
 function etiket(n) {
-  const s = n.role === 'founder' && n.org ? n.org : n.name
+  const s = kisaAd(n)
   return s.length > 16 ? s.slice(0, 15) + '…' : s
 }
 

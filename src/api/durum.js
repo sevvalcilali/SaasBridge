@@ -1,5 +1,6 @@
 // Durum nesnesinden türetilen küçük kararlar. Ekran bileşenleri bu
 // yardımcıları çağırır, JSX içinde eşik/karşılaştırma/metin kurgusu yapmaz.
+import { tamAd } from './ad.js'
 import { sureYazisi, onceYazisi } from './format.js'
 
 // brief §5.1: receiverAge alıcıdan son satırın kaç SANİYE önce geldiği;
@@ -9,11 +10,8 @@ export function aliciBagli(durum) {
   return yas != null && yas <= 5
 }
 
-// Girişimcide kurum adı kişi adından önce gösterilir (brief §3).
-export function gorunenAd(kisi) {
-  if (kisi.role === 'founder' && kisi.org) return `${kisi.org} · ${kisi.name}`
-  return kisi.name
-}
+// Girişimcide kurum adı kişi adından önce gösterilir (brief §3). Kural tek yerde: api/ad.js.
+export const gorunenAd = tamAd
 
 // Satırdaki durum cümlesi (brief §7): "X ile · süre" / "boşta" / "görünmüyor · …".
 export function durumCumlesi(kisi) {

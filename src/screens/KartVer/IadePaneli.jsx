@@ -1,5 +1,6 @@
 // Kart iadesi (brief §6): kişi ayrılınca kartı geri alınır, kart boşa çıkar.
 // Geçmiş süreleri silinmez, raporda kalır. Kişi aranır/seçilir → tek onay → iade.
+import { tamAd } from '../../api/ad.js'
 import { useState } from 'react'
 import { iadeAdaylari } from '../../api/masaYardim.js'
 
@@ -68,7 +69,7 @@ export default function IadePaneli({ api, katilimcilar, baslangicKart = null, on
             <button type="button" className="kisisec-oge" data-test="iade-oge" onClick={() => setSecili(k)}>
               <span className="kisisec-renk" style={{ background: k.renk }} aria-hidden="true" />
               <span className="kisisec-ad">
-                <strong>{k.rol === 'founder' && k.kurum ? `${k.kurum} · ${k.ad}` : k.ad}</strong>
+                <strong>{tamAd(k)}</strong>
               </span>
               <span className="kartsec-etiket kartsec-no">Kart {k.atananKart}</span>
             </button>

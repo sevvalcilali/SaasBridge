@@ -27,9 +27,6 @@ export function yonFarki(s) {
   return s.ab == null || s.ba == null ? null : Math.round(Math.abs(s.ab - s.ba) * 10) / 10
 }
 
-// Görünen ad: girişimcide kurum öne çıkar (pano ile aynı kural, brief §7).
-export const gorunenAd = (k) => (k.role === 'founder' && k.org ? k.org : k.name)
-
 // Listede olmayan kart (ör. 100+ dinleyici) için yer tutucu kişi.
 export const kartKisisi = (id) => ({ id, name: `Kart ${id}`, org: '', role: null, color: null })
 

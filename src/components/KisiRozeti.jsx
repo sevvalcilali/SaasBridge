@@ -1,7 +1,7 @@
 // Kişi kimliği tek parçada (brief §10: kimlik asla yalnız renkle verilmez):
 // renk + rol şekli (○ yatırımcı, □ girişimci, ◇ misafir) + ad + kart no.
 // Girişimcide kurum öne çıkar (panodaki gibi). Kurulum ekranında ortak kullanılır.
-import { gorunenAd } from '../api/sinyal.js'
+import { kisaAd } from '../api/ad.js'
 import './KisiRozeti.css'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
@@ -12,7 +12,7 @@ export function RolSekli({ rol }) {
 }
 
 export default function KisiRozeti({ kisi, kartNo = true }) {
-  const ad = gorunenAd(kisi)
+  const ad = kisaAd(kisi)
   // Kayıtsız kart zaten "Kart 14" adını taşır; numarayı ikinci kez yazma.
   const noGoster = kartNo && ad !== `Kart ${kisi.id}`
   const baslik = [kisi.name, kisi.org, ROL_ADI[kisi.role], `Kart ${kisi.id}`].filter(Boolean).join(' · ')

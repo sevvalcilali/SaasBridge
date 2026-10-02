@@ -2,6 +2,7 @@
 // Kayıtlı kişinin bilgisi (ad/rol/kurum/yıldız) buradan düzenlenir (2.11).
 // Kartı olmayanlar "kart bekliyor", iade edilenler "ayrıldı" (2.12); CSV ile toplu yükleme.
 // Dokunmatik-ayakta: büyük hedefler, az yazı, klavye en son çare.
+import { tamAd } from '../../api/ad.js'
 import { useState } from 'react'
 import { katilimciAra, duzenlemeFarki, kisiDurumu, kartBekleyenler } from '../../api/masaYardim.js'
 import KisiFormu from './KisiFormu.jsx'
@@ -111,7 +112,7 @@ export default function KisiSecAdim({ api, katilimcilar, kayipKisiIdler, onYenil
               <button type="button" className="kisisec-oge" data-test="kisisec-oge" onClick={() => onKisiSec(k)}>
                 <span className="kisisec-renk" style={{ background: k.renk }} aria-hidden="true" />
                 <span className="kisisec-ad">
-                  <strong>{k.rol === 'founder' && k.kurum ? `${k.kurum} · ${k.ad}` : k.ad}</strong>
+                  <strong>{tamAd(k)}</strong>
                   <span className="kisisec-durum">
                     <span className={`kisisec-etiket-durum kisisec-etiket-durum--${durum.tur}`} data-test="kisi-durum">{durum.etiket}</span>
                     {k.yildiz ? ` · ${'★'.repeat(k.yildiz)}` : ''}

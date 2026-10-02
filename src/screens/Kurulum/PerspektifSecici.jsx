@@ -1,6 +1,7 @@
 // Perspektif (brief §8): bir kişi seçilince grafik ve çift tablosu yalnız onun
 // çiftlerini gösterir. Seçenekler: şu an en az bir çifti duyulan kişiler.
-import { perspektifKisileri, gorunenAd } from '../../api/sinyal.js'
+import { perspektifKisileri } from '../../api/sinyal.js'
+import { kisaAd } from '../../api/ad.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
 
 export default function PerspektifSecici({ signals, people, secili, onSec }) {
@@ -13,7 +14,7 @@ export default function PerspektifSecici({ signals, people, secili, onSec }) {
         <select value={secili ?? ''} onChange={(e) => onSec(e.target.value || null)} data-test="perspektif-sec">
           <option value="">Tüm çiftler</option>
           {kisiler.map((k) => (
-            <option key={k.id} value={k.id}>{gorunenAd(k)} ({k.id})</option>
+            <option key={k.id} value={k.id}>{kisaAd(k)} ({k.id})</option>
           ))}
         </select>
       </label>
