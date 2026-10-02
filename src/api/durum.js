@@ -10,6 +10,10 @@ export function aliciBagli(durum) {
   return yas != null && yas <= 5
 }
 
+// Ekrandaki veri "canlı" mı: sunucuya bağlıyız VE alıcı taze satır gönderiyor. Değilse içerik
+// solar ama silinmez (brief §2 "eski veriyi canlıymış gibi gösterme", §11 "son veri soluk").
+export const veriCanli = (durum, baglandi) => Boolean(baglandi) && aliciBagli(durum)
+
 // Girişimcide kurum adı kişi adından önce gösterilir (brief §3). Kural tek yerde: api/ad.js.
 export const gorunenAd = tamAd
 

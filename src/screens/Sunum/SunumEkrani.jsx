@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { useTema } from '../../api/useTema.js'
-import { ozetKutulari } from '../../api/durum.js'
+import { ozetKutulari, veriCanli } from '../../api/durum.js'
 import { isimsizMi, sunumAdresi, SUNUMDAN_CIKIS } from '../../api/useRota.js'
 import AgGorunumu from '../../components/AgGorunumu.jsx'
 import HataBantlari from '../../components/HataBantlari.jsx'
@@ -47,7 +47,7 @@ export default function SunumEkrani() {
   }
 
   return (
-    <main className={`sunum ${baglandi ? '' : 'sunum--soluk'}`} data-test="sunum">
+    <main className={`sunum ${veriCanli(durum, baglandi) ? '' : 'sunum--soluk'}`} data-test="sunum">
       <HataBantlari durum={durum} baglandi={baglandi} />
       {araclar}
       <header className="sunum-ust">

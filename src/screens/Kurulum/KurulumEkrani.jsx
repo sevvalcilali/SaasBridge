@@ -4,6 +4,7 @@
 import { useRef, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { ciftSayisi } from '../../api/sinyal.js'
+import { veriCanli } from '../../api/durum.js'
 import { KurulumApi } from '../../api/kurulumApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
 import { useSeyrek } from '../../api/useSeyrek.js'
@@ -41,7 +42,7 @@ export default function KurulumEkrani() {
   }
 
   return (
-    <main className={`kurulum ${baglandi ? '' : 'kurulum--soluk'}`}>
+    <main className={`kurulum ${veriCanli(durum, baglandi) ? '' : 'kurulum--soluk'}`}>
       <HataBantlari durum={durum} baglandi={baglandi} />
       <header className="kurulum-bas">
         <h1>Kurulum</h1>

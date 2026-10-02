@@ -12,6 +12,7 @@ import HataBantlari from '../../components/HataBantlari.jsx'
 import AgGorunumu from '../../components/AgGorunumu.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
 import { kartVerAdresi, KURULUM_ADRESI } from '../../api/useRota.js'
+import { veriCanli } from '../../api/durum.js'
 import './PanoEkrani.css'
 
 export default function PanoEkrani() {
@@ -71,7 +72,7 @@ export default function PanoEkrani() {
   }
 
   return (
-    <div className={`pano ${baglandi ? '' : 'pano--soluk'}`}>
+    <div className={`pano ${veriCanli(durum, baglandi) ? '' : 'pano--soluk'}`}>
       <HataBantlari durum={durum} baglandi={baglandi} />
       <UstSerit durum={durum} onSifirla={sifirlaIste} onEsikTikla={esikAc} />
 

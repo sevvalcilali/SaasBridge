@@ -1,6 +1,6 @@
 // Sayfa üstü hata bantları (brief §11): sunucuya bağlanılamıyor ve/veya
-// alıcı bağlı değil. İkisi birden görünebilir. Son veri silinmez, yalnız
-// solar (ekranın --soluk sınıfı). Bağlantı/alıcı gelince bant kalkar. Pano ve Kurulum ortak.
+// alıcı bağlı değil. İkisi birden görünebilir. Son veri silinmez, yalnız solar
+// (ekranın --soluk sınıfı; iki durumda da — api/durum.veriCanli). Bağlantı/alıcı gelince bant kalkar.
 import { aliciBagli } from '../api/durum.js'
 import './HataBantlari.css'
 

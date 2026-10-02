@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri, karsiRolYazisi, SIRALAMALAR } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri, karsiRolYazisi, SIRALAMALAR, veriCanli } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -179,4 +179,11 @@ test('siralaKisiler(sure): süre sırası değişmedikçe satır yer değiştirm
   const t1 = [{ id: 'a', min: 10.5 }, { id: 'b', min: 10.0 }, { id: 'c', min: 9.5 }] // a ve b konuşuyor, sıra aynı
   assert.deepEqual(ids(siralaKisiler(t0, 'sure')), ['a', 'b', 'c'])
   assert.deepEqual(ids(siralaKisiler(t1, 'sure')), ['a', 'b', 'c'])
+})
+
+test('veriCanli: sunucu bağlı ve alıcı taze → canlı; alıcı kopuk (receiverAge > 5) ya da sunucu kopuk → soluk', () => {
+  assert.equal(veriCanli({ receiverAge: 0.4 }, true), true)
+  assert.equal(veriCanli({ receiverAge: 12 }, true), false)
+  assert.equal(veriCanli({ receiverAge: null }, true), false)
+  assert.equal(veriCanli({ receiverAge: 0.4 }, false), false)
 })
