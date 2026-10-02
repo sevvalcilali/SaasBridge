@@ -1,8 +1,8 @@
 // Kişi listesi satırı: renk + rol şekli + ad (girişimcide kurum öne) +
-// yıldız + durum (ikon+renk+yazı) + toplam süre. Kimlik renk+şekil+ad ile;
+// yıldız + durum (ikon+renk+yazı) + toplam süre + karşı rol sayısı. Kimlik renk+şekil+ad ile;
 // durum renk+ikon+yazı üçlüsüyle verilir (renk körlüğü — brief §10).
 import { memo } from 'react'
-import { durumCumlesi, atanmamisKartMi } from '../../api/durum.js'
+import { durumCumlesi, atanmamisKartMi, karsiRolYazisi } from '../../api/durum.js'
 import { sureYazisi } from '../../api/format.js'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
@@ -10,6 +10,7 @@ const DURUM_IKON = { talking: '●', idle: '○', away: '◌' }
 
 function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) {
   const atanmamis = atanmamisKartMi(kisi)
+  const karsi = karsiRolYazisi(kisi)
 
   return (
     <li
@@ -68,7 +69,12 @@ function KisiSatiri({ kisi, vurgulu, secili, onSec, onKisiAta }) {
           Kişi ata
         </button>
       ) : (
-        <span className="kisi-sure sayi" title="bugünkü toplam süre">{sureYazisi(kisi.min)}</span>
+        <span className="kisi-sure">
+          <span className="sayi" title="bugünkü toplam süre">{sureYazisi(kisi.min)}</span>
+          {karsi && (
+            <span className="kisi-karsi sayi" title="bugün kaç farklı karşı rol kişisiyle görüştü" data-test="kisi-karsi">{karsi}</span>
+          )}
+        </span>
       )}
     </li>
   )
@@ -84,7 +90,8 @@ function esit(a, b) {
     a.onSec === b.onSec && a.onKisiAta === b.onKisiAta &&
     k.id === m.id && k.status === m.status && k.withName === m.withName &&
     k.name === m.name && k.org === m.org && k.color === m.color &&
-    k.stars === m.stars && k.min === m.min && k.live === m.live && k.seenAgo === m.seenAgo
+    k.stars === m.stars && k.min === m.min && k.live === m.live && k.seenAgo === m.seenAgo &&
+    k.invPeers === m.invPeers
   )
 }
 

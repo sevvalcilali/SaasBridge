@@ -663,6 +663,27 @@ Uçtan uca kod incelemesi (dal ↔ `main`) 10 doğrulanmış bulgu verdi. Sıray
   - R4: `api/ad.js` (`tamAd`, `kisaAd`, iki veri biçimi); `durum.gorunenAd`/`rapor.raporAdi` = `tamAd`; `sinyal.gorunenAd` kaldırıldı; ağ etiketi ve masa listeleri ortak kuralı kullanır.
   - R5: 210/210 test; Faz 2 (11/11), 3 (16/16), 4 (13/13), 5 (15/15) kabul senaryoları yeniden geçti; PR güncellendi.
 
+### 🟡 C turu — brief §7 eksikleri (onay 02.10.2026: "C maddelerini de yap, hepsini sırayla")
+Tarama bulgularının karar bekleyen dört maddesi. Brief'te "nasıl" yazmayan yerlerde karar aşağıda, sorgulanmadan
+uygulanıyor (Şevval talimatı); itiraz olursa tek sabit/düğme değişir.
+
+- **C1** Kişi satırında karşı rol sayısı (brief §7.2 "kaç karşı rol kişisiyle görüştüğü"). Karar: toplam sürenin altında
+  ikinci satır, "2 yatırımcı" / "3 girişimci"; misafirde yok (karşı rolü yok); 0 ise "0 yatırımcı" (filtreyle tutarlı).
+- **C2** Sıralama + filtreler (brief §7 "sıralama (en uzun görüşen, en yalnız)", "filtre (rol, durum, …)"). Kararlar:
+  - Sıralama seçici (grup içinde): **Durum** (varsayılan, bugünkü), **En uzun görüşen** (`min` azalan), **En yalnız**
+    (`min` artan, eşitlikte `invPeers` artan), **Yıldız** (`tier` azalan — §4.2 "özellikle önemli yatırımcılar").
+    Eşitlikte her zaman sunucu sırası (kararlı). Süreye göre sıralamada satır yalnız biri diğerini gerçekten geçince yer
+    değiştirir; FLIP yumuşatır (sakin hareket). Seçim `localStorage`'da (brief §11).
+  - **"Yalnız kaldı"** filtresi = şu an boşta olan **yatırımcılar** (kart duyuluyor, kimseyle değil). "Ne kadardır"
+    sunucuda yok (`idleSinceS` → SUNUCUDAN_ISTENENLER'e istek); gelince satıra "boşta · 4 dk'dır" eklenebilir.
+  - **"Misafir"** filtre düğmesi (mantık zaten vardı).
+- **C3** Bildirim akışı (PLAN 1.7 "tümünü göster" sözü). Karar: varsayılan son 20 (sakin), **"Tümünü göster (N)"** ile
+  hepsi; **önem süzgeci** Tümü / Ciddi / Uyarı / Olumlu (kart kayboldu bildirimi anlaşma bildirimlerinin altında
+  kaybolmasın). Süzgeç `localStorage`'da. Öğeler memo (97 kişide yüzlerce bildirim 2 Hz'de yeniden çizilmesin).
+- **C4** Alıcı kopunca (brief §2 "eski veriyi canlıymış gibi gösterme", §11 "son veri soluk"): bant zaten vardı; artık
+  pano, kurulum ve sunum içeriği sunucu kopmasındaki gibi solar (`veriCanli = bağlı ∧ alıcı taze`).
+- **C5** Doğrulama (birim + tarayıcı + Faz 2–5 kabul), PLAN, SUNUCUDAN_ISTENENLER, PR.
+
 ---
 
 ## 3. PROJE YAPISI (güncel, 30.09.2026)

@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri, karsiRolYazisi } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -137,4 +137,12 @@ test('kisiGorusmeleri: karşı tarafı listede olmayan kenar atlanır', () => {
   const people = [{ id: '10', name: 'Ayşe' }]
   const g = kisiGorusmeleri('10', [{ a: '10', b: '99', min: 3 }], people)
   assert.equal(g.length, 0)
+})
+
+test('karsiRolYazisi: yatırımcıda girişimci, girişimcide yatırımcı sayısı; misafirde yok (brief §7.2)', () => {
+  assert.equal(karsiRolYazisi({ role: 'investor', invPeers: 3 }), '3 girişimci')
+  assert.equal(karsiRolYazisi({ role: 'founder', invPeers: 1 }), '1 yatırımcı')
+  assert.equal(karsiRolYazisi({ role: 'founder', invPeers: 0 }), '0 yatırımcı')
+  assert.equal(karsiRolYazisi({ role: 'founder' }), '0 yatırımcı')
+  assert.equal(karsiRolYazisi({ role: 'guest', invPeers: 2 }), null)
 })

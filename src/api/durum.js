@@ -20,6 +20,14 @@ export function durumCumlesi(kisi) {
   return 'boşta'
 }
 
+// Satırda "kaç karşı rol kişisiyle görüştüğü" (brief §7.2): yatırımcı için girişimci sayısı,
+// girişimci için yatırımcı sayısı. Misafirin karşı rolü yok → null (gösterilmez).
+const KARSI_ROL_ADI = { investor: 'girişimci', founder: 'yatırımcı' }
+export function karsiRolYazisi(kisi) {
+  const ad = KARSI_ROL_ADI[kisi.role]
+  return ad ? `${kisi.invPeers ?? 0} ${ad}` : null
+}
+
 // Sunucu, listede olmayan bir kart duyulunca onu "Kart N", role:"guest"
 // olarak kendiliğinden ekler (brief §5.1). Bu satır "atanmamış kart" olarak
 // öne çıkarılır ve "Kişi ata" düğmesi gösterilir.

@@ -190,10 +190,16 @@
 .kisi-sure {
   grid-area: sure;
   align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
   color: var(--metin-2);
   font-size: var(--punto-kucuk);
   white-space: nowrap;
 }
+/* Karşı rol sayısı (brief §7.2): toplam sürenin altında, daha hafif. */
+.kisi-karsi { font-size: var(--punto-kucuk); color: var(--metin-2); opacity: 0.85; }
 
 /* Dar telefon (≤420px): durum cümlesi kesilmesin, ikinci satıra insin. */
 @media (max-width: 420px) {
