@@ -2,7 +2,7 @@
 // Yerleşim deterministik (api/agYerlesim.js) — düğümler sabit durur, zıplamaz.
 // Sunum modunda (salon ekranı) tıklanmaz ve ekrana sığar; isimsiz seçilirse ad yazılmaz.
 // Konum FİZİKSEL konum DEĞİLDİR; bu SVG altında belirtilir.
-import { useMemo } from 'react'
+import { memo, useMemo, useRef } from 'react'
 import { agYerlesimi, agCizgileri, agYukseklik, agGenislik } from '../api/agYerlesim.js'
 import './AgGorunumu.css'
 
@@ -20,7 +20,9 @@ function etiket(n) {
   return s.length > 16 ? s.slice(0, 15) + '…' : s
 }
 
-function Dugum({ n, vurgulu, secili, isimsiz, onSec }) {
+// memo: düğüm nesnesi (yerleşimden) ve onSec kararlı olduğundan düğümler yalnız vurgu/seçim
+// değişince yeniden çizilir; her tikte 97 düğüm boşuna çizilmez.
+const Dugum = memo(function Dugum({ n, vurgulu, secili, isimsiz, onSec }) {
   const ortak = {
     fill: n.color,
     stroke: secili ? 'var(--vurgu)' : 'var(--yuzey)',
@@ -54,7 +56,11 @@ function Dugum({ n, vurgulu, secili, isimsiz, onSec }) {
       )}
     </g>
   )
-}
+})
+
+// Yerleşim ve düğüm görünümü yalnız şunlara bağlıdır: kimler var, sırası, rolü, rengi, adı.
+// Her SSE mesajında `people` yeni bir dizidir; bu imza değişmedikçe yerleşim yeniden hesaplanmaz.
+const kadroImzasi = (people) => people.map((k) => `${k.id}:${k.role}:${k.color}:${k.name}:${k.org ?? ''}`).join('|')
 
 export default function AgGorunumu({
   people, edges = [], live = [], vurgulanan = [], seciliId, onKisiSec, sunum = false, isimsiz = false,
@@ -62,7 +68,11 @@ export default function AgGorunumu({
   const sutunBasi = sunum ? SUNUM_SUTUN_BASI : Infinity
   const vbH = agYukseklik(people, sutunBasi)
   const vbW = sunum ? agGenislik(people, VB_W_SUNUM, sutunBasi) : VB_W
-  const dugumler = useMemo(() => agYerlesimi(people, { w: vbW, h: vbH, sutunBasi }), [people, vbW, vbH, sutunBasi])
+  const imza = kadroImzasi(people)
+  const peopleRef = useRef(people)
+  peopleRef.current = people
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- people yerine imzası izlenir (yukarıdaki not)
+  const dugumler = useMemo(() => agYerlesimi(peopleRef.current, { w: vbW, h: vbH, sutunBasi }), [imza, vbW, vbH, sutunBasi])
   const cizgiler = useMemo(() => agCizgileri(edges, live, dugumler), [edges, live, dugumler])
   const vurguSet = useMemo(() => new Set(vurgulanan), [vurgulanan])
   const vurguAktif = vurgulanan.length > 0

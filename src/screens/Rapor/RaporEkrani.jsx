@@ -1,9 +1,9 @@
 // Etkinlik sonrası rapor (brief §4.4): kim kimle toplam kaç dakika, hangi girişimci
 // kaç yatırımcıya ulaştı, en uzun görüşmeler. Yazdırılabilir / PDF'e uygun.
 // Kaynak: kayıt defteri + görüşme kayıtları (ayrılanlar dahil) — /state yalnız etkinlik
-// başlığı, saat ve "potansiyel anlaşma" sayısı için (görüntü alındığı andaki değerleri).
+// başlığı, saat ve "potansiyel anlaşma" sayısı için — görüntü alınırken TEK seferlik okunur;
+// rapor sabit olduğu için canlı akış (2 Hz) dinlenmez, sayfa her tikte yeniden çizilmez.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { usePano } from '../../api/usePano.js'
 import { RaporApi } from '../../api/raporApi.js'
 import { raporHesapla } from '../../api/rapor.js'
 import { tarihSaatYazisi } from '../../api/format.js'
@@ -12,9 +12,6 @@ import { Ozet, Girisimciler, EnUzun, Kisiler, Ciftler } from './RaporBolumleri.j
 import './RaporEkrani.css'
 
 export default function RaporEkrani() {
-  const { durum, hata: akisHatasi } = usePano()
-  const durumRef = useRef(durum)
-  durumRef.current = durum
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new RaporApi()
   const [veri, setVeri] = useState(null) // anlık görüntü: kayıtlar + o anki saat/geçen süre/başlık
@@ -26,8 +23,8 @@ export default function RaporEkrani() {
   const yukle = useCallback(async () => {
     setHata(null)
     try {
-      const [kisiler, oturumlar] = await Promise.all([apiRef.current.kisileriGetir(), apiRef.current.oturumlariGetir()])
-      const d = durumRef.current
+      const api = apiRef.current
+      const [kisiler, oturumlar, d] = await Promise.all([api.kisileriGetir(), api.oturumlariGetir(), api.durumGetir()])
       setVeri({
         kisiler, oturumlar, zaman: new Date(),
         simdi: d.elapsed, saat: d.clock, etkinlik: d.event ?? {}, anlasma: d.stats?.deals ?? 0,
@@ -36,13 +33,11 @@ export default function RaporEkrani() {
       setHata('Rapor verisi alınamadı — sunucuya ulaşılamıyor.')
     }
   }, [])
-  const durumVar = durum != null
-  useEffect(() => { if (durumVar) yukle() }, [durumVar, yukle])
+  useEffect(() => { yukle() }, [yukle])
   const r = useMemo(() => veri && raporHesapla(veri.kisiler, veri.oturumlar, veri.simdi), [veri])
 
   if (!veri) {
-    const bekleme = hata ?? (akisHatasi && !durumVar ? 'Sunucuya bağlanılamıyor, yeniden deneniyor…' : 'Rapor hazırlanıyor…')
-    return <main className="rapor"><p className="rp-bos">{bekleme}</p></main>
+    return <main className="rapor"><p className="rp-bos">{hata ?? 'Rapor hazırlanıyor…'}</p></main>
   }
 
   const { simdi, saat, etkinlik } = veri
