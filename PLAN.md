@@ -12,14 +12,14 @@
 > kuralları)** ve `UI_TASARIM_BRIEF.md`'yi oku. Ayrıntı gerekirse ilgili fazın başlığına ve `docs/`'a in.
 
 ### Tek cümlede durum
-Brief §12'deki **beş önceliğin hepsi bitti** (Faz 0–5) ve üstüne bir **uçtan uca tarama + düzeltme turu**
-yapıldı. Arayüz **mock sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz
+Brief §12'deki **beş önceliğin hepsi bitti** (Faz 0–5) ve üstüne bir **uçtan uca tarama + düzeltme turu** ile
+bir **kod incelemesi turu** yapıldı (sırasıyla `docs/duzeltme-turu/NOT.md` ve aşağıda "Kod incelemesi turu"). Arayüz **mock sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz
 bağlanmadı. Sıradaki iş iki koldan ilerliyor:
 1. **Karar bekleyen dört brief eksiği** (aşağıda C1–C4),
 2. **gerçek sunucuya geçiş.** Bunun için Muhittin'in cevapları ve `/api/*` uçları gerekiyor.
 
 - **Dal:** `faz-0-altyapi` · **PR:** https://github.com/sevvalcilali/SaasBridge/pull/1 (açık, `main`'e birleşmedi)
-- **Son commit:** `57eab29` "Düzeltme T5" · **Testler:** `npm test` → 202/202 yeşil · **Build:** temiz
+- **Son commit:** bkz. `git log -1` (02.10.2026: kod incelemesi turu R1–R5) · **Testler:** `npm test` → 210/210 yeşil · **Build:** temiz
 
 ### Nasıl çalıştırılır (5 dakika)
 Gereken tek şey Node 22 (ya da 20+). İnternet gerekmez: CDN yok, font indirilmez.
@@ -68,6 +68,7 @@ da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.c
 | 4 | Derin kişi paneli (zaman çizelgesi) + rapor (yazdır/PDF, 2 CSV) | `docs/faz4/FAZ4_TESLIM.md` |
 | 5 | Doğrulanmış palet, koyu tema, sunum modu, 97 kişi performansı | `docs/faz5/FAZ5_TESLIM.md` |
 | Tarama | 3 kod incelemesi + tarayıcı taraması → 20 düzeltme | `docs/duzeltme-turu/NOT.md` |
+| İnceleme | Uçtan uca kod incelemesi → 10 bulgu, R1–R4 düzeltmeleri (ölçümlü) | PLAN "Kod incelemesi turu" |
 
 Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
 
@@ -102,8 +103,6 @@ Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): *
     sunucu `kisiId` de gönderebilir mi, sorulmalı.
 
 **3. Bilinen küçük konular.** Bölüm 4'te ayrıntılı; hiçbiri engelleyici değil.
-- **Yinelenen anahtar:** Bildirim akışında aynı anahtar (`t-kind`) iki kez kullanılabiliyor. Hızlandırılmış mock'ta
-  konsola uyarı düşer.
 - **Kart değişiminde "Geri al":** Eski kartı geri vermiyor, kişi kartsız kalıyor. Ekranda bu söyleniyor.
 - **Kurulum'da ~500 çift:** 4× yavaşlatılmış işlemcide 2 sn'de bir ~330 ms takılma var.
 - **Atama geçmişi sunucuda yok:** "Geri al" masanın kendi hafızasında; sayfa yenilenince kaybolur.
@@ -648,7 +647,7 @@ sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca s
   filtresini kalıcı yapmak denendi, geri alındı: CSV sonrası açık kalınca kartı olan kişi aranamıyordu (Faz 2 gerileme
   testi yakaladı). Ayrıntı: `docs/duzeltme-turu/NOT.md`.
 
-### 🟡 Kod incelemesi turu (onay 02.10.2026: "sırayla yap")
+### ✅ Kod incelemesi turu (TAMAMLANDI 02.10.2026; onay: "sırayla yap")
 Uçtan uca kod incelemesi (dal ↔ `main`) 10 doğrulanmış bulgu verdi. Sırayla:
 - **R1** Gerçek sunucu: gövdesiz başarılı yanıt (204/boş 200) hata sayılmasın (`http.js`); 100+ dinleyici cihazlar
   `people` dışında `signals`/`history`/`edges`/`live` içinden de tek yerde ayıklansın (`client.js durumIsle`).
@@ -657,6 +656,12 @@ Uçtan uca kod incelemesi (dal ↔ `main`) 10 doğrulanmış bulgu verdi. Sıray
 - **R3** Performans: ağ yerleşimi yalnız rol/sıra değişince hesaplansın; rapor ekranı canlı akışı dinlemesin (ölçümlü).
 - **R4** Görünen ad kuralı tek yerde (iki farklı `gorunenAd` vardı).
 - **R5** Doğrulama (test + Faz 2–5 kabul), belge, PR.
+- **Yapıldı (R1–R4, dört commit):**
+  - R1: `http.js` gövdesiz 2xx → `null` (hata değil); `client.js durumIsle` dinleyici cihazları `edges/live/signals/history`'den de ayıklar. Testler eski kodda kırmızıydı.
+  - R2: mock'ta `anlasmalar` ve `yalnizSn` kişi kimliğiyle; `kenarlariTasi` anlaşmayı da taşır; kayıp kart senaryosu boş listede `null` kalır; kalibrasyon demosu önceki çifti bırakır; bildirim anahtarı `durumIsle`'de türetilir (`anahtar`: t+tür+kişiler+sıra). `mock-server/inceleme.test.js` (2 test, eski mock'ta kırmızı). PLAN §4 "yinelenen anahtar" kapandı.
+  - R3: `AgGorunumu` yerleşimi kadro imzasıyla memo + `Dugum` memo; `RaporEkrani` `usePano` yerine `RaporApi.durumGetir()` (tek `/state`). Ölçüm (97 kişi, 4× yavaş, 15 sn): pano uzun görev 20 → 6, düzen+stil %12,2 → %8,0, 52 → 56 fps; rapor betik %2,6 → %0,4.
+  - R4: `api/ad.js` (`tamAd`, `kisaAd`, iki veri biçimi); `durum.gorunenAd`/`rapor.raporAdi` = `tamAd`; `sinyal.gorunenAd` kaldırıldı; ağ etiketi ve masa listeleri ortak kuralı kullanır.
+  - R5: 210/210 test; Faz 2 (11/11), 3 (16/16), 4 (13/13), 5 (15/15) kabul senaryoları yeniden geçti; PR güncellendi.
 
 ---
 
@@ -737,5 +742,4 @@ SaasBridge/
 - [x] ~~**Kenarlar kart no ile anahtarlı**~~ → 2.11'de düzeltildi (kenarlar kişiye bağlı).
 - [ ] **Kart değişiminde "Geri al"** yeni kartı boşa çıkarır, eski kartı geri vermez;
       kişi kartsız kalır (ekranda bu söylenir). Eski kartı geri vermek istenirse ayrıca karar.
-- [ ] **Bildirim akışı yinelenen React anahtarı** (`t-kind`): aynı tikte iki anlaşma aynı
-      zaman damgasını alıyor (hızlandırılmış mock'ta sık). Faz 1'den kalma, 2.10 öncesi de var.
+- [x] ~~**Bildirim akışı yinelenen React anahtarı**~~ → kod incelemesi R2'de `durumIsle` tekil `anahtar` türetir.
