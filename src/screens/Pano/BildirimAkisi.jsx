@@ -1,18 +1,47 @@
 // Bildirim akışı: en yeni üstte (sunucu tarafında sıralı gelir), türe göre
 // ikon, severity'ye göre sol kenar rengi. Tıklayınca ilgili kişileri vurgular
-// (vurgu efekti 1.8'de kişi listesi + ağda). Son 20 gösterilir, gerisi kaydırmada.
+// (vurgu efekti kişi listesi + ağda). Varsayılan son 20; "Tümünü göster" ile hepsi.
+// Önem süzgeci (Ciddi / Uyarı / Olumlu): kart kayboldu gibi ciddi bildirimler çok sayıda
+// anlaşma bildiriminin altında kaybolmasın. Mantık api/bildirim.js'te.
+import { memo, useState } from 'react'
+import { ONEM_SUZGECLERI, GORUNEN_VARSAYILAN, onemSayilari, gorunenBildirimler } from '../../api/bildirim.js'
+import { useKalici } from '../../api/useKalici.js'
 import BildirimIkon from './bildirimIkonlari.jsx'
 import './BildirimAkisi.css'
-
-const GORUNEN = 20
 
 function ayniKisiler(a, b) {
   return a.length === b.length && a.every((x, i) => x === b[i])
 }
 
+// memo: her SSE tikinde yeni bildirim nesneleri gelir; anahtar + seçim değişmedikçe öğe çizilmez
+// (97 kişide yüzlerce bildirim "Tümünü göster" ile açıkken 2 Hz yeniden çizim olmasın).
+const BildirimOge = memo(function BildirimOge({ b, secili, onTikla }) {
+  return (
+    <button
+      type="button"
+      className={`bildirim bildirim--${b.severity} ${secili ? 'bildirim--secili' : ''}`}
+      onClick={() => onTikla?.(b)}
+      data-test="bildirim"
+      data-kind={b.kind}
+      data-people={b.people.join(',')}
+    >
+      <span className="bildirim-ikon" aria-hidden="true"><BildirimIkon kind={b.kind} /></span>
+      <span className="bildirim-govde">
+        <span className="bildirim-ust">
+          <strong className="bildirim-title">{b.title}</strong>
+          <time className="bildirim-saat sayi">{b.clock}</time>
+        </span>
+        <span className="bildirim-detay">{b.detail}</span>
+      </span>
+    </button>
+  )
+}, (p, n) => p.b.anahtar === n.b.anahtar && p.secili === n.secili && p.onTikla === n.onTikla)
+
 export default function BildirimAkisi({ alerts, vurgulanan = [], onBildirimTikla }) {
-  const gorunen = alerts.slice(0, GORUNEN)
-  const kalan = alerts.length - gorunen.length
+  const [onem, setOnem] = useKalici('pano.bildirimOnem', 'tumu') // brief §11: süzgeç korunur
+  const [hepsi, setHepsi] = useState(false)
+  const sayilar = onemSayilari(alerts)
+  const { liste, kalan, toplam } = gorunenBildirimler(alerts, { onem, hepsi })
 
   return (
     <div className="bildirim-akisi">
@@ -20,38 +49,37 @@ export default function BildirimAkisi({ alerts, vurgulanan = [], onBildirimTikla
         Bildirimler <span className="bildirim-sayi sayi">{alerts.length}</span>
       </h2>
 
-      {alerts.length === 0 ? (
-        <p className="bildirim-bos">Henüz bildirim yok.</p>
+      <div className="bildirim-suzgec" role="group" aria-label="Önem">
+        {ONEM_SUZGECLERI.map((s) => (
+          <button key={s.deger} type="button" className={`bildirim-suzgec-dugme ${onem === s.deger ? 'bildirim-suzgec-dugme--secili' : ''}`}
+            aria-pressed={onem === s.deger} onClick={() => setOnem(s.deger)} data-test={`bildirim-onem-${s.deger}`}>
+            {s.etiket} <span className="sayi">{sayilar[s.deger]}</span>
+          </button>
+        ))}
+      </div>
+
+      {toplam === 0 ? (
+        <p className="bildirim-bos">{alerts.length === 0 ? 'Henüz bildirim yok.' : 'Bu önemde bildirim yok.'}</p>
       ) : (
         <ul className="bildirim-liste">
-          {gorunen.map((b) => {
-            const secili = ayniKisiler(vurgulanan, b.people)
-            return (
-              <li key={b.anahtar}>
-                <button
-                  type="button"
-                  className={`bildirim bildirim--${b.severity} ${secili ? 'bildirim--secili' : ''}`}
-                  onClick={() => onBildirimTikla?.(b)}
-                  data-test="bildirim"
-                  data-kind={b.kind}
-                  data-people={b.people.join(',')}
-                >
-                  <span className="bildirim-ikon" aria-hidden="true"><BildirimIkon kind={b.kind} /></span>
-                  <span className="bildirim-govde">
-                    <span className="bildirim-ust">
-                      <strong className="bildirim-title">{b.title}</strong>
-                      <time className="bildirim-saat sayi">{b.clock}</time>
-                    </span>
-                    <span className="bildirim-detay">{b.detail}</span>
-                  </span>
-                </button>
-              </li>
-            )
-          })}
+          {liste.map((b) => (
+            <li key={b.anahtar}>
+              <BildirimOge b={b} secili={ayniKisiler(vurgulanan, b.people)} onTikla={onBildirimTikla} />
+            </li>
+          ))}
         </ul>
       )}
 
-      {kalan > 0 && <p className="bildirim-kalan">+ {kalan} daha eski bildirim</p>}
+      {kalan > 0 && (
+        <button type="button" className="bildirim-kalan" onClick={() => setHepsi(true)} data-test="bildirim-tumu">
+          Tümünü göster (+{kalan} daha eski)
+        </button>
+      )}
+      {hepsi && toplam > GORUNEN_VARSAYILAN && (
+        <button type="button" className="bildirim-kalan" onClick={() => setHepsi(false)} data-test="bildirim-azalt">
+          Yalnız son {GORUNEN_VARSAYILAN} bildirimi göster
+        </button>
+      )}
     </div>
   )
 }
