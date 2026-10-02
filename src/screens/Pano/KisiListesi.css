@@ -176,7 +176,7 @@
   overflow: hidden;
   white-space: nowrap;
 }
-.kisi-durum-ikon { flex: none; font-size: 10px; }
+.kisi-durum-ikon { flex: none; font-size: 12px; }
 
 /* Durum yazısının rengi (satır zemini ile kontrastı doğrulanmış) */
 .kisi-satiri[data-durum='talking'] .kisi-durum { color: var(--birlikte); font-weight: 600; }
@@ -215,4 +215,25 @@
 /* Dar telefon (≤420px): durum cümlesi kesilmesin, ikinci satıra insin. */
 @media (max-width: 420px) {
   .kisi-durum { white-space: normal; align-items: flex-start; }
+}
+
+/* Dokunmatik (≤1024): çipler, sıralama seçici ve "Kişi ata" ≥40 px */
+@media (max-width: 1024px) {
+  .filtre-dugme { min-height: 40px; padding: 0 var(--aralik-3); }
+  .filtre-sirala select { min-height: 40px; }
+  .kisi-ata-dugme { min-height: 40px; }
+}
+/* Telefon (≤600): çubuk sabit değil (ekranı yemesin); çipler tek sıra yatay kaydırmalı; satır sıkı */
+@media (max-width: 600px) {
+  .filtre-cubugu { position: static; }
+  .filtre-dugmeler { flex-wrap: nowrap; overflow-x: auto; padding-bottom: var(--aralik-1); scrollbar-width: none; }
+  .filtre-dugmeler::-webkit-scrollbar { display: none; }
+  .filtre-dugme { flex: none; white-space: nowrap; }
+  .filtre-sirala select { flex: 1; min-width: 0; }
+  .kisi-satiri { padding: var(--aralik-2) var(--aralik-3); column-gap: var(--aralik-2); }
+}
+/* Dar telefon (≤480): ad kesilmek yerine sarar (yıldızlar bölünmez) */
+@media (max-width: 480px) {
+  .kisi-ad { white-space: normal; }
+  .kisi-yildiz { white-space: nowrap; }
 }

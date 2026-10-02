@@ -198,3 +198,9 @@
 .saglik-sorun--sessiz { color: var(--metin-2); }
 .saglik-sorun--pil { color: var(--uyari); }
 .saglik-pil--dusuk { color: var(--uyari); font-weight: 700; }
+
+/* Dokunmatik (≤1024): tablodaki ad düğmeleri ≥36 px (görünüm aynı, vuruş alanı büyür); seçiciler ≥40 px */
+@media (max-width: 1024px) {
+  .kisi-dugme { min-height: 36px; align-items: center; padding: 4px 6px; margin: -4px -6px; }
+  .perspektif-etiket select { min-height: 40px; }
+}

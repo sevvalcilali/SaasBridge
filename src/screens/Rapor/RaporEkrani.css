@@ -30,8 +30,13 @@
 .rp-soluk { color: var(--metin-soluk); font-style: italic; }
 .rp-dipnot { margin: 0; color: var(--metin-soluk); font-size: var(--punto-kucuk); }
 
+/* Telefon/dar tablet: tablo hücreleri sarılıp sayfayı uzatmasın — kaydırma kabı, en az 560 px,
+   ilk sütun (kişi) kaydırırken sabit. Yazdırmada kapalı. */
+.rp-kaydir { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 @media (max-width: 700px) {
-  .rp-tablo { display: block; overflow-x: auto; }
+  .rp-tablo { min-width: 560px; }
+  .rp-tablo th:first-child, .rp-tablo td:first-child { position: sticky; left: 0; z-index: 1; background: var(--yuzey); min-width: 150px; }
+  .rp-uyari-satir td:first-child { background: var(--uyari-zemin); }
 }
 
 /* Yazdırma / PDF: menü ve düğmeler gizli, beyaz zemin, satırlar sayfa arasında bölünmez */
@@ -39,6 +44,9 @@
   .uyg-nav, .rp-araclar { display: none !important; }
   body, .rapor, .rp-tablo, .rp-ozet > div { background: var(--yuzey) !important; }
   .rapor { max-width: none; padding: 0; gap: 14pt; }
+  .rp-kaydir { overflow: visible; }
+  .rp-tablo { min-width: 0; }
+  .rp-tablo th:first-child, .rp-tablo td:first-child { position: static; }
   .rp-tablo { font-size: 9.5pt; }
   .rp-tablo tr { break-inside: avoid; }
   .rp-bolum h2 { break-after: avoid; }

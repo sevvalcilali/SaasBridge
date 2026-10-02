@@ -8,6 +8,7 @@
   z-index: 11;
   width: min(380px, 92vw);
   height: 100vh;
+  height: 100dvh; /* telefonda adres çubuğu hesaba katılır */
   overflow: auto;
   background: var(--yuzey);
   border-left: 1px solid var(--cizgi);
@@ -64,7 +65,8 @@
 .detay-gorusmeler { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--aralik-2); }
 .detay-gorusmeler li {
   display: grid;
-  grid-template-columns: 12px minmax(0, 1fr) auto;
+  /* renk · rol şekli · ad · süre (rol şekli T4'te eklendi; sütun sayısı onunla büyüdü) */
+  grid-template-columns: 12px auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--aralik-2);
   padding: var(--aralik-2) var(--aralik-3);
@@ -86,3 +88,8 @@
 }
 .detay-kisayol-bag:hover { background: var(--vurgu-zemin); }
 .detay-kisayol-bag:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 2px; }
+
+/* Telefon (≤600): panel tam ekran — arkada kalan şerit işe yaramıyordu; Kapat/Escape listeye döndürür */
+@media (max-width: 600px) {
+  .detay { width: 100vw; border-left: 0; padding: var(--aralik-3); }
+}

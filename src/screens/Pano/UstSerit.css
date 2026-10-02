@@ -94,3 +94,6 @@
   .us-sag { align-items: flex-start; }
   .us-arac { justify-content: flex-start; }
 }
+
+/* Dokunmatik: eşik rozeti ve sıfırla ≥40 px */
+@media (max-width: 1024px) { .esik-chip, .sifirla-dugme { min-height: 40px; } }

@@ -83,3 +83,8 @@
   .bildirim-liste { flex-direction: row; overflow-x: auto; padding-bottom: var(--aralik-2); }
   .bildirim-liste > li { flex: 0 0 auto; width: 280px; }
 }
+
+@media (max-width: 1024px) {
+  .bildirim-suzgec-dugme { min-height: 40px; padding: 0 var(--aralik-3); }
+  .bildirim-kalan { min-height: 44px; }
+}

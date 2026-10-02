@@ -2,6 +2,7 @@
 .sunum {
   position: relative;
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   gap: var(--aralik-4);
@@ -70,7 +71,10 @@
 }
 .sunum-cikis:hover { color: var(--metin); }
 
+@media (hover: none) { .sunum-araclar { opacity: 1; } }
+@media (max-width: 1024px) { .sunum-cikis { min-height: 36px; display: inline-flex; align-items: center; } }
 @media (max-width: 900px) {
-  .sunum { padding: var(--aralik-4); }
+  /* Tablet/telefon: tek ekrana sığdırmaya çalışma, kaydırılabilir; ağ kendi oranında */
+  .sunum { padding: var(--aralik-4); height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
   .sunum-araclar { position: static; justify-content: flex-end; flex-wrap: wrap; opacity: 1; }
 }

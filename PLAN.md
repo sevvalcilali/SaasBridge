@@ -686,6 +686,30 @@ uygulanıyor (Şevval talimatı); itiraz olursa tek sabit/düğme değişir.
   5 (15/15) yeniden geçti. Not: Faz 5 kabul betiğindeki "kalabalık kurulum" kontrolü mock henüz 100 çift
   biriktirmemişken düşüyordu (zamanlama); betik artık bekliyor. `SUNUCUDAN_ISTENENLER.md` §9: `idleSinceS` isteği.
 
+### 🟡 Duyarlı tasarım turu — telefon / tablet / bilgisayar (onay 02.10.2026: "responsive olmalı, telefondan tabletten pc'den açacak")
+Brief §7 "mobil/tablet düzeni" ve §11 "ucuz tablette akıcı" diyordu; şimdiye kadar hedef 600 px ve üstüydü. Bu turda
+gerçek cihaz genişlikleri hedeflendi: **360 / 390 / 430 (telefon), 600, 768 / 820 (tablet dikey), 1024 (tablet yatay),
+1180 / 1280 / 1440 (bilgisayar) + 740×360 yatay telefon**, 8 ekran durumu (pano, pano + panel, masa 3 durum, kurulum,
+rapor, sunum). Tarama ölçütleri: yatay taşma, ekran dışına çıkan öğe, dokunma hedefi < 36 px, yazı < 12 px.
+
+**Tarama (önce):** hiçbir genişlikte yatay taşma yok. Sorunlar: menü 360'ta üç satıra dağılıyor; filtre çipleri dört
+satır; kişi satırında ad kesiliyor (sol sütuna 133 px kalıyor); kişi paneli %92 genişlikte, arkada işe yaramaz şerit;
+**panelin "Bugün kiminle" listesinde süre alt satıra düşüp bölünüyor (T4'te eklenen rol şekli grid'de 4. sütun oldu — her
+genişlikte hata)**; rapor tabloları kaydırmak yerine hücreleri sarıp 8 000 px uzuyor; sunumda ağ görünmez küçüklükte;
+küçük dokunma hedefleri (menü bağlantısı 20 px, tema 28, eşik/sıfırla 30, filtre çipleri 28, kurulum ad düğmeleri 24);
+10–11 px yazılar (durum ikonu, zaman çizelgesi).
+
+**Kararlar (kırılma noktaları tek yerde, `theme/tokens.css` başında):**
+- ≤480 dar telefon · ≤600 telefon · 601–900 tablet dikey ve yatay telefon · 901–1100 tablet yatay / küçük laptop · >1100 masaüstü.
+- **Dokunma hedefi:** ≤1024 px'te (tablet + telefon) tüm düğme/bağlantı/seçiciler en az 36 px, birincil olanlar 40–44 px.
+- **Menü (≤600):** dört sekme eşit genişlikte tek sıra (44 px), altında sunum bağlantısı + tema.
+- **Pano (≤600):** boşluklar küçülür; filtre çipleri tek sıra yatay kaydırmalı (dikey yer yemesin); çubuk sabit (sticky)
+  değil; ≤480'de ad kesilmek yerine sarar. **Kişi paneli** telefonda tam ekran (100 dvh), Escape/Kapat ile döner.
+- **Rapor (≤700):** tablolar kaydırma kabında (`rp-kaydir`), en az 560 px, **ilk sütun (kişi) kaydırırken sabit**; yazdırma etkilenmez.
+- **Sunum (≤900):** sayfa kaydırılabilir, ağ kendi oranında; dokunmatikte araç çubuğu her zaman görünür (`hover: none`).
+- `viewport-fit=cover` + güvenli alan dolguları; `100vh` yerine `100dvh` (adres çubuğu); hiç yeni bağımlılık yok.
+- **D2** doğrulama: aynı tarama "sonra", Faz 2–5 kabul; `docs/duyarli/` görüntüler + not.
+
 ---
 
 ## 3. PROJE YAPISI (güncel, 30.09.2026)

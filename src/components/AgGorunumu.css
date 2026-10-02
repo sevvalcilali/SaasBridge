@@ -84,3 +84,9 @@
 /* Büyük ekranda onlarca çizginin sürekli akışı tüm SVG'yi her karede yeniden boyar
    (kalabalıkta ucuz cihazda kare düşer). Salonda kesikli yeşil sabit durur — sakin hareket. */
 .ag-gorunumu--sunum .ag-cizgi--birlikte { animation: none; }
+
+/* Sunum modu dar ekranda (≤900): ağ ekranı doldurmaz, kendi oranında (viewBox) yükseklik alır */
+@media (max-width: 900px) {
+  .ag-gorunumu--sunum { flex: none; }
+  .ag-gorunumu--sunum .ag-svg { flex: none; height: auto; min-height: 0; }
+}

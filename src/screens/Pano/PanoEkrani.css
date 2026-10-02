@@ -116,3 +116,10 @@
   .pano-govde[data-sekme='ag'] > :not(.pano-orta),
   .pano-govde[data-sekme='bildirimler'] > :not(.pano-sag) { display: none; }
 }
+
+/* Telefon: boşluklar küçülür, sekmeler dokunmatik boyda */
+@media (max-width: 600px) {
+  .pano { padding: var(--aralik-2); gap: var(--aralik-3); }
+  .pano-sol, .pano-orta, .pano-sag { padding: var(--aralik-3); }
+  .pano-sekme { min-height: 44px; }
+}

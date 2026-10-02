@@ -334,3 +334,10 @@
 
 /* Sunucu kopukken son liste solar ama silinmez; bant net kalır (brief §11, pano ile aynı). */
 .kartver--soluk > *:not(.hata-bantlari) { opacity: 0.6; transition: opacity var(--gecis); }
+
+/* Dar telefon (≤480): ad sütununa yer kalsın — boşluklar ve "Düzenle" daralır */
+@media (max-width: 480px) {
+  .kartver { padding-left: var(--aralik-2); padding-right: var(--aralik-2); }
+  .kisisec-oge { gap: var(--aralik-2); }
+  .kisisec-duzenle { min-width: 72px; padding-left: var(--aralik-2); padding-right: var(--aralik-2); }
+}

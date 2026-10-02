@@ -133,11 +133,18 @@
   }
 }
 
+/* --- Kırılma noktaları (tek yerde; bileşen CSS'leri bu değerleri kullanır) ---
+   ≤480 dar telefon · ≤600 telefon · 601–900 tablet dikey / yatay telefon ·
+   901–1100 tablet yatay, küçük laptop · >1100 masaüstü.
+   Dokunmatik (≤1024): her düğme/bağlantı/seçici ≥36 px, birincil olanlar ≥40 px. */
+
 /* --- Temel --- */
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
+  /* Çentikli telefonlarda içerik güvenli alanda kalsın (viewport-fit=cover) */
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background: var(--zemin);
   color: var(--metin);
   font-family: var(--yazi);

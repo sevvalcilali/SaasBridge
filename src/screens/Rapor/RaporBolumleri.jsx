@@ -33,6 +33,7 @@ export function Ozet({ ozet, anlasma }) {
 
 export function Girisimciler({ girisimciler }) {
   return (
+    <div className="rp-kaydir">
     <table className="rp-tablo" data-test="rapor-girisimciler">
       <thead><tr><th>Girişimci</th><th className="sag">Yatırımcı</th><th>Görüştüğü yatırımcılar</th><th className="sag">Toplam</th></tr></thead>
       <tbody>
@@ -50,12 +51,14 @@ export function Girisimciler({ girisimciler }) {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }
 
 export function EnUzun({ enUzun, saat, simdi }) {
   if (!enUzun.length) return <p className="rp-bos">Henüz görüşme yok.</p>
   return (
+    <div className="rp-kaydir">
     <table className="rp-tablo" data-test="rapor-en-uzun">
       <thead><tr><th className="sag">#</th><th>Kim</th><th>Kiminle</th><th className="sag">Başlangıç</th><th className="sag">Süre</th></tr></thead>
       <tbody>
@@ -70,11 +73,13 @@ export function EnUzun({ enUzun, saat, simdi }) {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }
 
 export function Kisiler({ satirlar }) {
   return (
+    <div className="rp-kaydir">
     <table className="rp-tablo" data-test="rapor-kisiler">
       <thead>
         <tr><th>Kişi</th><th>Rol</th><th className="sag">Toplam</th><th className="sag">Görüşme</th>
@@ -94,12 +99,14 @@ export function Kisiler({ satirlar }) {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }
 
 export function Ciftler({ ciftler }) {
   if (!ciftler.length) return <p className="rp-bos">Henüz görüşme yok.</p>
   return (
+    <div className="rp-kaydir">
     <table className="rp-tablo" data-test="rapor-ciftler">
       <thead><tr><th>Kişi</th><th>Kişi</th><th className="sag">Toplam</th><th className="sag">Görüşme</th></tr></thead>
       <tbody>
@@ -111,5 +118,6 @@ export function Ciftler({ ciftler }) {
         ))}
       </tbody>
     </table>
+    </div>
   )
 }

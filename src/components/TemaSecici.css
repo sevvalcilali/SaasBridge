@@ -23,3 +23,5 @@
   box-shadow: var(--golge);
 }
 .tema-secici-dugme:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 2px; }
+
+@media (max-width: 1024px) { .tema-secici-dugme { min-height: 36px; padding: 0 var(--aralik-3); } }
