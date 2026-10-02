@@ -13,7 +13,8 @@
 
 ### Tek cümlede durum
 Brief §12'deki **beş önceliğin hepsi bitti** (Faz 0–5) ve üstüne bir **uçtan uca tarama + düzeltme turu** ile
-bir **kod incelemesi turu** yapıldı (sırasıyla `docs/duzeltme-turu/NOT.md` ve aşağıda "Kod incelemesi turu"). Brief'teki açık maddeler de (C turu, 02.10.2026) kapandı: arayüz tarafında **bilinen eksik yok**. Arayüz **mock
+bir **kod incelemesi turu** yapıldı (sırasıyla `docs/duzeltme-turu/NOT.md` ve aşağıda "Kod incelemesi turu"). Brief'teki açık maddeler de (C turu, 02.10.2026) kapandı ve arayüz **telefon / tablet / bilgisayarda** çalışacak
+şekilde elden geçti (Duyarlı tasarım turu): arayüz tarafında **bilinen eksik yok**. Arayüz **mock
 sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz bağlanmadı; **sıradaki iş gerçek
 sunucuya geçiş** — Muhittin'in cevapları ve `/api/*` uçları gerekiyor (aşağıda 2. madde).
 
@@ -69,6 +70,7 @@ da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.c
 | Tarama | 3 kod incelemesi + tarayıcı taraması → 20 düzeltme | `docs/duzeltme-turu/NOT.md` |
 | İnceleme | Uçtan uca kod incelemesi → 10 bulgu, R1–R4 düzeltmeleri (ölçümlü) | PLAN "Kod incelemesi turu" |
 | C turu | Brief §7 eksikleri: karşı rol sayısı, sıralama + filtreler, bildirim süzgeci/"tümünü göster", alıcı kopunca soluk | PLAN "C turu" |
+| Duyarlı | Telefon / tablet / bilgisayar: menü, dokunma hedefleri, kaydırmalı çipler, tam ekran panel, kaydırmalı rapor tabloları | `docs/duyarli/NOT.md` |
 
 Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
 
@@ -115,8 +117,10 @@ Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): *
 3. **Her değişiklik şu sırayla doğrulanır:**
    - `npm test` tamamen yeşil,
    - `npm run build` temiz,
-   - tarayıcıda gerçekten denenir (mock ile). Tarayıcı kabul betikleri (Playwright) **repoda değil**; kabul
-     ölçütleri her fazın başlığında ve `docs/faz*/…TESLIM.md`'de yazılı.
+   - tarayıcıda gerçekten denenir (mock ile) — **telefon (390), tablet (768) ve bilgisayar (1280) genişliklerinde**.
+     Tarayıcı kabul betikleri (Playwright) **repoda değil**; kabul ölçütleri her fazın başlığında ve
+     `docs/faz*/…TESLIM.md`'de yazılı. Kabul betikleri mock'u **taze** başlatıp hemen koşmalı: mock'un zamanlı
+     senaryoları (Kart 14 → 45. sn, kayıp kart → 180–300. sn, alıcı kopması → 120. sn) kaçırılırsa beklemeler düşer.
 4. **Commit ve not:** Her adım kendi commit'i. Bu dosyada ilgili adım ✅ yapılır ve kısa bir "Yapıldı:" notu düşülür.
    Faz sonunda `docs/fazN/` altına ekran görüntüsü ve "neyi neden" notu eklenir.
 5. **Süreç kapatırken:** `pkill -f` desenini içeren metin, aynı komutta başka yerde geçmemeli. Yoksa komut kendi
@@ -686,7 +690,7 @@ uygulanıyor (Şevval talimatı); itiraz olursa tek sabit/düğme değişir.
   5 (15/15) yeniden geçti. Not: Faz 5 kabul betiğindeki "kalabalık kurulum" kontrolü mock henüz 100 çift
   biriktirmemişken düşüyordu (zamanlama); betik artık bekliyor. `SUNUCUDAN_ISTENENLER.md` §9: `idleSinceS` isteği.
 
-### 🟡 Duyarlı tasarım turu — telefon / tablet / bilgisayar (onay 02.10.2026: "responsive olmalı, telefondan tabletten pc'den açacak")
+### ✅ Duyarlı tasarım turu — telefon / tablet / bilgisayar (TAMAMLANDI 02.10.2026; onay: "responsive olmalı, telefondan tabletten pc'den açacak")
 Brief §7 "mobil/tablet düzeni" ve §11 "ucuz tablette akıcı" diyordu; şimdiye kadar hedef 600 px ve üstüydü. Bu turda
 gerçek cihaz genişlikleri hedeflendi: **360 / 390 / 430 (telefon), 600, 768 / 820 (tablet dikey), 1024 (tablet yatay),
 1180 / 1280 / 1440 (bilgisayar) + 740×360 yatay telefon**, 8 ekran durumu (pano, pano + panel, masa 3 durum, kurulum,
@@ -709,6 +713,15 @@ küçük dokunma hedefleri (menü bağlantısı 20 px, tema 28, eşik/sıfırla 
 - **Sunum (≤900):** sayfa kaydırılabilir, ağ kendi oranında; dokunmatikte araç çubuğu her zaman görünür (`hover: none`).
 - `viewport-fit=cover` + güvenli alan dolguları; `100vh` yerine `100dvh` (adres çubuğu); hiç yeni bağımlılık yok.
 - **D2** doğrulama: aynı tarama "sonra", Faz 2–5 kabul; `docs/duyarli/` görüntüler + not.
+- **Yapıldı (D1–D2, iki commit):** yalnız CSS + iki küçük JSX (rapor tabloları `rp-kaydir` kabında; panel liste grid'i).
+  Dosyalar: `App.css`, `tokens.css` (kırılma noktaları notu, güvenli alan), `TemaSecici.css`, `UstSerit.css`,
+  `PanoEkrani.css`, `KisiListesi.css`, `BildirimAkisi.css`, `DetayPaneli.css`, `ZamanCizelgesi.css`, `RaporEkrani.css`,
+  `RaporBolumleri.jsx`, `SunumEkrani.css`, `AgGorunumu.css`, `KurulumEkrani.css`, `KartVerEkrani.css`, `index.html`.
+  **Tarama (sonra):** 8 durum × 10 genişlik — taşma yok, 36 px altı dokunma hedefi yok, 12 px altı yazı yok, konsol temiz
+  (tek işaret: bilerek yatay kaydırılan çip satırı). 223/223 test. Faz 2 (11/11), 3 (16/16), 4 (13/13), 5 (15/15)
+  yeniden geçti. Görüntüler ve not: `docs/duyarli/` (17 görüntü: telefon 390, tablet 768/1024, bilgisayar 1280/1440,
+  salon 1920, yatay telefon). Not: Faz 2 kabul betiği, belge görüntüleri önce alınınca "kayıp kart" penceresini (180–300.
+  sn) kaçırıp düştü; taze mock'la hemen koşulunca geçti — betik mock başlar başlamaz koşulmalı (devir notuna yazıldı).
 
 ---
 
@@ -743,7 +756,7 @@ SaasBridge/
 │     ├─ Kurulum/             # Faz 3
 │     ├─ Rapor/               # Faz 4
 │     └─ Sunum/               # Faz 5 (?clean=1)
-├─ docs/faz1..faz5/ · docs/duzeltme-turu/   # teslim notları + ekran görüntüleri + örnek çıktılar
+├─ docs/faz1..faz5/ · docs/duzeltme-turu/ · docs/duyarli/   # teslim notları + ekran görüntüleri + örnek çıktılar
 ├─ index.html · package.json
 └─ dist/                      # npm run build çıktısı (git'te yok; sunucu bunu statik verir)
 ```
