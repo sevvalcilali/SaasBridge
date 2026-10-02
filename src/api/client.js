@@ -18,11 +18,23 @@ export const SUNUCU_ADRESI = ''
 const ILK_BEKLEME_MS = 500
 const EN_UZUN_BEKLEME_MS = 10000
 
+// Kart no 100+ dinleyici cihazdır, kişi değildir (brief §2): TEK yerde, bütün koleksiyonlardan
+// ayıklanır — ekranların (pano, ağ, kurulum grafiği/tablosu) ayrıca hatırlaması gerekmez.
+const ciftKisilerde = (c) => kisiKartiMi(c.a) && kisiKartiMi(c.b)
+const ciftleriAyikla = (dizi) => (Array.isArray(dizi) ? dizi.filter(ciftKisilerde) : dizi)
+function gecmisiAyikla(gecmis) {
+  if (!gecmis || typeof gecmis !== 'object') return gecmis
+  return Object.fromEntries(Object.entries(gecmis).filter(([anahtar]) => anahtar.split('-').every(kisiKartiMi)))
+}
+
 /** Ham sunucu durumunu arayüzün kullandığı biçime çevirir. */
 export function durumIsle(ham) {
   return {
     ...ham,
-    // Kart no 100+ dinleyici cihazdır, kişi değildir (brief §2).
+    edges: ciftleriAyikla(ham.edges),
+    live: ciftleriAyikla(ham.live),
+    signals: ciftleriAyikla(ham.signals),
+    history: gecmisiAyikla(ham.history),
     people: ham.people
       .filter((k) => kisiKartiMi(k.id))
       .map((k) => ({ ...k, color: sunucuRengi(k.color), sunucuColor: k.color })),

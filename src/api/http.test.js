@@ -18,3 +18,20 @@ test('mock (200) → demo var; gerçek sunucu (404) → yok; ulaşılamayan → 
   assert.equal(await demoVarMi('http://localhost:1'), false)
   mock.kapat(); gercek.kapat()
 })
+
+test('jsonIstek: gövdesiz başarı (204 / boş 200) hata değildir; JSON gövde okunur; 4xx istisna', async () => {
+  const { jsonIstek } = await import('./http.js')
+  const s = http.createServer((i, y) => {
+    if (i.url === '/bos204') { y.writeHead(204); y.end(); return }
+    if (i.url === '/bos200') { y.writeHead(200); y.end(); return }
+    if (i.url === '/json') { y.writeHead(200, { 'Content-Type': 'application/json' }); y.end('{"ok":true}'); return }
+    y.writeHead(400); y.end('{}')
+  })
+  await new Promise((c) => s.listen(0, c))
+  const a = `http://localhost:${s.address().port}`
+  assert.equal(await jsonIstek(a, '/bos204', 'POST', { kart: '7' }), null)
+  assert.equal(await jsonIstek(a, '/bos200', 'POST', { kart: '7' }), null)
+  assert.deepEqual(await jsonIstek(a, '/json'), { ok: true })
+  await assert.rejects(jsonIstek(a, '/hata', 'POST', {}))
+  s.close()
+})

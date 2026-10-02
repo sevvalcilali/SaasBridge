@@ -6,7 +6,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import http from 'node:http'
-import { PanoBaglantisi } from './client.js'
+import { durumIsle, PanoBaglantisi } from './client.js'
 import { PALET } from './renkler.js'
 
 const ORNEK_DURUM = {
@@ -243,4 +243,26 @@ test('kapat(): dinleyici bırakılır, yeni bağlantı denenmez', async () => {
   await new Promise((c) => setTimeout(c, 150))
   assert.equal(s.kayit.eventsIstek, istekSayisi, 'kapatıldıktan sonra yeniden bağlanmamalı')
   s.kapat()
+})
+
+test('durumIsle: 100+ dinleyici cihazlar kişilerden ve bütün çift koleksiyonlarından ayıklanır', () => {
+  const d = durumIsle({
+    people: [{ id: '10', color: '#3987e5' }, { id: '101', color: '#3987e5' }],
+    edges: [{ a: '10', b: '11', min: 3 }, { a: '10', b: '101', min: 2 }],
+    live: [{ a: '101', b: '11' }],
+    signals: [{ a: '10', b: '11', value: -60 }, { a: '11', b: '120', value: -50 }],
+    history: { '10-11': [[0, -60]], '11-101': [[0, -50]] },
+    alerts: [],
+  })
+  assert.deepEqual(d.people.map((k) => k.id), ['10'])
+  assert.deepEqual(d.edges.map((e) => `${e.a}-${e.b}`), ['10-11'])
+  assert.deepEqual(d.live, [])
+  assert.deepEqual(d.signals.map((s) => `${s.a}-${s.b}`), ['10-11'])
+  assert.deepEqual(Object.keys(d.history), ['10-11'])
+})
+
+test('durumIsle: eksik koleksiyonlar (sunucu göndermediyse) bozulmadan geçer', () => {
+  const d = durumIsle({ people: [], alerts: [] })
+  assert.equal(d.edges, undefined)
+  assert.equal(d.history, undefined)
 })

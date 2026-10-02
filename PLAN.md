@@ -648,6 +648,16 @@ sıralama/yalnız kaldı/misafir filtresi, bildirim geçmişi, alıcı kopunca s
   filtresini kalıcı yapmak denendi, geri alındı: CSV sonrası açık kalınca kartı olan kişi aranamıyordu (Faz 2 gerileme
   testi yakaladı). Ayrıntı: `docs/duzeltme-turu/NOT.md`.
 
+### 🟡 Kod incelemesi turu (onay 02.10.2026: "sırayla yap")
+Uçtan uca kod incelemesi (dal ↔ `main`) 10 doğrulanmış bulgu verdi. Sırayla:
+- **R1** Gerçek sunucu: gövdesiz başarılı yanıt (204/boş 200) hata sayılmasın (`http.js`); 100+ dinleyici cihazlar
+  `people` dışında `signals`/`history`/`edges`/`live` içinden de tek yerde ayıklansın (`client.js durumIsle`).
+- **R2** Mock + arayüz: anlaşma geçmişi ve "yalnız kaldı" süresi karta değil kişiye bağlı; kayıp kart senaryosu boş
+  listede çökmesin; kalibrasyon demosu önceki çifti bıraksın; bildirim anahtarı tekil olsun.
+- **R3** Performans: ağ yerleşimi yalnız rol/sıra değişince hesaplansın; rapor ekranı canlı akışı dinlemesin (ölçümlü).
+- **R4** Görünen ad kuralı tek yerde (iki farklı `gorunenAd` vardı).
+- **R5** Doğrulama (test + Faz 2–5 kabul), belge, PR.
+
 ---
 
 ## 3. PROJE YAPISI (güncel, 30.09.2026)
