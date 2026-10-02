@@ -13,10 +13,9 @@
 
 ### Tek cümlede durum
 Brief §12'deki **beş önceliğin hepsi bitti** (Faz 0–5) ve üstüne bir **uçtan uca tarama + düzeltme turu** ile
-bir **kod incelemesi turu** yapıldı (sırasıyla `docs/duzeltme-turu/NOT.md` ve aşağıda "Kod incelemesi turu"). Arayüz **mock sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz
-bağlanmadı. Sıradaki iş iki koldan ilerliyor:
-1. **Karar bekleyen dört brief eksiği** (aşağıda C1–C4),
-2. **gerçek sunucuya geçiş.** Bunun için Muhittin'in cevapları ve `/api/*` uçları gerekiyor.
+bir **kod incelemesi turu** yapıldı (sırasıyla `docs/duzeltme-turu/NOT.md` ve aşağıda "Kod incelemesi turu"). Brief'teki açık maddeler de (C turu, 02.10.2026) kapandı: arayüz tarafında **bilinen eksik yok**. Arayüz **mock
+sunucuyla uçtan uca çalışıyor**. Gerçek sunucuya (Muhittin'in `pano.py`'si) henüz bağlanmadı; **sıradaki iş gerçek
+sunucuya geçiş** — Muhittin'in cevapları ve `/api/*` uçları gerekiyor (aşağıda 2. madde).
 
 - **Dal:** `faz-0-altyapi` · **PR:** https://github.com/sevvalcilali/SaasBridge/pull/1 (açık, `main`'e birleşmedi)
 - **Son commit:** bkz. `git log -1` (02.10.2026: kod incelemesi turu R1–R5) · **Testler:** `npm test` → 210/210 yeşil · **Build:** temiz
@@ -69,19 +68,15 @@ da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.c
 | 5 | Doğrulanmış palet, koyu tema, sunum modu, 97 kişi performansı | `docs/faz5/FAZ5_TESLIM.md` |
 | Tarama | 3 kod incelemesi + tarayıcı taraması → 20 düzeltme | `docs/duzeltme-turu/NOT.md` |
 | İnceleme | Uçtan uca kod incelemesi → 10 bulgu, R1–R4 düzeltmeleri (ölçümlü) | PLAN "Kod incelemesi turu" |
+| C turu | Brief §7 eksikleri: karşı rol sayısı, sıralama + filtreler, bildirim süzgeci/"tümünü göster", alıcı kopunca soluk | PLAN "C turu" |
 
 Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
 
 ### Nerede kaldık / sıradaki işler (öncelik sırasıyla)
 
-**1. Karar bekleyen brief eksikleri (C).** Şevval'e sorulacak. Onaysız yapılmaz (Bölüm 0, kural 1–2).
-
-| # | Eksik (brief) | Nereye dokunulur | Not |
-|---|---|---|---|
-| C1 | Kişi satırında "kaç karşı rol kişisiyle görüştü" (§7) | `screens/Pano/KisiSatiri.jsx` | veri hazır: `people[].invPeers` |
-| C2 | Sıralama seçeneği ("en uzun görüşen / en yalnız") + "yalnız kaldı" ve "Misafir" filtreleri (§7) | `api/durum.js siralaKisiler`, `api/filtre.js`, `screens/Pano/FiltreCubugu.jsx` | "sakin hareket" kuralı: sıra her tikte zıplamamalı (`useSakinSiralama.js`) |
-| C3 | Bildirim akışı 20'de kesiliyor, eskilere ulaşılamıyor | `screens/Pano/BildirimAkisi.jsx` | "kart kayboldu" gibi ciddi bildirimler anlaşma bildirimleri altında kaybolmamalı |
-| C4 | Alıcı koptuğunda (`receiverAge > 5`) veri soluklaşmıyor, yalnız bant çıkıyor (§11) | `screens/Pano/PanoEkrani.jsx` (`pano--soluk`) | sunucu kopmasında zaten soluyor |
+**1. ~~Karar bekleyen brief eksikleri (C)~~ — bitti (02.10.2026).** Dört madde de uygulandı; verilen kararlar
+"C turu" başlığında. Kalan tek açık nokta sunucuya ait: "yalnız kaldı" süresi için `people[].idleSinceS`
+(`SUNUCUDAN_ISTENENLER.md` §9). Gelirse satıra "boşta · 4 dk'dır" eklenir (`api/durum.durumCumlesi`).
 
 **2. Gerçek sunucuya geçiş.** Muhittin'e bağlı.
 - `pano.py` bugün yalnız `/`, `/state`, `/events`, `/control` sunuyor. Masa, rapor, kart sağlığı ve kişi panelinin ek
@@ -663,7 +658,7 @@ Uçtan uca kod incelemesi (dal ↔ `main`) 10 doğrulanmış bulgu verdi. Sıray
   - R4: `api/ad.js` (`tamAd`, `kisaAd`, iki veri biçimi); `durum.gorunenAd`/`rapor.raporAdi` = `tamAd`; `sinyal.gorunenAd` kaldırıldı; ağ etiketi ve masa listeleri ortak kuralı kullanır.
   - R5: 210/210 test; Faz 2 (11/11), 3 (16/16), 4 (13/13), 5 (15/15) kabul senaryoları yeniden geçti; PR güncellendi.
 
-### 🟡 C turu — brief §7 eksikleri (onay 02.10.2026: "C maddelerini de yap, hepsini sırayla")
+### ✅ C turu — brief §7 eksikleri (TAMAMLANDI 02.10.2026; onay: "C maddelerini de yap, hepsini sırayla")
 Tarama bulgularının karar bekleyen dört maddesi. Brief'te "nasıl" yazmayan yerlerde karar aşağıda, sorgulanmadan
 uygulanıyor (Şevval talimatı); itiraz olursa tek sabit/düğme değişir.
 
@@ -683,6 +678,13 @@ uygulanıyor (Şevval talimatı); itiraz olursa tek sabit/düğme değişir.
 - **C4** Alıcı kopunca (brief §2 "eski veriyi canlıymış gibi gösterme", §11 "son veri soluk"): bant zaten vardı; artık
   pano, kurulum ve sunum içeriği sunucu kopmasındaki gibi solar (`veriCanli = bağlı ∧ alıcı taze`).
 - **C5** Doğrulama (birim + tarayıcı + Faz 2–5 kabul), PLAN, SUNUCUDAN_ISTENENLER, PR.
+- **Yapıldı (C1–C5, beş commit):** `durum.karsiRolYazisi`, `durum.siralaKisiler(people, ölçüt)` + `SIRALAMALAR`,
+  `filtre.js` (`guest`, `yalniz`), `api/bildirim.js` (süz/say/görünen), `durum.veriCanli`; `FiltreCubugu` sırala seçici,
+  `BildirimAkisi` süzgeç + "Tümünü göster" + memo öğe; üç ekranda alıcı kopmasında soluk. 223/223 test. Tarayıcıda C
+  senaryosu 22/22 (sıralamalar sunucu verisiyle karşılaştırıldı; süzgeç ve sıralama yenilemede korunuyor; alıcı
+  kopunca pano/kurulum/sunum soluk, gelince canlı; 600 px taşma yok; koyu tema). Faz 2 (11/11), 3 (16/16), 4 (13/13),
+  5 (15/15) yeniden geçti. Not: Faz 5 kabul betiğindeki "kalabalık kurulum" kontrolü mock henüz 100 çift
+  biriktirmemişken düşüyordu (zamanlama); betik artık bekliyor. `SUNUCUDAN_ISTENENLER.md` §9: `idleSinceS` isteği.
 
 ---
 
@@ -732,10 +734,11 @@ SaasBridge/
       telefon bildirimi vb. kapsam dışı).
 
 **Uçtan uca taramada (30.09.2026) bulunan, karar bekleyen brief eksikleri (C):**
-- [ ] Kişi satırında "kaç karşı rol kişisiyle görüştü" (`invPeers`) gösterilmiyor (brief §7; Faz 1 notunda tamam sanılmış).
-- [ ] Liste sıralama seçeneği ("en uzun görüşen / en yalnız") ve "yalnız kaldı" / "Misafir" filtreleri yok (brief §7).
-- [ ] Bildirim akışı 20'de kesiliyor, eskilere ulaşılamıyor; çok "anlaşma" bildirimi "kart kayboldu"yu aşağı itebilir.
-- [ ] Alıcı koptuğunda (receiverAge > 5) veri soluklaşmıyor; yalnız bant çıkıyor.
+- [x] ~~Kişi satırında "kaç karşı rol kişisiyle görüştü" gösterilmiyor~~ → C1 (02.10.2026).
+- [x] ~~Sıralama seçeneği ve "yalnız kaldı" / "Misafir" filtreleri yok~~ → C2. Kalan: "ne kadardır yalnız" için
+      sunucudan `idleSinceS` (SUNUCUDAN_ISTENENLER §9).
+- [x] ~~Bildirim akışı 20'de kesiliyor~~ → C3 ("Tümünü göster" + önem süzgeci).
+- [x] ~~Alıcı koptuğunda veri soluklaşmıyor~~ → C4.
 
 **5.4 sırasında fark edilen:**
 - [ ] **"100+ kişi" ile kart no 1–99 çelişiyor** → `SUNUCUDAN_ISTENENLER.md` Soru 6 (Muhittin).

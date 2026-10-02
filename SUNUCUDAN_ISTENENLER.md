@@ -225,3 +225,15 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
 - **Uçlar henüz yoksa:** Masa "sunucuya bağlanılamıyor" bandı gösterir ve son listeyi korur; kişi paneli
   "görüşme kayıtları alınamadı" der; rapor "rapor verisi alınamadı" der. Pano, `/state` + `/events` ile
   her durumda çalışır.
+
+## 9. "Yalnız kaldı" için istenen alan (C turu, 02.10.2026)
+
+Pano'da **"Yalnız kaldı"** filtresi var: şu an boşta olan yatırımcılar. "Ne kadardır yalnız" bilgisi `/state`'te
+yok; sunucu `idle_investor` bildirimini 6 dk'da üretiyor ama süreyi vermiyor. İstek (isteğe bağlı, küçük):
+
+| Alan | Nerede | Anlamı |
+|---|---|---|
+| `people[].idleSinceS` | `/state` | Kişinin kesintisiz kaç **saniyedir** kimseyle birlikte olmadığı (birlikteyken `0`/`null`) |
+
+Gelince satırdaki durum cümlesi "boşta · 4 dk'dır" olur ve "Yalnız kaldı" filtresi süreyle sıralanabilir.
+Arayüz bu alanı istemci tarafında saymıyor: sayfa yenilenince sıfırlanır ve yanıltır.
