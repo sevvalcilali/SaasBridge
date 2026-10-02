@@ -11,14 +11,15 @@ import './KisiListesi.css'
 
 export default function KisiListesi({ people, vurgulanan = [], seciliId, onKisiSec, onKisiAta }) {
   const [filtre, setFiltre] = useKalici('pano.filtre', 'tumu')
+  const [sirala, setSirala] = useKalici('pano.sirala', 'durum') // brief §11: yenilemede korunur
   const [arama, setArama] = useState('')
   const kapRef = useRef(null)
   const vurguSeti = useMemo(() => new Set(vurgulanan), [vurgulanan])
 
   const gruplar = useMemo(() => {
     const suzulmus = filtreleKisiler(people, { arama, filtre })
-    return gruplaRol(suzulmus).map((g) => ({ ...g, kisiler: siralaKisiler(g.kisiler) }))
-  }, [people, arama, filtre])
+    return gruplaRol(suzulmus).map((g) => ({ ...g, kisiler: siralaKisiler(g.kisiler, sirala) }))
+  }, [people, arama, filtre, sirala])
 
   const toplam = gruplar.reduce((n, g) => n + g.kisiler.length, 0)
 
@@ -35,7 +36,7 @@ export default function KisiListesi({ people, vurgulanan = [], seciliId, onKisiS
 
   return (
     <div className="kisi-listesi" ref={kapRef}>
-      <FiltreCubugu arama={arama} filtre={filtre} onArama={setArama} onFiltre={setFiltre} />
+      <FiltreCubugu arama={arama} filtre={filtre} sirala={sirala} onArama={setArama} onFiltre={setFiltre} onSirala={setSirala} />
 
       {toplam === 0 ? (
         <p className="kisi-bos">Bu süzgece uyan kişi yok.</p>

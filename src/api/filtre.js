@@ -5,9 +5,11 @@ export const FILTRELER = [
   { deger: 'tumu', etiket: 'Tümü' },
   { deger: 'investor', etiket: 'Yatırımcı' },
   { deger: 'founder', etiket: 'Girişimci' },
+  { deger: 'guest', etiket: 'Misafir' },
   { deger: 'talking', etiket: 'Birlikte' },
   { deger: 'idle', etiket: 'Boşta' },
   { deger: 'away', etiket: 'Görünmüyor' },
+  { deger: 'yalniz', etiket: 'Yalnız kaldı' },
   { deger: 'gorusmemis', etiket: 'Hiç görüşmemiş' },
 ]
 
@@ -22,6 +24,10 @@ function filtreUyar(kisi, filtre) {
     case 'talking':
     case 'idle':
     case 'away': return kisi.status === filtre
+    // Yalnız kaldı (brief §4.2 "kim yalnız kaldı, özellikle önemli yatırımcılar"): şu an boşta olan
+    // YATIRIMCI — kartı duyuluyor, kimseyle değil. Ne kadardır boşta olduğu sunucudan gelmiyor (bkz.
+    // SUNUCUDAN_ISTENENLER); "Yıldız" sıralamasıyla önemliler üste alınır.
+    case 'yalniz': return kisi.role === 'investor' && kisi.status === 'idle'
     // Hiç görüşmemiş: karşı rolle (yatırımcıyla) hiç görüşmemiş GİRİŞİMCİ (brief §7).
     case 'gorusmemis': return kisi.role === 'founder' && kisi.invPeers === 0
     default: return true

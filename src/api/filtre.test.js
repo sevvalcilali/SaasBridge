@@ -33,6 +33,14 @@ test('hiç görüşmemiş: yalnız invPeers=0 girişimciler (misafir/yatırımc�
   assert.deepEqual(idler(filtreleKisiler(KISILER, { filtre: 'gorusmemis' })), ['13', '14'])
 })
 
+test('misafir filtresi', () => {
+  assert.deepEqual(idler(filtreleKisiler(KISILER, { filtre: 'guest' })), ['15'])
+})
+
+test('yalnız kaldı: şu an boşta olan yatırımcılar (girişimci/misafir ve birlikte olanlar hariç)', () => {
+  assert.deepEqual(idler(filtreleKisiler(KISILER, { filtre: 'yalniz' })), ['11'])
+})
+
 test('arama: ad, kurum ve kart no üzerinde', () => {
   assert.deepEqual(idler(filtreleKisiler(KISILER, { arama: 'nova' })), ['12'])       // kurum
   assert.deepEqual(idler(filtreleKisiler(KISILER, { arama: 'kılıç' })), ['11'])      // ad
@@ -58,6 +66,6 @@ test('FILTRELER listesi UI için sıralı ve etiketli', () => {
   assert.ok(FILTRELER.every((f) => typeof f.etiket === 'string' && f.etiket.length))
   assert.deepEqual(
     FILTRELER.map((f) => f.deger),
-    ['tumu', 'investor', 'founder', 'talking', 'idle', 'away', 'gorusmemis'],
+    ['tumu', 'investor', 'founder', 'guest', 'talking', 'idle', 'away', 'yalniz', 'gorusmemis'],
   )
 })

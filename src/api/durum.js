@@ -35,14 +35,30 @@ export function atanmamisKartMi(kisi) {
   return kisi.role === 'guest' && /^Kart \d+$/.test(kisi.name)
 }
 
-// Kararlı sıralama: durum önceliği, eşitlikte sunucu sırası. Süre gibi her
-// tik değişen değerlere göre sıralama YAPILMAZ — liste ancak durum değişince
-// yeniden dizilir, saniyede 2 güncellemeyle zıplamaz (brief §10 sakin hareket).
+// Sıralama ölçütleri (brief §7: "sıralama (en uzun görüşen, en yalnız)"; §4.2 önemli yatırımcılar).
+// Hepsi KARARLI: eşitlikte sunucu sırası korunur → liste tikten tike zıplamaz (brief §10).
+// - durum: birlikte → boşta → görünmüyor (varsayılan; yalnız durum değişince yeniden dizilir)
+// - sure:  bugünkü toplam süre azalan — satır ancak biri diğerini gerçekten geçince yer değiştirir
+// - yalniz: bugünkü toplam süre artan (en az görüşen üstte), eşitlikte daha az karşı rol kişisi üstte
+// - yildiz: yıldız azalan (önemli yatırımcı üstte); yıldızsızlar sunucu sırasında
+export const SIRALAMALAR = [
+  { deger: 'durum', etiket: 'Durum' },
+  { deger: 'sure', etiket: 'En uzun görüşen' },
+  { deger: 'yalniz', etiket: 'En yalnız' },
+  { deger: 'yildiz', etiket: 'Yıldız' },
+]
 const DURUM_ONCELIK = { talking: 0, idle: 1, away: 2 }
-export function siralaKisiler(people) {
+const KARSILASTIR = {
+  durum: (a, b) => DURUM_ONCELIK[a.status] - DURUM_ONCELIK[b.status],
+  sure: (a, b) => (b.min ?? 0) - (a.min ?? 0),
+  yalniz: (a, b) => (a.min ?? 0) - (b.min ?? 0) || (a.invPeers ?? 0) - (b.invPeers ?? 0),
+  yildiz: (a, b) => (b.tier ?? 0) - (a.tier ?? 0),
+}
+export function siralaKisiler(people, olcut = 'durum') {
+  const karsilastir = KARSILASTIR[olcut] ?? KARSILASTIR.durum
   return people
     .map((k, i) => ({ k, i }))
-    .sort((a, b) => (DURUM_ONCELIK[a.k.status] - DURUM_ONCELIK[b.k.status]) || (a.i - b.i))
+    .sort((a, b) => karsilastir(a.k, b.k) || (a.i - b.i))
     .map((x) => x.k)
 }
 

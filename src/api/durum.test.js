@@ -1,7 +1,7 @@
 // Durumdan türetilen küçük kararlar — JSX içinde hesap yok (temiz mimari).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri, karsiRolYazisi } from './durum.js'
+import { aliciBagli, durumCumlesi, gruplaRol, gorunenAd, atanmamisKartMi, siralaKisiler, ozetKutulari, etkinlikYuzde, kisiGorusmeleri, karsiRolYazisi, SIRALAMALAR } from './durum.js'
 
 test('aliciBagli: taze veri geliyorsa bağlı', () => {
   assert.equal(aliciBagli({ receiverAge: 0.1 }), true)
@@ -145,4 +145,38 @@ test('karsiRolYazisi: yatırımcıda girişimci, girişimcide yatırımcı sayı
   assert.equal(karsiRolYazisi({ role: 'founder', invPeers: 0 }), '0 yatırımcı')
   assert.equal(karsiRolYazisi({ role: 'founder' }), '0 yatırımcı')
   assert.equal(karsiRolYazisi({ role: 'guest', invPeers: 2 }), null)
+})
+
+const SIRA_KISILER = [
+  { id: '1', status: 'idle', min: 12, invPeers: 1, tier: 3 },
+  { id: '2', status: 'talking', min: 40, invPeers: 3, tier: 0 },
+  { id: '3', status: 'idle', min: 0, invPeers: 0, tier: 5 },
+  { id: '4', status: 'away', min: 12, invPeers: 0, tier: 4 },
+  { id: '5', status: 'idle', min: 0, invPeers: 0, tier: 0 },
+]
+const ids = (l) => l.map((k) => k.id)
+
+test('siralaKisiler(sure): en uzun görüşen üstte; eşit sürede sunucu sırası (kararlı)', () => {
+  assert.deepEqual(ids(siralaKisiler(SIRA_KISILER, 'sure')), ['2', '1', '4', '3', '5'])
+})
+
+test('siralaKisiler(yalniz): en az görüşen üstte, eşitlikte daha az karşı rol kişisi, sonra sunucu sırası', () => {
+  const p = [...SIRA_KISILER, { id: '6', status: 'idle', min: 0, invPeers: 2, tier: 0 }]
+  assert.deepEqual(ids(siralaKisiler(p, 'yalniz')), ['3', '5', '6', '4', '1', '2'])
+})
+
+test('siralaKisiler(yildiz): yıldız azalan, yıldızsızlar sunucu sırasında', () => {
+  assert.deepEqual(ids(siralaKisiler(SIRA_KISILER, 'yildiz')), ['3', '4', '1', '2', '5'])
+})
+
+test('siralaKisiler: bilinmeyen ölçüt (ör. eski localStorage değeri) → durum sıralaması', () => {
+  assert.deepEqual(ids(siralaKisiler(SIRA_KISILER, 'yok')), ids(siralaKisiler(SIRA_KISILER)))
+  assert.deepEqual(SIRALAMALAR.map((s) => s.deger), ['durum', 'sure', 'yalniz', 'yildiz'])
+})
+
+test('siralaKisiler(sure): süre sırası değişmedikçe satır yer değiştirmez (sakin hareket)', () => {
+  const t0 = [{ id: 'a', min: 10.0 }, { id: 'b', min: 9.5 }, { id: 'c', min: 9.5 }]
+  const t1 = [{ id: 'a', min: 10.5 }, { id: 'b', min: 10.0 }, { id: 'c', min: 9.5 }] // a ve b konuşuyor, sıra aynı
+  assert.deepEqual(ids(siralaKisiler(t0, 'sure')), ['a', 'b', 'c'])
+  assert.deepEqual(ids(siralaKisiler(t1, 'sure')), ['a', 'b', 'c'])
 })
