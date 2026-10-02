@@ -266,3 +266,17 @@ test('durumIsle: eksik koleksiyonlar (sunucu göndermediyse) bozulmadan geçer',
   assert.equal(d.edges, undefined)
   assert.equal(d.history, undefined)
 })
+
+test('durumIsle: aynı anda aynı türden iki bildirim ayrı, kararlı anahtar alır (React key çakışması yok)', () => {
+  const alerts = [
+    { t: 100, kind: 'idle_investor', people: ['10'] },
+    { t: 100, kind: 'idle_investor', people: ['11'] },
+    { t: 100, kind: 'deal', people: ['10', '12'] },
+    { t: 100, kind: 'deal', people: ['10', '12'] }, // tıpatıp aynı → sıra no ile ayrılır
+  ]
+  const d1 = durumIsle({ people: [], alerts })
+  const anahtarlar = d1.alerts.map((a) => a.anahtar)
+  assert.equal(new Set(anahtarlar).size, 4)
+  const d2 = durumIsle({ people: [], alerts: [...alerts] })
+  assert.deepEqual(d2.alerts.map((a) => a.anahtar), anahtarlar, 'her tikte aynı anahtar')
+})

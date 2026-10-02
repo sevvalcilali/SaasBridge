@@ -76,6 +76,9 @@ export default function KalibrasyonSihirbazi({ signals, people, esik, api, onEsi
     setOlcuyor({ tur, baslangic: t })
   }
   function demo(tur) {
+    // Başka bir çift zorlanıyorsa önce onu bırak; yoksa oturum boyunca "yakın" kalıp sahte görüşme üretir.
+    const onceki = demoRef.current
+    if (onceki && (onceki.a !== secili.a.id || onceki.b !== secili.b.id)) api.demoTut(onceki.a, onceki.b, null).catch(() => {})
     demoRef.current = { a: secili.a.id, b: secili.b.id }
     api.demoTut(secili.a.id, secili.b.id, tur).catch(() => setHata('Demo çalışmadı (yalnız mock sunucuda var).'))
   }

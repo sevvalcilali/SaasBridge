@@ -122,10 +122,10 @@ let ciftler = new Map()             // "a-b" → çift kaydı
 let kenarlar = new Map()            // "a-b" → toplam dakika
 let bildirimler = []
 let oturumlar = []                  // görüşme kayıtları (§9-6): { a, b, start, end } kişi kimliğiyle
-let anlasmalar = new Set()          // anlaşma çıkmış çift anahtarları
+let anlasmalar = new Set()          // anlaşma çıkmış çiftler — KİŞİ kimliğiyle (kenarAnahtari), karta değil
 let bitenGorusme = 0
 let esik = -72
-let yalnizSn = new Map()            // yatırımcı id → kesintisiz yalnız sn
+let yalnizSn = new Map()            // yatırımcı KİMLİĞİ → kesintisiz yalnız sn (kart başkasına geçince devredilmez)
 let atanmamisGeldi = false
 let aliciKopuk = false              // alıcı şu an kopuk mu (tik kararı; durum bunu okur)
 let sonAliciSn = 0                  // alıcıdan son satırın geldiği benzetim saniyesi
@@ -256,6 +256,13 @@ function kenarlariTasi(eski, yeni) {
     kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + dk)
   }
   for (const o of oturumlar) { if (o.a === eski) o.a = yeni; if (o.b === eski) o.b = yeni }
+  // Kayıtsız kartla çıkan anlaşma da karta kişi atanınca o kişiye geçer.
+  for (const key of [...anlasmalar]) {
+    const [x, y] = key.split('|')
+    if (x !== eski && y !== eski) continue
+    anlasmalar.delete(key)
+    anlasmalar.add(kenarAnahtari(x === eski ? yeni : x, y === eski ? yeni : y))
+  }
 }
 
 // Kart iadesi (brief §6): kişi "ayrıldı" olur. "Geri al" (yanlış atama) ayrildi=false
@@ -413,8 +420,9 @@ function tik() {
 
   // kayıp kart senaryosu: seçilen kart bir süre susar
   if (!kayipKisi && simSn >= KAYIP_ARALIK[0]) {
-    kayipKisi = kisiler[Math.floor(kisiler.length / 3)]
-    for (const esId of [...kayipKisi.esler]) fizikselAyril(kayipKisi.id, esId)
+    // Sahnede hiç kart yoksa (hepsi iade edildi) senaryo bekler; boş listede çökmesin.
+    kayipKisi = kisiler[Math.floor(kisiler.length / 3)] ?? null
+    if (kayipKisi) for (const esId of [...kayipKisi.esler]) fizikselAyril(kayipKisi.id, esId)
   }
   const kayipSessiz = kayipKisi && simSn >= KAYIP_ARALIK[0] && simSn < KAYIP_ARALIK[1]
 
@@ -479,8 +487,8 @@ function tik() {
     if (!c.together && ustunde && c.ustundeSn >= GIRIS_SN) {
       c.together = true; c.birlikteSn = 0
       oturumAc(c)
-      if (anlasmalar.has(key)) {
-        const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
+      const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
+      if (anlasmalar.has(kenarAnahtari(kimlik(ka), kimlik(kb)))) {
         bildir('repeat', 'deal', 'Yeniden bir arada',
           `${gorunenAd(ka)} ile ${gorunenAd(kb)} anlaşma sonrası tekrar bir araya geldi.`, [c.a, c.b])
       }
@@ -494,7 +502,7 @@ function tik() {
       if (karsiRol(ka, kb)) { ka.invMin += DT / 60; kb.invMin += DT / 60 }
       if (!c.anlasmaVerildi && c.birlikteSn >= anlasmaSuresiSn(c)) {
         c.anlasmaVerildi = true
-        anlasmalar.add(key)
+        anlasmalar.add(kk) // kişi çifti: kart iade edilip başkasına verilince devredilmez
         const yat = ka.role === 'investor' ? ka : kb
         const gir = yat === ka ? kb : ka
         bildir('deal', 'deal', 'Potansiyel anlaşma',
@@ -524,16 +532,17 @@ function tik() {
 
     // yalnız kalan önemli yatırımcı (≥★★★, 6 dk)
     if (k.role === 'investor' && k.tier >= 3) {
-      const yalniz = (yalnizSn.get(k.id) ?? 0)
+      const kim = kimlik(k)
+      const yalniz = (yalnizSn.get(kim) ?? 0)
       if (!birlikteMi && k.seenAgo < 30) {
-        yalnizSn.set(k.id, yalniz + DT)
+        yalnizSn.set(kim, yalniz + DT)
         if (yalniz + DT >= 360 && !k.yalnizBildirildi) {
           k.yalnizBildirildi = true
           bildir('idle_investor', 'warn', 'Önemli yatırımcı yalnız',
             `${k.name} (${'★'.repeat(k.tier)}) 6 dk'dır kimseyle görüşmüyor.`, [k.id])
         }
       } else {
-        yalnizSn.set(k.id, 0)
+        yalnizSn.set(kim, 0)
         k.yalnizBildirildi = false
       }
     }

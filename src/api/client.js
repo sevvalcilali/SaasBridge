@@ -27,6 +27,19 @@ function gecmisiAyikla(gecmis) {
   return Object.fromEntries(Object.entries(gecmis).filter(([anahtar]) => anahtar.split('-').every(kisiKartiMi)))
 }
 
+// Sunucunun bildirimlerinde kimlik alanı yok (brief §5). Aynı anda (aynı t) aynı türden iki bildirim
+// gelebilir; React anahtarı tekil olsun diye zaman + tür + kişiler + aynıların sıra no'su ile türetilir.
+// Sıralama kararlı olduğundan aynı bildirim her tikte aynı anahtarı alır.
+function bildirimAnahtarla(bildirimler) {
+  const sayac = new Map()
+  return bildirimler.map((b) => {
+    const temel = `${b.t}-${b.kind}-${(b.people ?? []).join('.')}`
+    const n = sayac.get(temel) ?? 0
+    sayac.set(temel, n + 1)
+    return { ...b, anahtar: `${temel}-${n}` }
+  })
+}
+
 /** Ham sunucu durumunu arayüzün kullandığı biçime çevirir. */
 export function durumIsle(ham) {
   return {
@@ -39,7 +52,7 @@ export function durumIsle(ham) {
       .filter((k) => kisiKartiMi(k.id))
       .map((k) => ({ ...k, color: sunucuRengi(k.color), sunucuColor: k.color })),
     // Sunucu en eskiyi başa koyar; akışta en yeni en üstte durur (brief §7).
-    alerts: [...ham.alerts].sort((a, b) => b.t - a.t),
+    alerts: bildirimAnahtarla([...ham.alerts].sort((a, b) => b.t - a.t)),
   }
 }
 

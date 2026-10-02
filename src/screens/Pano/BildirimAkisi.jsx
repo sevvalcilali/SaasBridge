@@ -27,7 +27,7 @@ export default function BildirimAkisi({ alerts, vurgulanan = [], onBildirimTikla
           {gorunen.map((b) => {
             const secili = ayniKisiler(vurgulanan, b.people)
             return (
-              <li key={`${b.t}-${b.kind}`}>
+              <li key={b.anahtar}>
                 <button
                   type="button"
                   className={`bildirim bildirim--${b.severity} ${secili ? 'bildirim--secili' : ''}`}
