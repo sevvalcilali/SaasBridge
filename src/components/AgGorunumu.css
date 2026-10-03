@@ -1,0 +1,92 @@
+/* Ağ görünümü — yalnız token. */
+
+.ag-gorunumu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--aralik-2);
+}
+
+.ag-svg {
+  width: 100%;
+  height: auto;   /* oran bileşende viewBox'a göre verilir; kalabalıkta uzar */
+}
+
+/* Çizgiler: geçmiş görüşme gri, şu an birlikte yeşil + yavaş akış (sakin). */
+.ag-dugum { cursor: pointer; }
+.ag-dugum--sabit { cursor: default; }
+.ag-dugum:focus-visible { outline: none; }
+.ag-dugum:focus-visible > :not(text) { stroke: var(--vurgu); stroke-width: 3; }
+
+.ag-cizgi {
+  stroke: var(--cizgi-koyu);
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.ag-cizgi--birlikte {
+  stroke: var(--birlikte);           /* YEŞİL = şu an birlikte */
+  opacity: 1;
+  stroke-dasharray: 6 10;
+  animation: ag-akis 2.4s linear infinite;
+}
+@keyframes ag-akis {
+  to { stroke-dashoffset: -16; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-cizgi--birlikte { animation: none; stroke-dasharray: none; }
+}
+/* Kalabalıkta akış durur, kesikli yeşil sabit kalır (performans; bileşendeki AKIS_EN_COK). */
+.ag-svg[data-kalabalik] .ag-cizgi--birlikte { animation: none; }
+
+.ag-etiket {
+  font-size: 24px;             /* viewBox birimi; ~470px sütunda ≈11px */
+  fill: var(--metin-2);
+  font-family: var(--yazi);
+  /* Zemin renginde hale: üstünden geçen çizgiler adı bozmasın */
+  paint-order: stroke;
+  stroke: var(--yuzey);
+  stroke-width: 6px;
+  stroke-linejoin: round;
+}
+
+/* Vurgulama (bildirimden): ilgili düğümlerde parlak halka, diğerleri solar.
+   Liste vurgusuyla eş zamanlı; 3 sn sonra söner (PanoEkrani). */
+.ag-dugum, .ag-cizgi { transition: opacity var(--gecis); }
+.ag-svg[data-vurgu] .ag-dugum:not(.ag-dugum--vurgulu) { opacity: 0.2; }
+.ag-svg[data-vurgu] .ag-cizgi { opacity: 0.12; }
+
+.ag-halka {
+  stroke: var(--vurgu);
+  stroke-width: 3;
+  animation: ag-halka-parilti 0.8s ease 3;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ag-halka { animation: none; }
+}
+@keyframes ag-halka-parilti {
+  0%, 100% { stroke-opacity: 0.4; }
+  40% { stroke-opacity: 1; }
+}
+
+.ag-not {
+  margin: 0;
+  color: var(--metin-soluk);
+  font-size: var(--punto-kucuk);
+  text-align: center;
+}
+
+/* Sunum modu (salon ekranı): ağ kalan alanı doldurur ve sığar (viewBox meet);
+   etiketler ana metin renginde, 2–3 metreden okunur. */
+.ag-gorunumu--sunum { flex: 1; min-height: 0; }
+.ag-gorunumu--sunum .ag-svg { flex: 1; min-height: 0; height: 100%; }
+.ag-gorunumu--sunum .ag-etiket { fill: var(--metin); font-weight: 600; stroke: var(--zemin); }
+/* Salonda vurgu "şu an birlikte"de: geçmiş görüşme çizgileri daha soluk (kalabalıkta yumak olmasın). */
+.ag-gorunumu--sunum .ag-cizgi:not(.ag-cizgi--birlikte) { opacity: 0.4; }
+/* Büyük ekranda onlarca çizginin sürekli akışı tüm SVG'yi her karede yeniden boyar
+   (kalabalıkta ucuz cihazda kare düşer). Salonda kesikli yeşil sabit durur — sakin hareket. */
+.ag-gorunumu--sunum .ag-cizgi--birlikte { animation: none; }
+
+/* Sunum modu dar ekranda (≤900): ağ ekranı doldurmaz, kendi oranında (viewBox) yükseklik alır */
+@media (max-width: 900px) {
+  .ag-gorunumu--sunum { flex: none; }
+  .ag-gorunumu--sunum .ag-svg { flex: none; height: auto; min-height: 0; }
+}
