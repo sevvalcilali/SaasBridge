@@ -73,8 +73,8 @@ da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.c
 | Duyarlı | Telefon / tablet / bilgisayar: menü, dokunma hedefleri, kaydırmalı çipler, tam ekran panel, kaydırmalı rapor tabloları | `docs/duyarli/NOT.md` |
 
 Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
-Gerçek sunucuyu yazmak için yol haritası (mimari, veri modeli, sözleşme, kalıcılık, test, fazlar B0–B8, riskler, açık
-kararlar): **`BACKEND_PLAN.md`** (02.10.2026, taslak — uygulamaya başlanmadı).
+Gerçek sunucu **ayrı repoda** yazılıyor: https://github.com/sevvalcilali/saasBridgeBackend (`PLAN.md` = kurallar + Faz B
+uygulama sırası, `BACKEND_PLAN.md` = mimari/veri modeli/sözleşme/kalıcılık/test/riskler). Bu repoda sunucu kodu **yok**.
 
 ### Nerede kaldık / sıradaki işler (öncelik sırasıyla)
 
@@ -82,8 +82,10 @@ kararlar): **`BACKEND_PLAN.md`** (02.10.2026, taslak — uygulamaya başlanmadı
 "C turu" başlığında. Kalan tek açık nokta sunucuya ait: "yalnız kaldı" süresi için `people[].idleSinceS`
 (`SUNUCUDAN_ISTENENLER.md` §9). Gelirse satıra "boşta · 4 dk'dır" eklenir (`api/durum.durumCumlesi`).
 
-**2. Gerçek sunucuya geçiş.** Muhittin'e bağlı. Sunucu bu ekip tarafından yazılacaksa plan hazır: `BACKEND_PLAN.md`
-(Python + FastAPI önerisi, fazlar B0–B8, her fazın kabul ölçütü; mock davranışın çalışan şartnamesi olarak kullanılır).
+**2. Gerçek sunucu — ayrı repoda yazılıyor (karar 03.10.2026).** https://github.com/sevvalcilali/saasBridgeBackend —
+Python 3.11 + FastAPI; donanım yok, benzetim kaynağıyla; fazlar B0–B8 ve kabul ölçütleri orada. Bu repoya düşen tek iş
+B2.6: `mock-server/*.test.js`'e `SUNUCU=` değişkeni (sözleşme testleri gerçek sunucuya karşı) — **ayrı onayla**.
+Muhittin'e sorular hâlâ geçerli (aşağıda).
 - `pano.py` bugün yalnız `/`, `/state`, `/events`, `/control` sunuyor. Masa, rapor, kart sağlığı ve kişi panelinin ek
   verisi için `/api/people`, `/api/assign`, `/api/unassign`, `/api/people/import`, `/api/cards`, `/api/sessions`
   gerekiyor. Biçimleri `SUNUCUDAN_ISTENENLER.md` §1–3, §6 ve §8'de.
@@ -207,6 +209,7 @@ kararlar): **`BACKEND_PLAN.md`** (02.10.2026, taslak — uygulamaya başlanmadı
 | Kişi paleti | Brief paleti açık zemine uyarlanır; **`#199e70` paletten çıkarılır** | Gerekçe: yeşil yalnızca "birlikte" durumunun rengi (brief §10 kendi önerisi) |
 | Mock mimarisi | **Gerçek SSE mock sunucusu** (tek dosya Node) | pano.py ile birebir aynı sözleşme; EventSource/kopma davranışı gerçekçi test edilir |
 | İlk hedef | **Organizatör panosu** | Brief §12 öncelik sırası korunuyor |
+| Gerçek sunucu (03.10.2026) | **Ayrı repo** `saasBridgeBackend`, Python 3.11 + FastAPI + pyserial, SQLite; donanım yokken benzetim kaynağı | Bu repo yalnız arayüz + mock + sözleşme belgesi; sunucu planı ve kodu orada |
 
 ---
 
@@ -735,7 +738,6 @@ SaasBridge/
 ├─ UI_TASARIM_BRIEF.md        # gereksinim belgesi (Muhittin) — her şeyin kaynağı
 ├─ PLAN.md                    # bu dosya: kurallar, kararlar, fazlar, devir notu
 ├─ SUNUCUDAN_ISTENENLER.md    # Muhittin'e: istenen uçlar, veri biçimleri, açık sorular
-├─ BACKEND_PLAN.md            # gerçek sunucu yol haritası (mimari, sözleşme, kalıcılık, test, fazlar B0–B8) — taslak
 ├─ dev.js                     # npm run dev: mock (8002) + Vite birlikte
 ├─ vite.config.js             # geliştirmede /state /events /control /api → 8002 proxy
 ├─ mock-server/
@@ -769,8 +771,9 @@ SaasBridge/
 
 ## 4. AÇIK SORULAR / BEKLEYENLER
 
-- [ ] Gerçek backend klasörü Muhittin'den alınacak (hangi fazdaysak orada bağlanır). Sunucu burada yazılacaksa
-      `BACKEND_PLAN.md` izlenir; Bölüm 16'daki Soru 7–11 Muhittin'e iletilecek (`SUNUCUDAN_ISTENENLER.md`'ye henüz taşınmadı).
+- [ ] Gerçek sunucu ayrı repoda yazılıyor (`saasBridgeBackend`); Muhittin'in mevcut kodu gelirse oraya referans olarak
+      alınır. `saasBridgeBackend/BACKEND_PLAN.md` Bölüm 16'daki Soru 7–11 Muhittin'e iletilecek (`SUNUCUDAN_ISTENENLER.md`'ye
+      henüz taşınmadı).
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,
       telefon bildirimi vb. kapsam dışı).
