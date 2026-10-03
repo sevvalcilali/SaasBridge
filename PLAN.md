@@ -82,8 +82,10 @@ kararlar): **`BACKEND_PLAN.md`** (02.10.2026, taslak — uygulamaya başlanmadı
 "C turu" başlığında. Kalan tek açık nokta sunucuya ait: "yalnız kaldı" süresi için `people[].idleSinceS`
 (`SUNUCUDAN_ISTENENLER.md` §9). Gelirse satıra "boşta · 4 dk'dır" eklenir (`api/durum.durumCumlesi`).
 
-**2. Gerçek sunucuya geçiş.** Muhittin'e bağlı. Sunucu bu ekip tarafından yazılacaksa plan hazır: `BACKEND_PLAN.md`
-(Python + FastAPI önerisi, fazlar B0–B8, her fazın kabul ölçütü; mock davranışın çalışan şartnamesi olarak kullanılır).
+**2. Gerçek sunucu — burada yazılıyor (karar 03.10.2026).** Python + FastAPI, `sunucu/` klasörü, `backend` dalı. Uygulama
+sırası ve kabul ölçütleri: Bölüm 2 **"Faz B"** (B0 iskelet → B1 giriş + sinyal → B2 `/state` eşdeğerliği → B3 kişi/atama →
+B4 kartlar → B5 kayıtlar → B6 kalıcılık → B7 dağıtım → B8 donanım). Gerekçe/mimari: `BACKEND_PLAN.md`. Donanım yok;
+benzetim kaynağıyla ilerlenir, seri katman B8'de. Muhittin'e sorular hâlâ geçerli (aşağıda).
 - `pano.py` bugün yalnız `/`, `/state`, `/events`, `/control` sunuyor. Masa, rapor, kart sağlığı ve kişi panelinin ek
   verisi için `/api/people`, `/api/assign`, `/api/unassign`, `/api/people/import`, `/api/cards`, `/api/sessions`
   gerekiyor. Biçimleri `SUNUCUDAN_ISTENENLER.md` §1–3, §6 ve §8'de.
@@ -207,6 +209,9 @@ kararlar): **`BACKEND_PLAN.md`** (02.10.2026, taslak — uygulamaya başlanmadı
 | Kişi paleti | Brief paleti açık zemine uyarlanır; **`#199e70` paletten çıkarılır** | Gerekçe: yeşil yalnızca "birlikte" durumunun rengi (brief §10 kendi önerisi) |
 | Mock mimarisi | **Gerçek SSE mock sunucusu** (tek dosya Node) | pano.py ile birebir aynı sözleşme; EventSource/kopma davranışı gerçekçi test edilir |
 | İlk hedef | **Organizatör panosu** | Brief §12 öncelik sırası korunuyor |
+| Gerçek sunucu dili (03.10.2026) | **Python 3.11 + FastAPI + uvicorn + pyserial**; SQLite (stdlib) | `BACKEND_PLAN.md` Bölüm 3; Muhittin'in Python kodu taşınabilir. Başka bağımlılık onaya tabi |
+| Gerçek sunucu konumu | **Aynı repo, `sunucu/` klasörü, `backend` dalı** (ayrı PR) | Sözleşme testleri arayüzle aynı yerde koşar |
+| Donanım | **Şimdilik yok → benzetim kaynağıyla başlanır** | Seri katman arayüz olarak bırakılır; paket biçimi gelince `SeriKaynak` tamamlanır (B8) |
 
 ---
 
@@ -728,6 +733,133 @@ küçük dokunma hedefleri (menü bağlantısı 20 px, tema 28, eşik/sıfırla 
 
 ---
 
+### ⬜ Faz B — Gerçek sunucu (Python), `sunucu/` klasörü, `backend` dalı (planlandı 03.10.2026, onay bekliyor)
+
+**Amaç:** Arayüzün mock'tan aldığı her şeyi gerçek bir sunucudan, aynı sözleşmeyle vermek. Ayrıntılı gerekçe, mimari,
+veri modeli, kurallar ve riskler `BACKEND_PLAN.md`'de; **burası uygulama sırası ve kabul ölçütleridir.** Her B fazı
+ayrı onayla başlar (Bölüm 0 kuralı), kendi commit'lerini alır, sonunda `docs/backend/Bn_NOT.md` yazılır.
+
+**Verilen kararlar (03.10.2026, Şevval):** Python 3.11 + FastAPI + uvicorn + pyserial; aynı repoda `sunucu/`; `backend` dalı
+(`faz-0-altyapi` üzerinden), ayrı PR; donanım ve seri paket biçimi **yok** → benzetim kaynağıyla başlanır, seri katman
+arayüz olarak bırakılır. Bağımlılıklar (tamamı): `fastapi`, `uvicorn[standard]`, `pyserial`; geliştirme: `pytest`,
+`pytest-asyncio`, `httpx`. **Başka paket onaysız eklenmez.**
+
+**Sunucu için mimari kuralları (Bölüm 0'ın karşılığı):**
+- `sunucu/yakinlik/cekirdek/` → **saf**: I/O yok, zaman parametre (`simdi: float`), her kural birim testli.
+- `sunucu/yakinlik/http/` → ince katman: doğrulama (pydantic şema = sözleşme) + çekirdek çağrısı + JSON. İş kuralı yazılmaz.
+- `sunucu/yakinlik/giris/` → `PaketKaynagi` arayüzü; benzetim / kayıt / seri aynı `Paket`'i üretir.
+- Alan durumunu **yalnız olay döngüsü** (`motor.py`) değiştirir; HTTP işleyicileri komut kuyruğuna bırakır.
+- Mock (`mock-server/mock.js`) **çalışan şartname**: aynı girdiye aynı karar. Fark bulunursa önce mock'un neden öyle
+  olduğu anlaşılır, sonra sözleşme belgesi (`SUNUCUDAN_ISTENENLER.md`) güncellenir — asla sessizce sapılmaz.
+- Mock'a özgü uçlar (`/api/demo`, `/api/yaklastir`, `/api/demo/tut`) gerçek sunucuda **tanımlanmaz** (404).
+- Kart no 1–99 kişi, 100+ dinleyici; metre/cm/konum üretilmez.
+
+**Geliştirme döngüsü:** `cd sunucu && python -m yakinlik --kaynak benzetim --port 8002` + kökte `npx vite` (proxy zaten
+8002'ye gider). Doğrulama sırası: `pytest` yeşil → `npm run build` → arayüz tarayıcıda gerçek sunucuyla (390/768/1280).
+
+#### B0 ⬜ İskelet (tahmin: 1 gün)
+- **B0.1** `sunucu/pyproject.toml` (paket adı `yakinlik`, Python ≥3.11), `requirements.txt` + `requirements-dev.txt`,
+  `.gitignore` (`.venv/`, `veri/`, `__pycache__/`), `README.md` (kurulum + çalıştırma, 10 satır).
+- **B0.2** `yakinlik/ayar.py`: `config.toml` okuma (stdlib `tomllib`) + komut satırı (`--port --kaynak --dist --veri --seri`);
+  varsayılanlar: port 8002, kaynak `benzetim`, dist `../dist`, eşik −72, etkinlik adı/alt başlık/tarih.
+- **B0.3** `yakinlik/saat.py`: `Saat` arayüzü (`simdi()` duvar, `monotonic()`); gerçek ve **sahte** (test) uygulaması.
+- **B0.4** `yakinlik/http/uygulama.py`: FastAPI app; `dist/` statik servis; **MIME tablosu elle** (`.js` → `text/javascript`,
+  `.css`, `.svg`, `.woff2`, `.json`); `/` ve `/?clean=1` → `index.html`; `dist/` yoksa `/` 200 "arayüz derlenmedi" metni.
+  `GET /api/health` → `{ok, surum, kaynak}`. `/api/*` bilinmeyen uç → 404 `{ok:false, hata}`; işleyici istisnası → 500, süreç düşmez.
+- **B0.5** `yakinlik/__main__.py`: `python -m yakinlik` uvicorn'u başlatır; `Ctrl+C` temiz kapanış.
+- **B0.6** `tests/` iskeleti: `conftest.py` (sahte saat, `httpx.AsyncClient`), ilk testler: `/api/health` 200,
+  `/assets/x.js` MIME, `/api/yok` 404 JSON, `/api/demo` 404.
+- **B0.7** `baslat.sh` / `baslat.bat`: `.venv` yoksa kur (`pip install -r requirements.txt`; `wheelhouse/` varsa `--no-index`), çalıştır.
+- **Doğrulama / kabul:** `pytest` yeşil; `npm run build` sonrası `python -m yakinlik` → tarayıcıda `http://localhost:8002/`
+  arayüz açılıyor ("Veri bekleniyor…" — henüz `/state` yok, çökmüyor); `.js` dosyaları doğru MIME; `/api/demo` 404.
+
+#### B1 ⬜ Giriş katmanı + sinyal işleme (tahmin: 2 gün)
+- **B1.1** `giris/paket.py`: `Paket{kart: str, duyulanlar: [(kart, rssi)], pil: int|None, t: float}` dataclass; 100+ kart
+  işaretlenir ama **atılmaz** (`/api/cards` için). Ayrıştırıcı **yok** (biçim bilinmiyor) — `SeriKaynak` B8'de.
+- **B1.2** `giris/kaynak.py`: `PaketKaynagi` arayüzü (`async def paketler() -> AsyncIterator[list[Paket]]`, tik başına liste).
+- **B1.3** `giris/benzetim.py`: mock `tik()` dinamiğinin Python'u — aynı tohumlu RNG değil, **aynı senaryo zamanlaması**:
+  Kart 14 → 45. sn, kayıp kart → 180–300. sn, alıcı kopması → 120. sn ve her 360 sn (`--kopma=0` ile kapalı), yedek kartlar
+  (6 adet, masada), `--kisi` (≤97), `--hizlandir`. Ad/kurum listeleri mock'tan. Böylece arayüzün Faz 2–5 kabul betikleri
+  **aynen** çalışır.
+- **B1.4** `giris/kayit.py`: `--kaydet iz.jsonl` ile her tikin paketleri dosyaya; `--kaynak kayit --iz dosya` ile aynı
+  zamanlamayla geri oynatma (altın dosya testleri için).
+- **B1.5** `cekirdek/sinyal.py` (saf): çift anahtarı `"küçük-büyük"`, ölçüm (`ab`, `ba`, `value`), 10 sn penceresi + ortanca +
+  `n`, 90 sn / 2 sn kovalı grafik serisi (en eski başta), 30 sn duyulmayan çiftin unutulması, `seenAgo`, `receiverAge`.
+  Testler: pencere sınırları, tek yönlü veri (`null`), kova sıralaması, 100+ eleme.
+- **Doğrulama / kabul:** `pytest` yeşil; benzetim 60 sn koşup `signals` sayısı ve `history` uzunluğu mock'la aynı büyüklükte
+  (±%10); kayıt → oynatma aynı `signals` dizisini üretir (deterministik).
+
+#### B2 ⬜ `/state` · `/events` · `/control` eşdeğerliği (tahmin: 3 gün) — pano, kurulum, sunum gerçek sunucuyla
+- **B2.1** `cekirdek/cift.py`: eşik karşılaştırması, 5 sn giriş / 15 sn çıkış histerezisi, `together`, `birlikteSn`;
+  `cekirdek/kenar.py`: kişi kimliği (`kisiId` ya da `"kart:N"`) ile dakika birikimi (başladığı tik dahil), `invMin`, `invPeers`.
+- **B2.2** `cekirdek/bildirim.py`: `deal` (yıldız tablosu, `rules.dealAfterS` zorlaması), `repeat` (kişi çifti), `idle_investor`
+  (6 dk, `seenAgo<30`), `lost` (60 sn, tekrar duyulunca sıfırlanır), `no_investor` (kapalı); `clock` + `t`; `people` kart no.
+  **`idleSinceS`** burada sayılır.
+- **B2.3** `cekirdek/durum.py`: brief §5.1 nesnesi — `people` rol sırası, `status` (talking/idle/away), `withName`, `live` dk,
+  `stats`, `event.progress`, `clock` ve `elapsed` **aynı andan**, `threshold`, `signals`, `history`, `chartSeconds`, `rules`.
+  100+ cihaz hiçbir koleksiyonda yok. Kartı olmayan kişi yok.
+- **B2.4** `motor.py`: 500 ms tik; kuyruktan paketler → sinyal → çift → kenar → bildirim → `durumUret()` **bir kez** →
+  JSON **bir kez** → SSE istemcilerine aynı tampon. Alıcı kopukken (paket yok) sayaçlar donar, `seenAgo`/`receiverAge` büyür,
+  **yayın sürer.** Komut kuyruğu (`reset`, `threshold`; sonra `/api/*`).
+- **B2.5** `http/durum_uclari.py`: `GET /state` (`no-store`), `GET /events` (ilk mesaj hemen, `\n\n`, `X-Accel-Buffering: no`,
+  kopan istemci düşer, yavaş istemci >5 mesaj birikince kapatılır), `POST /control` (`reset` → çekirdek sıfırla; `threshold`
+  −100…−20 değilse 400; başarıda 200 `{ok:true}`). Eşik bu fazda bellekte; kalıcılık B6.
+- **B2.6** Arayüz tarafı küçük iş: `mock-server/*.test.js` dosyalarına `SUNUCU=` ortam değişkeni — verilirse mock başlatmayıp
+  o adrese koşarlar (benzetim senaryolarına bağlı olanlar aynı zamanlamayla geçmeli). `package.json`'a `test:sunucu` betiği.
+- **Doğrulama / kabul:** `pytest`; `SUNUCU=http://localhost:8002 npm run test:sunucu` → `mock.test.js`, `saglamlik.test.js`,
+  `kalibrasyon.test.js` yeşil; tarayıcıda **Pano, Kurulum, Sunum** gerçek sunucuyla (benzetim) 390/768/1280 — Faz 1, 3, 5
+  kabul ölçütleri; alıcı kopması penceresinde (120. sn) "ALICI BAĞLI DEĞİL" bandı çıkıyor ve "bağlanılamıyor" **çıkmıyor**
+  (yayın 2 Hz sürüyor); 1,5 sn'de ≥2 SSE mesajı; eşik kaydırıcısı değiştirip geri okuyor.
+
+#### B3 ⬜ Kişi kayıt defteri + atama + CSV (tahmin: 3 gün) — karşılama masası gerçek sunucuyla
+- `cekirdek/kisi.py` (kayıt, renk ataması brief §10 paleti, doğrulama/kırpma), `cekirdek/atama.py` (ata / iade / geri al /
+  değişim; kart başkasındaysa eski atama kapanır, `ayrildi` değişmez; kişinin başka kartı varsa değişim → kenarlar birleşir,
+  `kart:N` kayıtları kişiye geçer; iade/değişimde açık çift kapatılır, eşi serbest), `cekirdek/csv_ice.py` (ayraç `; , \t`,
+  Türkçe/harfsiz başlık, tırnak + `""`, BOM, yinelenen ad+kurum, satır no), `http/api_uclari.py` + `http/semalar.py`:
+  `GET/POST /api/people`, `PATCH/DELETE /api/people/{id}`, `POST /api/people/import`, `POST /api/assign`, `POST /api/unassign`.
+  Durum kodları `BACKEND_PLAN.md` Bölüm 8.2. Atama geçmişi listesi (`GET /api/assignments`) burada **kaydedilir**, B5'te sunulur.
+- **Kabul:** `mock-server/{api,degisim,iade,iceaktar}.test.js` senaryoları `tests/`'te yeşil ve `SUNUCU=` ile de yeşil;
+  tarayıcıda **Faz 2 kabul akışı 11/11** (kart ver / değiştir / iade / geri al / CSV / kayıp kart) gerçek sunucuyla.
+
+#### B4 ⬜ Kartlar — `GET /api/cards` (tahmin: 1–2 gün)
+- Alıcının duyduğu tüm kartlar (atanmış, yedek, iade dönmüş, 100+), `rssiAlici`, `seenAgo`, `pil`, `atanan`; benzetimde
+  yedekler masada −80 civarı, "yaklaştır" senaryosu **yok** (mock'un `/api/yaklastir`'ı demo; gerçek kart yaklaştırılır).
+  Yedek kartlar `people`'a **girmez** (Soru 1 varsayılanı: yalnız bir görüşmeye girince eklenir).
+- **Kabul:** `stok.test.js`, `cards.test.js` senaryoları; Kurulum kart sağlığı tablosu ve masadaki "boştaki kartlar" şeridi
+  gerçek sunucuyla; Faz 3 kabul 16/16.
+
+#### B5 ⬜ Görüşme kayıtları + atama geçmişi + bildirim kimlikleri (tahmin: 2 gün) — kişi paneli ve rapor
+- `cekirdek/oturum.py` (`together` olunca açılır, bitince kapanır; iade/değişimde kapanır; `kart:N` → kişiye devir),
+  `GET /api/sessions` (etkinlik sn, 1 ondalık, `end:null`), `GET /api/assignments`, `alerts[].kisiler` (Yeni Soru 7 —
+  geriye uyumlu ek alan).
+- **Kabul:** `oturum.test.js` eşdeğeri (çift başına kayıt toplamı ≈ `edges.min` ±1 tik); Faz 4 kabul 13/13 (zaman çizelgesi,
+  rapor, iki CSV) gerçek sunucuyla.
+
+#### B6 ⬜ Kalıcılık + sıfırlama (tahmin: 2 gün)
+- `depo/sema.sql` + `depo/sqlite.py` (WAL): kişi, atama, oturum, kenar, bildirim, anlaşma, ayar (eşik, başlangıç zamanı,
+  etkinlik). Tik sonunda yalnız **değişenler**, tek işlem. Açılışta yükleme; açık oturumlar yeniden başlatmada kapatılır;
+  `elapsed` sürer. `reset`: süreler/kenarlar/kayıtlar/bildirimler/atama geçmişi silinir, **kişiler + açık atamalar + eşik kalır**
+  (Yeni Soru 8 varsayılanı); reset öncesi otomatik yedek kopyası. Eşik artık **kalıcı** (brief §5).
+- **Kabul:** süreç `kill -9` ile öldürülüp açılınca `/api/people`, `/api/sessions`, `/state.edges`, `threshold` aynı; reset
+  sonrası beklenen kümeler boş/dolu; `veri/yedek/` dosyası var.
+
+#### B7 ⬜ Sertleştirme + dağıtım (tahmin: 2 gün)
+- Yük: `--kisi 97` 30 dk — tik < 50 ms, JSON boyutu, bellek sabit, 5 SSE istemcisi. Yavaş istemci kesme, gövde sınırı 1 MB /
+  413, metin kırpma, günlük (`yakinlik.log`, döner), `wheelhouse/` ile çevrimdışı kurulum provası, Windows MIME/COM notları,
+  `docs/backend/DAGITIM.md` (etkinlik sabahı kontrol listesi).
+- **Kabul:** yük ölçümleri belgede; temiz makinede `pip install --no-index` başarılı; `baslat.sh` tek komutla açıyor.
+
+#### B8 ⬜ Donanım ve geçiş günü (Muhittin'e bağlı; tahmin: 2–3 gün)
+- Seri paket biçimi belgesi (`docs/backend/SERI_PROTOKOL.md`) → `giris/seri.py` (pyserial thread → kuyruk, aygıt çekilince
+  2 sn'de bir yeniden açma, `--seri auto` VID/PID) + ayrıştırıcı testleri; gerçek alıcıyla 10 dk iz kaydı → `tests/izler/`;
+  `server.py` yumuşatması ile ortanca karşılaştırması; Soru 1–6 + 7–11 cevaplarının uygulanması; Faz 2–5 kabul akışları
+  gerçek kartlarla; `SUNUCUDAN_ISTENENLER.md` "gerçekleşti" işaretleri; DEVİR NOTU güncellemesi; PR.
+
+**Sıra ve bağımlılık:** B0 → B1 → B2 zorunlu sıra. B3, B4, B5 B2'den sonra bu sırayla (masa → kartlar → rapor; brief §12
+önceliği). B6 B3'ten sonra her an öne alınabilir (kayıt defteri kaybı en pahalı risk). B7 B6'dan sonra. B8 donanım gelince.
+
+---
+
 ## 3. PROJE YAPISI (güncel, 30.09.2026)
 
 ```
@@ -735,7 +867,8 @@ SaasBridge/
 ├─ UI_TASARIM_BRIEF.md        # gereksinim belgesi (Muhittin) — her şeyin kaynağı
 ├─ PLAN.md                    # bu dosya: kurallar, kararlar, fazlar, devir notu
 ├─ SUNUCUDAN_ISTENENLER.md    # Muhittin'e: istenen uçlar, veri biçimleri, açık sorular
-├─ BACKEND_PLAN.md            # gerçek sunucu yol haritası (mimari, sözleşme, kalıcılık, test, fazlar B0–B8) — taslak
+├─ BACKEND_PLAN.md            # gerçek sunucu yol haritası (mimari, sözleşme, kalıcılık, test, fazlar B0–B8)
+├─ sunucu/                    # gerçek sunucu (Python + FastAPI) — Faz B ile doluyor; yakinlik/{giris,cekirdek,http,depo}, tests/
 ├─ dev.js                     # npm run dev: mock (8002) + Vite birlikte
 ├─ vite.config.js             # geliştirmede /state /events /control /api → 8002 proxy
 ├─ mock-server/
