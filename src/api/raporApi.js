@@ -14,7 +14,7 @@ export class RaporApi {
   // Görüşme kayıtları: [{ a, b, start, end }] — a/b kişi kimliği, etkinlik saniyesi.
   oturumlariGetir() { return jsonIstek(this.adres, '/api/sessions') }
   // Anlık görüntü için tek seferlik durum (başlık, saat, geçen süre, anlaşma sayısı); canlı akış dinlenmez.
-  durumGetir() { return jsonIstek(this.adres, '/state') }
+  durumGetir() { return jsonIstek(this.adres, '/state?grafik=0') } // grafik verisi raporda gerekmez
 
   // Kart bilgisi (pil, son duyulma) — kişi ayrıntı paneli.
   kartlariGetir() { return jsonIstek(this.adres, '/api/cards') }

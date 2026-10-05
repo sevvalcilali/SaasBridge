@@ -25,3 +25,11 @@ test('henüz değer yokken (veri gelmeden) bekletmez — ilk gerçek değer heme
   const a = seyrekDeger(null, null, 0, 2000, false)
   assert.equal(seyrekDeger(a, { signals: [] }, 10, 2000, true).deger.signals.length, 0)
 })
+
+test('seyrekDeger zorla: süre dolmadan da hemen yenilenir ("Şimdi güncelle")', () => {
+  const ilk = seyrekDeger(null, { v: 1 }, 1000, 60000, true)
+  const bekle = seyrekDeger(ilk, { v: 2 }, 5000, 60000, true)
+  const zorla = seyrekDeger(bekle, { v: 3 }, 6000, 60000, true, true)
+  assert.equal(bekle.deger.v, 1)
+  assert.deepEqual([zorla.deger.v, zorla.zaman], [3, 6000])
+})

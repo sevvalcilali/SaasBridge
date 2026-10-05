@@ -1,7 +1,7 @@
 // Hash yönlendirme: panodaki "Kişi ata" masayı o kartla açar.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { rotaAdi, rotaKart, kartVerAdresi, rotaParametresi, kartDegistirAdresi, kartIadeAdresi, sunumModuMu, isimsizMi, sunumAdresi } from './useRota.js'
+import { rotaAdi, rotaKart, kartVerAdresi, rotaParametresi, kartDegistirAdresi, kartIadeAdresi, sunumModuMu, isimsizMi, sunumAdresi, raporKisisi, kisiRaporuAdresi } from './useRota.js'
 
 test('rotaAdi: kart-ver (parametreli ya da değil), kurulum; diğer her şey pano', () => {
   assert.equal(rotaAdi('#/kart-ver'), 'kart-ver')
@@ -42,4 +42,13 @@ test('sunum modu: ?clean=1 (brief §4.5), isimsiz ayrı bayrak; adres hash rotas
   assert.equal(isimsizMi('?clean=1'), false)
   assert.equal(sunumAdresi(), '?clean=1#/')
   assert.equal(sunumAdresi(true), '?clean=1&isimsiz=1#/')
+})
+
+test('kişiye özel rapor adresi: #/rapor?kisi=k3 → Rapor; kimlik ya da "yatirimcilar" (hepsi)', () => {
+  assert.equal(rotaAdi('#/rapor?kisi=k3'), 'rapor')
+  assert.equal(raporKisisi('#/rapor?kisi=k3'), 'k3')
+  assert.equal(raporKisisi('#/rapor?kisi=yatirimcilar'), 'yatirimcilar')
+  assert.equal(raporKisisi('#/rapor'), null)
+  assert.equal(raporKisisi('#/rapor?kisi=<script>'), null)
+  assert.equal(raporKisisi(kisiRaporuAdresi('k12')), 'k12')
 })

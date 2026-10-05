@@ -1,7 +1,7 @@
 // Rapor: kişi/çift toplamları, girişimci → yatırımcı, en uzunlar, ayrılanlar, saat.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi } from './rapor.js'
+import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi, kisiRaporu } from './rapor.js'
 
 const K = [
   { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', atananKart: '10', ayrildi: false },
@@ -90,4 +90,28 @@ test('yatirimciMatrisi: satır yatırımcı, sütun girişimci, hücre birlikte 
   assert.equal(m.hucre.get('k1|k3'), 600)
   assert.equal(m.hucre.get('k6|k3'), undefined)
   assert.equal(m.enCok, 600)
+})
+
+test('kisiRaporu: karşı rol süreye göre, ilk saat, anlaşma; aynı rol ayrı; gelip görüşülmeyenler "kaçırdıkların"', () => {
+  const kisiler = [...K, { kisiId: 'k7', ad: 'Gül Ay', rol: 'founder', kurum: 'Mavi', atananKart: '20', ayrildi: false }]
+  const alerts = [{ kind: 'deal', kisiler: ['k3', 'k1'] }, { kind: 'repeat', kisiler: ['k2', 'k1'] }]
+  const r = kisiRaporu('k1', kisiler, O, SIMDI, { saat: '10:00:00', elapsed: SIMDI, alerts })
+
+  assert.equal(r.kisi.kisiId, 'k1')
+  assert.deepEqual(r.karsi.map((x) => [x.kisi.kisiId, x.toplamSn, x.adet, x.ilkSaat, x.anlasma]),
+    [['k3', 600, 1, '09:50', true], ['k2', 400, 2, '09:35', false]])
+  assert.deepEqual(r.diger, [])
+  assert.deepEqual(r.kacirilan.map((k) => k.kisiId), ['k7'], 'k5 hiç kart almadı (gelmedi): kaçırılan sayılmaz')
+  assert.deepEqual(r.ozet, { karsiSayisi: 2, karsiSn: 1000, toplamSn: 1000, anlasma: 1 })
+})
+
+test('kisiRaporu girişimci için: karşı rol yatırımcılar, misafir "diğer"', () => {
+  const r = kisiRaporu('k3', K, O, SIMDI, { saat: '10:00:00', elapsed: SIMDI, alerts: [] })
+  assert.deepEqual(r.karsi.map((x) => x.kisi.kisiId), ['k1'])
+  assert.deepEqual(r.diger.map((x) => [x.kisi.kisiId, x.toplamSn]), [['k4', 60]])
+})
+
+test('kisiRaporu: kayıtsız kart ("kart:N") katılımcıya gösterilmez', () => {
+  const r = kisiRaporu('k4', K, O, SIMDI, {})
+  assert.deepEqual(r.diger.map((x) => x.kisi.kisiId), ['k3'])
 })

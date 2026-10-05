@@ -207,7 +207,9 @@
 
 /* --- Görünürlük (2026-10): tam genişlik eşik + grafik paneli --- */
 .kurulum-sinyal { margin-bottom: var(--aralik-4); }
-.kurulum-sinyal-bas { display: flex; align-items: center; justify-content: space-between; gap: var(--aralik-3); flex-wrap: wrap; }
+.kurulum-sinyal-bas { display: flex; align-items: center; gap: var(--aralik-3); flex-wrap: wrap; }
+.kurulum-sinyal-bas .kurulum-baslik { margin-right: auto; }
+.kurulum-tazeleme { margin: 0; color: var(--metin-2); font-size: var(--punto-kucuk); }
 .kurulum-sinyal-esik { max-width: 720px; }
 .kurulum-sinyal:fullscreen { background: var(--zemin); padding: var(--aralik-5); overflow: auto; border-radius: 0; }
 /* Eşik altındaki çift soluk; üzerine gelinen çift öne çıkar, diğerleri solar. */

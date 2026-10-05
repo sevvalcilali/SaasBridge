@@ -24,7 +24,7 @@ export function useRota() {
 export function rotaAdi(hash) {
   if (hash === KART_VER || hash.startsWith(`${KART_VER}?`)) return 'kart-ver'
   if (hash === KURULUM_ADRESI) return 'kurulum'
-  if (hash === RAPOR_ADRESI) return 'rapor'
+  if (hash === RAPOR_ADRESI || hash.startsWith(`${RAPOR_ADRESI}?`)) return 'rapor'
   return 'pano'
 }
 
@@ -45,3 +45,11 @@ export const sunumModuMu = (search) => new URLSearchParams(search).get('clean') 
 export const isimsizMi = (search) => new URLSearchParams(search).get('isimsiz') === '1'
 export const sunumAdresi = (isimsiz = false) => `?clean=1${isimsiz ? '&isimsiz=1' : ''}#/`
 export const SUNUMDAN_CIKIS = './#/'
+
+// Kişiye özel rapor: #/rapor?kisi=k12 (tek kişi) ya da ?kisi=yatirimcilar (bütün yatırımcılar, art arda sayfalar).
+export function raporKisisi(hash) {
+  if (rotaAdi(hash) !== 'rapor') return null
+  const v = new URLSearchParams(hash.split('?')[1] ?? '').get('kisi')
+  return v && /^[a-z0-9:_-]+$/i.test(v) ? v : null
+}
+export const kisiRaporuAdresi = (kisiId) => `${RAPOR_ADRESI}?kisi=${encodeURIComponent(kisiId)}`
