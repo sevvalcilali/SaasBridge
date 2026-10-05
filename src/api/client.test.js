@@ -35,15 +35,17 @@ function testSunucusu(secenekler = {}) {
   const { stateHatasi = false, sseKapat = 0, satirSonu = '\n' } = secenekler
   const olay = (d) => `data: ${JSON.stringify(d)}${satirSonu}${satirSonu}`
   const durum = structuredClone(ORNEK_DURUM)
-  const kayit = { stateIstek: 0, eventsIstek: 0, kontrolGovdeleri: [] }
+  const kayit = { stateIstek: 0, eventsIstek: 0, kontrolGovdeleri: [], adresler: [] }
   const istemciler = new Set()
   const sunucu = http.createServer((istek, yanit) => {
-    if (istek.url === '/state') {
+    kayit.adresler.push(istek.url)
+    const yol = istek.url.split('?')[0]
+    if (yol === '/state') {
       kayit.stateIstek++
       if (stateHatasi) { yanit.writeHead(500); yanit.end('patladı'); return }
       yanit.writeHead(200, { 'Content-Type': 'application/json' })
       yanit.end(JSON.stringify(durum))
-    } else if (istek.url === '/events') {
+    } else if (yol === '/events') {
       kayit.eventsIstek++
       yanit.writeHead(200, { 'Content-Type': 'text/event-stream' })
       yanit.write(olay(durum))
@@ -279,4 +281,20 @@ test('durumIsle: aynı anda aynı türden iki bildirim ayrı, kararlı anahtar a
   assert.equal(new Set(anahtarlar).size, 4)
   const d2 = durumIsle({ people: [], alerts: [...alerts] })
   assert.deepEqual(d2.alerts.map((a) => a.anahtar), anahtarlar, 'her tikte aynı anahtar')
+})
+
+test('grafik istemeyen bağlantı /state ve /events için ?grafik=0 ister; varsayılan tam durum', async () => {
+  // Kurulum grafiğinin verisi (history) durumun en büyük parçası; yalnız Kurulum ister (backend B7).
+  const s = testSunucusu()
+  const adres = await s.baslat()
+  const akisAcildi = async (n) => { while (s.kayit.eventsIstek < n) await new Promise((c) => setTimeout(c, 10)) }
+  const grafiksiz = new PanoBaglantisi({ adres, grafik: false })
+  grafiksiz.basla()
+  await akisAcildi(1)
+  grafiksiz.kapat()
+  const tam = new PanoBaglantisi({ adres })
+  tam.basla()
+  await akisAcildi(2)
+  tam.kapat(); s.kapat()
+  assert.deepEqual(s.kayit.adresler, ['/state?grafik=0', '/events?grafik=0', '/state', '/events'])
 })

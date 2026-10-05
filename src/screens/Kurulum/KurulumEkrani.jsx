@@ -24,7 +24,7 @@ const KALABALIK_CIFT = 100
 const TABLO_TAZELEME_MS = 2000
 
 export default function KurulumEkrani() {
-  const { durum, baglandi, hata, baglanti } = usePano()
+  const { durum, baglandi, hata, baglanti } = usePano({ grafik: true }) // sinyal grafiği yalnız burada
   const [taslakEsik, setTaslakEsik] = useState(null) // kaydırılırken grafik anında izler
   const [perspektif, setPerspektif] = useKalici('kurulum.perspektif', null) // seçili kişinin kart no'su; yenilemede korunur
   const apiRef = useRef(null)

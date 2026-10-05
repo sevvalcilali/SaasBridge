@@ -231,3 +231,26 @@ test('alıcı kopması: receiverAge büyür, sonra toparlanır', async () => {
   const geldi = await bekleKi(8104, (s) => s.receiverAge !== null && s.receiverAge < 5, 12000, 25)
   assert.ok(geldi.tamam, 'alıcı geri gelmedi')
 })
+
+// ---------- Grafik verisi yalnız isteyene (port 8128): /state ve /events ?grafik=0 → history {} ----------
+
+test('?grafik=0: history boş gelir, geri kalan aynı; parametre yoksa tam', async () => {
+  sunucuBaslat(['--port=8128', '--kisi=25', '--tohum=7', '--hizlandir=60'])
+  await hazirBekle(8128)
+  await bekleKi(8128, (s) => Object.keys(s.history).length > 0)
+
+  const tam = await durum(8128)
+  const grafiksiz = await (await fetch('http://localhost:8128/state?grafik=0')).json()
+  assert.ok(Object.keys(tam.history).length > 0)
+  assert.deepEqual(grafiksiz.history, {})
+  assert.deepEqual(Object.keys(grafiksiz).sort(), Object.keys(tam).sort())
+
+  const kontrol = new AbortController()
+  const yanit = await fetch('http://localhost:8128/events?grafik=0', { signal: kontrol.signal })
+  const okuyucu = yanit.body.getReader()
+  let metin = ''
+  while ((metin.match(/\n\n/g) ?? []).length < 3) metin += new TextDecoder().decode((await okuyucu.read()).value)
+  kontrol.abort()
+  const mesajlar = metin.split('\n\n').filter(Boolean).slice(0, 3).map((b) => JSON.parse(b.replace(/^data: /, '')))
+  for (const m of mesajlar) assert.deepEqual(m.history, {})
+})

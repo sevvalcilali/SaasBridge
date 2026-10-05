@@ -843,18 +843,23 @@ const sunucu = http.createServer((istek, yanit) => {
     })
     return
   }
-  if (istek.method === 'GET' && istek.url === '/state') {
+  // ?grafik=0 → history {} (sinyal grafiğini yalnız Kurulum ister; gerçek sunucuyla aynı, backend B7)
+  const [durumYolu, durumSorgu = ''] = istek.url.split('?')
+  const grafikli = new URLSearchParams(durumSorgu).get('grafik') !== '0'
+  const grafigeGore = (d) => (grafikli ? d : { ...d, history: {} })
+  if (istek.method === 'GET' && durumYolu === '/state') {
     yanit.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' })
-    yanit.end(JSON.stringify(durumUret()))
+    yanit.end(JSON.stringify(grafigeGore(durumUret())))
     return
   }
-  if (istek.method === 'GET' && istek.url === '/events') {
+  if (istek.method === 'GET' && durumYolu === '/events') {
     yanit.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
     })
-    yanit.write(`data: ${JSON.stringify(durumUret())}\n\n`)
+    yanit.grafik = grafikli
+    yanit.write(`data: ${JSON.stringify(grafigeGore(durumUret()))}\n\n`)
     sseIstemciler.add(yanit)
     istek.on('close', () => sseIstemciler.delete(yanit))
     return
@@ -888,8 +893,12 @@ const sunucu = http.createServer((istek, yanit) => {
 setInterval(() => {
   tik()
   if (sseIstemciler.size) {
-    const veri = `data: ${JSON.stringify(durumUret())}\n\n`
-    for (const istemci of sseIstemciler) istemci.write(veri)
+    const d = durumUret()
+    const tam = `data: ${JSON.stringify(d)}\n\n`
+    let grafiksiz = null
+    for (const istemci of sseIstemciler) {
+      istemci.write(istemci.grafik ? tam : (grafiksiz ??= `data: ${JSON.stringify({ ...d, history: {} })}\n\n`))
+    }
   }
 }, TIK_MS)
 

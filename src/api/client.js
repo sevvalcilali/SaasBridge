@@ -57,8 +57,11 @@ export function durumIsle(ham) {
 }
 
 export class PanoBaglantisi {
-  constructor({ adres = SUNUCU_ADRESI, bekleme = null, sessizlikEsigiMs = 6000 } = {}) {
+  constructor({ adres = SUNUCU_ADRESI, bekleme = null, sessizlikEsigiMs = 6000, grafik = true } = {}) {
     this.adres = adres.replace(/\/$/, '')
+    // Sinyal grafiğinin verisi (history) büyük etkinlikte durumun ~%60'ı; yalnız Kurulum kullanır.
+    // grafik: false → sunucu onu göndermez (history: {}), Wi-Fi ve sunucu yükü düşer.
+    this.sorgu = grafik ? '' : '?grafik=0'
     this.beklemeGecersizKil = bekleme
     // Sunucu ~2 Hz yayınlar; bu kadar süre HİÇ mesaj gelmezse bağlantı sessizce
     // ölmüş sayılır (soket asılı kaldıysa hata/kapanış gelmez) → yeniden bağlan.
@@ -95,7 +98,7 @@ export class PanoBaglantisi {
 
     // Açılışta bir kez tam durum (brief §5): akış gecikirse ekran boş kalmasın.
     try {
-      const yanit = await fetch(`${this.adres}/state`)
+      const yanit = await fetch(`${this.adres}/state${this.sorgu}`)
       if (yanit.ok) this.durumAyarla(await yanit.json())
     } catch {
       /* akış yine de denenir */
@@ -119,7 +122,7 @@ export class PanoBaglantisi {
   async akisiDinle() {
     const kontrol = new AbortController()
     this.iptal = kontrol
-    const yanit = await fetch(`${this.adres}/events`, {
+    const yanit = await fetch(`${this.adres}/events${this.sorgu}`, {
       signal: kontrol.signal,
       headers: { Accept: 'text/event-stream' },
     })

@@ -140,7 +140,7 @@ Kurulum ekranı bugünkü sözleşmeyle çalışıyor; yalnız aşağıdakilerin
 |---|---|
 | `/state.threshold` | Kaydırıcının ve grafikteki eşik çizgisinin değeri |
 | `/state.signals[]` (`a, b, ab, ba, value, n, above, together`) | Çift tablosu. `value` = **son 10 sn ortancası** olmalı: kalibrasyon "10 sn tut → o anki `value`" ile ölçüyor |
-| `/state.history` (`"a-b": [[saniyeÖnce, dBm], …]`, en eski başta) + `chartSeconds` | Canlı grafik. Anahtar `"küçükNo-büyükNo"` |
+| `/state.history` (`"a-b": [[saniyeÖnce, dBm], …]`, en eski başta) + `chartSeconds` | Canlı grafik. Anahtar `"küçükNo-büyükNo"`. Yalnız Kurulum ister: diğer ekranlar `/state?grafik=0` ve `/events?grafik=0` ile bağlanır, `history` boş `{}` gelir (parametre yoksa tam durum) |
 | `POST /control {"cmd":"threshold","value":-68}` | Kaydırıcı (bırakınca ~250 ms sonra tek istek) ve kalibrasyon onayı. 2xx dışı yanıt hata sayılır, ekran eski değere döner |
 | `GET /api/cards` (`seenAgo`, `pil`, `atanan`) | Kart sağlığı: ≥60 sn "duyulmuyor", >30 sn "görünmüyor", pil <%20 "pil düşük" |
 
@@ -205,6 +205,8 @@ ile aynı olsun.
   ayrıştırıyor. Şimdilik sorun değil (4× yavaşlatılmış işlemcide pano %12 meşgul), ama gerçek
   salonda çift sayısı daha da büyürse `history`'nin yalnız Kurulum açıkken gönderilmesi
   düşünülebilir.
+  **Gerçekleşti (05.10.2026, backend B7):** gerçek sunucuda 97 kişi, 3. saat: `/state` ~620 KB, ~%60'ı
+  `history`. Artık yalnız Kurulum `history` alıyor (`?grafik=0`, yukarıda); isteyen ekran yoksa sunucu onu hesaplamıyor.
 
 **Soru 6 (Muhittin):** Brief §12 "kalabalık (100+ kişi)" diyor, ama kart numaraları 1–99
 (100 ve üstü dinleyici cihaz). Aynı anda en çok ~98 kartlı kişi olabiliyor. 100+ kişilik
