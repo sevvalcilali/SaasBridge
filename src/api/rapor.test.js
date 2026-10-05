@@ -1,7 +1,7 @@
 // Rapor: kişi/çift toplamları, girişimci → yatırımcı, en uzunlar, ayrılanlar, saat.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde } from './rapor.js'
+import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi } from './rapor.js'
 
 const K = [
   { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', atananKart: '10', ayrildi: false },
@@ -79,4 +79,15 @@ test('cizelgeAraligi / cizelgeYuzde: ilk görüşme → şimdi; boşta en az 1 d
   assert.equal(cizelgeYuzde(1600, a), 100)
   assert.equal(cizelgeYuzde(850, a), 50)
   assert.deepEqual(cizelgeAraligi([], 10), { bas: 0, son: 60 })
+})
+
+test('yatirimciMatrisi: satır yatırımcı, sütun girişimci, hücre birlikte geçen sn; görüşmeyen de listede', () => {
+  const kisiler = [...K, { kisiId: 'k6', ad: 'Fuat Ak', rol: 'investor', kurum: 'Fon', atananKart: '15', ayrildi: false }]
+  const m = yatirimciMatrisi(raporHesapla(kisiler, O, SIMDI), kisiler)
+  assert.deepEqual(m.satirlar.map((k) => k.kisiId), ['k1', 'k6'], 'en çok görüşen yatırımcı üstte; hiç görüşmeyen de var')
+  assert.deepEqual(m.sutunlar.map((k) => k.kisiId), ['k3', 'k2', 'k5'], 'girişimciler rapordaki sırayla')
+  assert.equal(m.hucre.get('k1|k2'), 400)
+  assert.equal(m.hucre.get('k1|k3'), 600)
+  assert.equal(m.hucre.get('k6|k3'), undefined)
+  assert.equal(m.enCok, 600)
 })

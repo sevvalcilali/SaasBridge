@@ -2,6 +2,7 @@
 // history: { "3-4": [[saniyeÖnce, dBm], ...] } — en eski başta (brief §5.1).
 import { ESIK_ALT, ESIK_UST } from './esik.js'
 import { kartKisisi } from './sinyal.js'
+import { kisaAd } from './ad.js'
 
 export const Y_ALT = ESIK_ALT // ölçek kaydırıcıyla aynı ve SABİT: veri gelince eksen oynamaz
 export const Y_UST = ESIK_UST
@@ -9,9 +10,30 @@ export const VARSAYILAN_CIFT = 6
 
 const parcala = (anahtar) => anahtar.split('-')
 
-// Hangi çiftler çizilir: kişi seçiliyse (perspektif) yalnız onunkiler; aksi halde
-// en güçlü N (son değere göre) ya da hepsi. Çizim sırası kart no'ya göre sabit.
-export function grafikSerileri(history, people, { hepsi = false, n = VARSAYILAN_CIFT, kisiId = null } = {}) {
+// Bir çiftin dBm'i her an zıplar; sistem "birlikte" kararını son 10 sn'nin ortancasıyla verir. Grafik de bunu
+// çizer: her nokta, o ana kadarki son `pencereSn` saniyenin ortancası (history: 2 sn'lik kovalar, en eski başta).
+export const YUMUSATMA_SN = 10
+const ortanca = (d) => {
+  const s = [...d].sort((p, q) => p - q)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+export function yumusat(noktalar, pencereSn = YUMUSATMA_SN) {
+  return noktalar.map(([sn]) => [sn, ortanca(noktalar.filter(([t]) => t >= sn && t < sn + pencereSn).map(([, v]) => v))])
+}
+
+// signals[].together (sunucu: eşiğin üstünde 1 dk kalmış, "birlikte") → history anahtarları ("küçük-büyük").
+export function birlikteAnahtarlari(signals = []) {
+  return new Set(signals.filter((s) => s.together)
+    .map((s) => (Number(s.a) < Number(s.b) ? `${s.a}-${s.b}` : `${s.b}-${s.a}`)))
+}
+
+// Hangi çiftler çizilir: kişi seçiliyse (perspektif) yalnız onunkiler (hepsi). `birlikte` verilirse varsayılan
+// yalnız 1 dk+ birlikte sayılanlar; kalabalıkta kart no sırasıyla ilk `enCok` — değer oynasa da liste değişmez
+// (okunabilirlik: Şevval kararı 2026-10). `birlikte` yoksa en güçlü N. Çizim sırası kart no'ya göre sabit.
+export function grafikSerileri(history, people, {
+  hepsi = false, n = VARSAYILAN_CIFT, kisiId = null, birlikte = null, enCok = 12, yumusak = false,
+} = {}) {
   const kisi = new Map(people.map((p) => [p.id, p]))
   let seriler = Object.entries(history)
     .filter(([, noktalar]) => noktalar.length > 0)
@@ -21,16 +43,22 @@ export function grafikSerileri(history, people, { hepsi = false, n = VARSAYILAN_
         anahtar,
         a: kisi.get(a) ?? kartKisisi(a),
         b: kisi.get(b) ?? kartKisisi(b),
-        noktalar,
-        son: noktalar[noktalar.length - 1][1],
+        noktalar: yumusak ? yumusat(noktalar) : noktalar,
       }
     })
+    .map((s) => ({ ...s, son: s.noktalar[s.noktalar.length - 1][1] }))
   if (kisiId) seriler = seriler.filter((s) => s.a.id === kisiId || s.b.id === kisiId)
   const toplam = seriler.length
-  if (!hepsi && seriler.length > n) seriler = [...seriler].sort((p, q) => q.son - p.son).slice(0, n)
   const sira = (s) => parcala(s.anahtar).map(Number)
-  seriler.sort((p, q) => sira(p)[0] - sira(q)[0] || sira(p)[1] - sira(q)[1])
-  return { seriler, toplam }
+  const kartSirasi = (p, q) => sira(p)[0] - sira(q)[0] || sira(p)[1] - sira(q)[1]
+  const birlikteSayisi = birlikte ? seriler.filter((s) => birlikte.has(s.anahtar)).length : null
+  if (birlikte && !hepsi && !kisiId) {
+    seriler = seriler.filter((s) => birlikte.has(s.anahtar)).sort(kartSirasi).slice(0, enCok)
+  } else if (!birlikte && !hepsi && seriler.length > n) {
+    seriler = [...seriler].sort((p, q) => q.son - p.son).slice(0, n)
+  }
+  seriler.sort(kartSirasi)
+  return { seriler, toplam, birlikteSayisi }
 }
 
 const sinirla = (v, alt, ust) => Math.min(ust, Math.max(alt, v))
@@ -75,3 +103,15 @@ export function anlikDegerler(seriler, saniyeOnce, tolerans = 2.5) {
 
 // "3 · 4" — brief §8 doğrudan etiket biçimi.
 export const ciftEtiketi = (s) => `${s.a.id} · ${s.b.id}`
+
+// Çizgi sonu etiketi: kart no yerine kısa ad ("Ayşe Demir · Nova Robotik"); kim olduğu tabloya bakmadan okunur.
+const kisalt = (ad) => (ad.length > 16 ? `${ad.slice(0, 12).trimEnd()}…` : ad)
+export const ciftAdi = (s) => `${kisalt(kisaAd(s.a))} · ${kisalt(kisaAd(s.b))}`
+
+// Grafik yüksekliği (px): dar ekranda kısa; genişte ekranın ~%45'i (340–520); tam ekranda ekranın tamamı
+// (üstteki eşik satırı ve eksen yazıları için pay bırakılır).
+export function grafikYuksekligi(genislik, ekranYuksekligi, tamEkran) {
+  if (tamEkran) return Math.max(240, ekranYuksekligi - 260)
+  if (genislik < 640) return 240
+  return Math.min(520, Math.max(340, Math.round(ekranYuksekligi * 0.45)))
+}

@@ -123,3 +123,6 @@
   .pano-sol, .pano-orta, .pano-sag { padding: var(--aralik-3); }
   .pano-sekme { min-height: 44px; }
 }
+
+/* Orta bölge görünüm seçici (Şimdi / Gün boyu) */
+.pano-ag-secici { align-self: flex-start; margin-bottom: var(--aralik-3); }

@@ -5,10 +5,10 @@
 // rapor sabit olduğu için canlı akış (2 Hz) dinlenmez, sayfa her tikte yeniden çizilmez.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { RaporApi } from '../../api/raporApi.js'
-import { raporHesapla } from '../../api/rapor.js'
+import { raporHesapla, yatirimciMatrisi } from '../../api/rapor.js'
 import { tarihSaatYazisi } from '../../api/format.js'
 import { katilimcilarCsv, gorusmelerCsv, csvIndir, dosyaAdi } from '../../api/csvDisa.js'
-import { Ozet, Girisimciler, EnUzun, Kisiler, Ciftler } from './RaporBolumleri.jsx'
+import { Ozet, Girisimciler, EnUzun, Kisiler, Ciftler, Matris } from './RaporBolumleri.jsx'
 import './RaporEkrani.css'
 
 export default function RaporEkrani() {
@@ -35,6 +35,7 @@ export default function RaporEkrani() {
   }, [])
   useEffect(() => { yukle() }, [yukle])
   const r = useMemo(() => veri && raporHesapla(veri.kisiler, veri.oturumlar, veri.simdi), [veri])
+  const matris = useMemo(() => r && yatirimciMatrisi(r, veri.kisiler), [r, veri])
 
   if (!veri) {
     return <main className="rapor"><p className="rp-bos">{hata ?? 'Rapor hazırlanıyor…'}</p></main>
@@ -66,6 +67,11 @@ export default function RaporEkrani() {
       <section className="rp-bolum">
         <h2>Girişimciler ve ulaştıkları yatırımcılar</h2>
         <Girisimciler girisimciler={r.girisimciler} />
+      </section>
+      <section className="rp-bolum">
+        <h2>Yatırımcı × girişimci (dakika)</h2>
+        <p className="rp-aciklama">Gün boyu kim kiminle ne kadar: koyu hücre = uzun görüşme. Boş satır, hiçbir girişimciyle görüşmemiş yatırımcı.</p>
+        <Matris m={matris} />
       </section>
       <section className="rp-bolum">
         <h2>En uzun görüşmeler</h2>

@@ -126,3 +126,23 @@ export function cizelgeAraligi(oturumlar, simdi) {
   return { bas, son: Math.max(simdi, bas + 60) } // en az 1 dk genişlik: tek kısa görüşme ezilmesin
 }
 export const cizelgeYuzde = (sn, aralik) => ((sn - aralik.bas) / (aralik.son - aralik.bas)) * 100
+
+// Gün boyu özeti matrisi: satırlar yatırımcılar (en çok girişimciyle görüşen üstte; hiç görüşmeyen de listede,
+// boş satırı da bilgidir), sütunlar girişimciler (rapordaki sırayla), hücre "yatırımcı|girişimci" → birlikte sn.
+export function yatirimciMatrisi(r, kisiler) {
+  const hucre = new Map()
+  const satirToplam = new Map()
+  let enCok = 0
+  for (const g of r.girisimciler) {
+    for (const y of g.yatirimcilar) {
+      hucre.set(`${y.kisi.kisiId}|${g.kisi.kisiId}`, y.toplamSn)
+      satirToplam.set(y.kisi.kisiId, (satirToplam.get(y.kisi.kisiId) ?? 0) + y.toplamSn)
+      enCok = Math.max(enCok, y.toplamSn)
+    }
+  }
+  const satirlar = kisiler
+    .filter((k) => k.rol === 'investor')
+    .sort((p, q) => (satirToplam.get(q.kisiId) ?? 0) - (satirToplam.get(p.kisiId) ?? 0)
+      || raporAdi(p).localeCompare(raporAdi(q), 'tr'))
+  return { satirlar, sutunlar: r.girisimciler.map((g) => g.kisi), hucre, enCok }
+}

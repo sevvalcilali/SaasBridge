@@ -53,3 +53,12 @@
   .rp-bolum { break-inside: auto; }
   .rp-renk, .rp-uyari-satir { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
+
+/* Yatırımcı × girişimci matrisi: sütun başlıkları dikey (çok girişimcide sığsın), hücre koyuluğu = süre. */
+.rp-matris th[scope='row'] { white-space: nowrap; font-weight: 400; }
+.rp-matris-kose { color: var(--metin-soluk); font-weight: 400; vertical-align: bottom; }
+.rp-matris-sutun { vertical-align: bottom; padding: var(--aralik-2) 2px; }
+.rp-matris-sutun span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; max-height: 9rem; overflow: hidden; text-overflow: ellipsis; }
+.rp-matris-hucre { text-align: center; min-width: 2.2rem; border-left: 1px solid var(--cizgi); }
+.rp-matris-bos { color: var(--metin-soluk); }
+.rp-matris-koyu { color: var(--metin-ters); font-weight: 700; }

@@ -9,7 +9,8 @@ import KisiListesi from './KisiListesi.jsx'
 import BildirimAkisi from './BildirimAkisi.jsx'
 import AltSerit from './AltSerit.jsx'
 import HataBantlari from '../../components/HataBantlari.jsx'
-import AgGorunumu from '../../components/AgGorunumu.jsx'
+import EgoGorunumu from '../../components/EgoGorunumu.jsx'
+import CanliGruplar from '../../components/CanliGruplar.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
 import { kartVerAdresi, KURULUM_ADRESI } from '../../api/useRota.js'
 import { veriCanli } from '../../api/durum.js'
@@ -23,6 +24,8 @@ export default function PanoEkrani() {
   const [seciliId, setSeciliId] = useState(null)
   // Telefonda (≤600px) tek bölge gösterilir; son sekme korunur (brief §11).
   const [sekme, setSekme] = useKalici('pano.sekme', 'kisiler')
+  // Orta bölge: "Şimdi" canlı gruplar (varsayılan), "Gün boyu" seçili kişinin gün boyu görüştükleri (ego).
+  const [agGorunum, setAgGorunum] = useKalici('pano.agGorunum', 'simdi')
 
   // Parıltı 3 sn sonra kendiliğinden söner (brief §7 tıkla-vurgula, sakin).
   useEffect(() => {
@@ -45,6 +48,11 @@ export default function PanoEkrani() {
         : bildirim.people,
     )
   }, [setSekme])
+
+  // Bir gruba tıklayınca üyeleri listede ve gruplarda parlar (bildirim tıklamasıyla aynı vurgu).
+  const grupTikla = useCallback((idler) => {
+    setVurgulanan((onceki) => (onceki.length === idler.length && onceki.every((x, i) => x === idler[i]) ? [] : idler))
+  }, [])
 
   // Atanmamış kart ("Kart N") → karşılama masası o kartla açılır, kişi seçilir.
   const kisiAta = useCallback((kisi) => { window.location.hash = kartVerAdresi(kisi.id) }, [])
@@ -102,14 +110,28 @@ export default function PanoEkrani() {
           />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
-          <AgGorunumu
-            people={durum.people}
-            edges={durum.edges}
-            live={durum.live}
-            vurgulanan={vurgulanan}
-            seciliId={seciliId}
-            onKisiSec={kisiSec}
-          />
+          <div className="tema-secici pano-ag-secici" role="group" aria-label="Görünüm">
+            {[['simdi', 'Şimdi'], ['gun', 'Gün boyu']].map(([deger, etiket]) => (
+              <button key={deger} type="button" className="tema-secici-dugme" data-test={`ag-${deger}`}
+                aria-pressed={agGorunum === deger} onClick={() => setAgGorunum(deger)}>
+                {etiket}
+              </button>
+            ))}
+          </div>
+          {agGorunum === 'gun' ? (
+            seciliKisi
+              ? <EgoGorunumu kisi={seciliKisi} people={durum.people} edges={durum.edges} live={durum.live} onKisiSec={kisiSec} />
+              : <p className="ego-sec" data-test="ego-sec">Bir kişinin gün boyu kiminle ne kadar görüştüğünü görmek için soldaki listeden ya da bir daireden onu seçin. Bütün etkinliğin özeti Rapor'da.</p>
+          ) : (
+            <CanliGruplar
+              people={durum.people}
+              live={durum.live}
+              vurgulanan={vurgulanan}
+              seciliId={seciliId}
+              onKisiSec={kisiSec}
+              onGrupSec={grupTikla}
+            />
+          )}
         </section>
         <aside className="pano-sag" data-bolge="sag" aria-label="Bildirimler">
           <BildirimAkisi alerts={durum.alerts} vurgulanan={vurgulanan} onBildirimTikla={bildirimTikla} />

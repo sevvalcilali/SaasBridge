@@ -1,5 +1,5 @@
 // Rapor sayfasının bölümleri (brief §4.4). Yalnız görüntüler; hesaplar api/rapor.js'te.
-import { raporAdi, kisiDurumYazisi, etkinlikSaati } from '../../api/rapor.js'
+import { raporAdi, kisaAd, kisiDurumYazisi, etkinlikSaati } from '../../api/rapor.js'
 import { sureYazisi } from '../../api/format.js'
 
 const ROL = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
@@ -118,6 +118,42 @@ export function Ciftler({ ciftler }) {
         ))}
       </tbody>
     </table>
+    </div>
+  )
+}
+
+// Gün boyu özeti (Şevval kararı 2026-10: Rapor'da): satır yatırımcı, sütun girişimci, hücre dakika; renk koyuluğu süre.
+export function Matris({ m }) {
+  if (m.satirlar.length === 0 || m.sutunlar.length === 0) return <p className="rp-soluk">Yatırımcı ya da girişimci yok.</p>
+  return (
+    <div className="rp-kaydir">
+      <table className="rp-tablo rp-matris" data-test="rapor-matris">
+        <thead>
+          <tr>
+            <th className="rp-matris-kose">Yatırımcı ↓ · Girişimci →</th>
+            {m.sutunlar.map((g) => <th key={g.kisiId} className="rp-matris-sutun" title={raporAdi(g)}><span>{kisaAd(g)}</span></th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {m.satirlar.map((y) => (
+            <tr key={y.kisiId}>
+              <th scope="row"><Ad kisi={y} /></th>
+              {m.sutunlar.map((g) => {
+                const sn = m.hucre.get(`${y.kisiId}|${g.kisiId}`)
+                if (!sn) return <td key={g.kisiId} className="rp-matris-hucre rp-matris-bos">·</td>
+                const yuzde = Math.round(15 + 70 * (sn / m.enCok))
+                return (
+                  <td key={g.kisiId} className={`rp-matris-hucre sayi ${yuzde > 55 ? 'rp-matris-koyu' : ''}`}
+                    style={{ background: `color-mix(in srgb, var(--birlikte) ${yuzde}%, transparent)` }}
+                    title={`${raporAdi(y)} – ${raporAdi(g)}: ${dk(sn)}`}>
+                    {sn < 60 ? '<1' : Math.round(sn / 60)}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
