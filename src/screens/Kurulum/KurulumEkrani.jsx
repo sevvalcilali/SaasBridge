@@ -1,7 +1,7 @@
 // Kurulum / eşik ekranı (brief §4.3, §8) — teknik kişi etkinlik öncesi kullanır:
 // eşik ayarı, canlı sinyal grafiği, çift tablosu, kalibrasyon, kart sağlığı.
 // Veri panoyla aynı kaynaktan (usePano / SSE); dBm burada gösterilebilir, metre yok.
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePano } from '../../api/usePano.js'
 import { ciftSayisi } from '../../api/sinyal.js'
 import { veriCanli } from '../../api/durum.js'
@@ -22,6 +22,9 @@ import './KurulumEkrani.css'
 // ucuz cihazda kare düşer ve yüzlerce değişen satır zaten okunamaz → 2 sn'de bir tazelenir.
 const KALABALIK_CIFT = 100
 const TABLO_TAZELEME_MS = 2000
+// Grafik her zaman 2 sn'de bir tazelenir: yarım saniyede değişen çizgiler okunmuyor (Şevval, 2026-10).
+// Eşik çizgisi kaydırıcıyla anında hareket eder (taslakEsik ayrı gelir).
+const GRAFIK_TAZELEME_MS = 2000
 
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano({ grafik: true }) // sinyal grafiği yalnız burada
@@ -32,6 +35,17 @@ export default function KurulumEkrani() {
   const { kartlar } = useKartlar(apiRef.current)
   const kalabalik = (durum?.signals.length ?? 0) > KALABALIK_CIFT
   const tablo = useSeyrek(durum && { signals: durum.signals, people: durum.people }, TABLO_TAZELEME_MS, kalabalik)
+  const grafik = useSeyrek(durum && { history: durum.history, people: durum.people, signals: durum.signals },
+    GRAFIK_TAZELEME_MS, true)
+  // Eşik + grafik paneli tam ekrana açılabilir (kalibrasyonda laptop ya da salon ekranı).
+  const sinyalRef = useRef(null)
+  const [tamEkran, setTamEkran] = useState(false)
+  useEffect(() => {
+    const degisti = () => setTamEkran(document.fullscreenElement != null && document.fullscreenElement === sinyalRef.current)
+    document.addEventListener('fullscreenchange', degisti)
+    return () => document.removeEventListener('fullscreenchange', degisti)
+  }, [])
+  const tamEkranDegistir = () => (tamEkran ? document.exitFullscreen() : sinyalRef.current?.requestFullscreen?.())
 
   if (!durum) {
     return (
@@ -49,18 +63,26 @@ export default function KurulumEkrani() {
         <p className="kurulum-alt">Teknik ekran — eşik ayarı, sinyaller ve kart sağlığı. Etkinlik öncesi kullanılır.</p>
       </header>
 
+      {/* Eşik ve canlı sinyal tek, tam genişlikte panelde: kaydırınca eşik çizgisi hemen altında hareket eder. */}
+      <section className="kurulum-kutu kurulum-sinyal" ref={sinyalRef} aria-labelledby="k-grafik" data-test="kutu-grafik">
+        <div className="kurulum-sinyal-bas">
+          <h2 id="k-grafik" className="kurulum-baslik">Eşik ve canlı sinyal (son {durum.chartSeconds} sn)</h2>
+          {document.fullscreenEnabled && (
+            <button type="button" className="kartver-geri grafik-dugme" onClick={tamEkranDegistir} data-test="grafik-tam-ekran">
+              {tamEkran ? 'Tam ekrandan çık' : 'Tam ekran'}
+            </button>
+          )}
+        </div>
+        <div className="kurulum-sinyal-esik" data-test="kutu-esik">
+          <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} onTaslak={setTaslakEsik} />
+        </div>
+        <PerspektifSecici signals={durum.signals} people={durum.people} secili={perspektif} onSec={setPerspektif} />
+        <SinyalGrafigi history={grafik.history} people={grafik.people} signals={grafik.signals} esik={taslakEsik ?? durum.threshold}
+          pencere={durum.chartSeconds} kisiId={perspektif} tamEkran={tamEkran} />
+      </section>
+
       <div className="kurulum-govde">
         <div className="kurulum-ana">
-          <section className="kurulum-kutu" aria-labelledby="k-esik" data-test="kutu-esik">
-            <h2 id="k-esik" className="kurulum-baslik">Eşik</h2>
-            <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} onTaslak={setTaslakEsik} />
-          </section>
-          <section className="kurulum-kutu" aria-labelledby="k-grafik" data-test="kutu-grafik">
-            <h2 id="k-grafik" className="kurulum-baslik">Canlı sinyal (son {durum.chartSeconds} sn)</h2>
-            <PerspektifSecici signals={durum.signals} people={durum.people} secili={perspektif} onSec={setPerspektif} />
-            <SinyalGrafigi history={durum.history} people={durum.people} esik={taslakEsik ?? durum.threshold}
-              pencere={durum.chartSeconds} kisiId={perspektif} />
-          </section>
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
             <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{ciftSayisi(durum.signals, perspektif)}</span></h2>
             {kalabalik && <p className="kurulum-not" data-test="tablo-seyrek">Kalabalık: tablo {TABLO_TAZELEME_MS / 1000} sn'de bir tazelenir. Bir kişiye odaklanmak için adına tıklayın.</p>}

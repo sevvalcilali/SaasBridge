@@ -1,7 +1,7 @@
 // Canlı sinyal grafiği geometrisi.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { grafikSerileri, olcekY, olcekX, xdenSaniye, etiketleriAyir, anlikDegerler, ciftEtiketi, Y_ALT, Y_UST } from './grafik.js'
+import { grafikSerileri, olcekY, olcekX, xdenSaniye, etiketleriAyir, anlikDegerler, ciftEtiketi, ciftAdi, grafikYuksekligi, yumusat, birlikteAnahtarlari, Y_ALT, Y_UST } from './grafik.js'
 
 const PEOPLE = [
   { id: '3', name: 'Cem', role: 'founder', color: '#c25022' },
@@ -55,4 +55,42 @@ test('anlikDegerler: o ana en yakın nokta, tolerans dışı yok; güçlü üstt
   const a = anlikDegerler(seriler, 1)
   assert.deepEqual(a.map((x) => ciftEtiketi(x.seri)), ['10 · 11', '3 · 10', '3 · 4'])
   assert.equal(anlikDegerler(seriler, 45).length, 0)
+})
+
+test('ciftAdi: çizgi sonunda kart no yerine kısa ad; girişimcide kurum, uzun ad kısaltılır', () => {
+  const s = (a, b) => ({ a, b })
+  assert.equal(ciftAdi(s({ id: '10', name: 'Ayşe Demir', role: 'investor' }, { id: '3', name: 'Cem', org: 'Nova Robotik', role: 'founder' })),
+    'Ayşe Demir · Nova Robotik')
+  assert.equal(ciftAdi(s({ id: '1', name: 'Çok Uzun Bir Kişi Adı', role: 'guest' }, { id: '2', name: 'Kart 2' })),
+    'Çok Uzun Bir… · Kart 2')
+})
+
+test('grafikYuksekligi: dar ekranda kısa, genişte ekranın ~yarısı (sınırlı), tam ekranda ekran kadar', () => {
+  assert.equal(grafikYuksekligi(500, 900, false), 240)
+  assert.equal(grafikYuksekligi(1200, 900, false), 405)
+  assert.equal(grafikYuksekligi(1200, 2000, false), 520)
+  assert.equal(grafikYuksekligi(1200, 600, false), 340)
+  assert.equal(grafikYuksekligi(1800, 1080, true), 820)
+})
+
+test('yumusat: her nokta, o ana kadarki son 10 sn ortancası (sistemin "birlikte" kararıyla aynı)', () => {
+  const ham = [[12, -90], [10, -50], [8, -52], [6, -88], [4, -51], [2, -53], [0, -50]]
+  assert.deepEqual(yumusat(ham).map(([, v]) => v), [-90, -70, -52, -70, -52, -52, -52])
+  assert.deepEqual(yumusat(ham).map(([sn]) => sn), [12, 10, 8, 6, 4, 2, 0])
+})
+
+test('grafikSerileri birlikte: yalnız 1 dk+ birlikte sayılan çiftler; kalabalıkta kart no sırasıyla ilk N (sabit)', () => {
+  const birlikte = new Set(['3-10', '4-10', '10-11'])
+  const { seriler, toplam, birlikteSayisi } = grafikSerileri(H, PEOPLE, { birlikte, enCok: 2 })
+  assert.deepEqual(seriler.map((s) => s.anahtar), ['3-10', '4-10'], 'güce göre değil kart no sırasıyla: değer oynasa da liste değişmez')
+  assert.equal(toplam, 4)
+  assert.equal(birlikteSayisi, 3)
+  assert.deepEqual(grafikSerileri(H, PEOPLE, { birlikte, hepsi: true }).seriler.length, 4, '"Tümünü göster" hepsini çizer')
+  assert.deepEqual(grafikSerileri(H, PEOPLE, { birlikte, kisiId: '3' }).seriler.map((s) => s.anahtar), ['3-4', '3-10'],
+    'kişi seçilince o kişinin bütün çiftleri')
+})
+
+test('birlikteAnahtarlari: signals[].together → history anahtarı ("küçük-büyük")', () => {
+  const s = [{ a: '10', b: '3', together: true }, { a: '4', b: '10', together: false }]
+  assert.deepEqual([...birlikteAnahtarlari(s)], ['3-10'])
 })

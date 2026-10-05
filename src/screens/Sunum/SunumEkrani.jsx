@@ -6,7 +6,7 @@ import { usePano } from '../../api/usePano.js'
 import { useTema } from '../../api/useTema.js'
 import { ozetKutulari, veriCanli } from '../../api/durum.js'
 import { isimsizMi, sunumAdresi, SUNUMDAN_CIKIS } from '../../api/useRota.js'
-import AgGorunumu from '../../components/AgGorunumu.jsx'
+import CanliGruplar from '../../components/CanliGruplar.jsx'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import TemaSecici from '../../components/TemaSecici.jsx'
 import './SunumEkrani.css'
@@ -58,7 +58,7 @@ export default function SunumEkrani() {
         <time className="sunum-saat sayi">{durum.clock.slice(0, 5)}</time>
       </header>
 
-      <AgGorunumu people={durum.people} edges={durum.edges} live={durum.live} sunum isimsiz={isimsiz} />
+      <CanliGruplar people={durum.people} live={durum.live} sunum isimsiz={isimsiz} />
 
       <footer className="sunum-alt-serit">
         <ul className="sunum-kutular">
@@ -71,7 +71,7 @@ export default function SunumEkrani() {
         </ul>
         <p className="sunum-anahtar">
           <span aria-hidden="true">○</span> yatırımcı · <span aria-hidden="true">□</span> girişimci ·{' '}
-          <span aria-hidden="true">◇</span> misafir · <span className="sunum-birlikte">yeşil çizgi = şu an birlikte</span>
+          <span aria-hidden="true">◇</span> misafir · <span className="sunum-birlikte">yeşil daire = yatırımcı ile girişimci birlikte</span>
         </p>
       </footer>
     </main>
