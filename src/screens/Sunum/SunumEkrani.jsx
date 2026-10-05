@@ -71,7 +71,7 @@ export default function SunumEkrani() {
         </ul>
         <p className="sunum-anahtar">
           <span aria-hidden="true">○</span> yatırımcı · <span aria-hidden="true">□</span> girişimci ·{' '}
-          <span aria-hidden="true">◇</span> misafir · <span className="sunum-birlikte">yeşil daire = yatırımcı ile girişimci birlikte</span>
+          <span aria-hidden="true">◇</span> misafir · <span className="sunum-birlikte">yeşil zemin = yatırımcı ile girişimci birlikte · siluet rengi = görüşme süresi</span>
         </p>
       </footer>
     </main>
