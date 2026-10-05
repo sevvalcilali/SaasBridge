@@ -62,3 +62,39 @@
 .rp-matris-hucre { text-align: center; min-width: 2.2rem; border-left: 1px solid var(--cizgi); }
 .rp-matris-bos { color: var(--metin-soluk); }
 .rp-matris-koyu { color: var(--metin-ters); font-weight: 700; }
+
+/* --- Kişiye özel rapor (katılımcıya verilecek tek sayfa) --- */
+.kr-giris-araclar, .kr-araclar { display: flex; gap: var(--aralik-3); align-items: center; flex-wrap: wrap; }
+.kr-secici { display: inline-flex; align-items: center; gap: var(--aralik-2); font-weight: 600; }
+.kr-secici select { min-height: 40px; font: inherit; padding: 0 var(--aralik-2); border: 1px solid var(--cizgi-koyu); border-radius: var(--kose); background: var(--yuzey); max-width: 22rem; }
+.kr { display: flex; flex-direction: column; gap: var(--aralik-4); background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: var(--kose); padding: var(--aralik-5); }
+.kr-bas h1 { margin: var(--aralik-1) 0; font-size: var(--punto-dev); }
+.kr-giris { margin: var(--aralik-2) 0 0; color: var(--metin-2); max-width: 60ch; }
+.kr-ozet dd.kr-en-uzun { font-size: var(--punto-orta); }
+.kr-tablo .kr-takip { text-align: center; width: 1%; white-space: nowrap; }
+.kr-kutu { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--metin-2); border-radius: 3px; vertical-align: middle; }
+.kr-one-cikan td { background: var(--birlikte-zemin); }
+.kr-yildiz { color: var(--birlikte); font-weight: 700; font-size: var(--punto-kucuk); }
+.kr-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--aralik-1) var(--aralik-4); }
+.kr-not-alani { height: 7.5em; border: 1px solid var(--cizgi-koyu); border-radius: var(--kose);
+  background: repeating-linear-gradient(transparent 0 1.45em, var(--cizgi) 1.45em 1.5em); }
+
+@media print {
+  /* Her kişi tek A4: sıkı aralık, küçük yazı, kısa not alanı. */
+  .kr-araclar { display: none !important; }
+  .kr-sayfalar { gap: 0; }
+  .kr { border: none; padding: 0; break-after: page; gap: 7pt; }
+  .kr:last-child { break-after: auto; }
+  .kr-bas h1 { font-size: 18pt; margin: 2pt 0; }
+  .kr-giris, .kr .rp-aciklama, .kr .rp-dipnot { font-size: 8.5pt; }
+  .kr .rp-ozet { gap: 6pt; }
+  .kr .rp-ozet > div { padding: 4pt 8pt; }
+  .kr .rp-ozet dd { font-size: 13pt; }
+  .kr .rp-tablo { font-size: 9pt; }
+  .kr .rp-tablo td, .kr .rp-tablo th { padding: 3pt 6pt; }
+  .kr .rp-bolum { gap: 3pt; }
+  .kr .rp-bolum h2 { font-size: 11pt; }
+  .kr-liste { font-size: 9pt; }
+  .kr-not-alani { height: 4.5em; }
+  .kr-one-cikan td, .kr-not-alani { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}

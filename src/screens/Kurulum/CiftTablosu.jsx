@@ -58,7 +58,7 @@ export default memo(function CiftTablosu({ signals, people, kisiId = null, onKis
         </tbody>
       </table>
       <p className="cift-aciklama">
-        <strong>başlıyor…</strong> eşiği geçti, 5 sn giriş gecikmesini bekliyor · <strong>bitiyor…</strong> eşiğin
+        <strong>başlıyor…</strong> eşiği geçti, 1 dk dolmasını bekliyor · <strong>bitiyor…</strong> eşiğin
         altına düştü, 15 sn çıkış gecikmesi süresince hâlâ birlikte sayılıyor · ⇄ iki yön arasında büyük fark
       </p>
     </div>

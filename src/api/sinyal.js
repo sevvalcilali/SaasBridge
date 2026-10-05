@@ -2,7 +2,7 @@
 //
 // Çift durumu mevcut alanlardan türetilir (§9-7'deki `pending` alanına gerek yok):
 //   above ∧ together   → birlikte
-//   above ∧ ¬together  → başlıyor… (5 sn giriş gecikmesi bekleniyor)
+//   above ∧ ¬together  → başlıyor… (1 dk giriş süresi bekleniyor; sunucu kuralı)
 //   ¬above ∧ together  → bitiyor…  (15 sn çıkış gecikmesi; hâlâ birlikte sayılıyor)
 //   ¬above ∧ ¬together → eşik altı
 

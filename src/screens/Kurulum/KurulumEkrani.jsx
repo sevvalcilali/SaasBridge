@@ -7,7 +7,8 @@ import { ciftSayisi } from '../../api/sinyal.js'
 import { veriCanli } from '../../api/durum.js'
 import { KurulumApi } from '../../api/kurulumApi.js'
 import { useKartlar } from '../../api/useKartlar.js'
-import { useSeyrek } from '../../api/useSeyrek.js'
+import { useSeyrekDurum } from '../../api/useSeyrek.js'
+import { onceYazisi } from '../../api/format.js'
 import { useKalici } from '../../api/useKalici.js'
 import HataBantlari from '../../components/HataBantlari.jsx'
 import EsikAyari from './EsikAyari.jsx'
@@ -18,13 +19,10 @@ import KalibrasyonSihirbazi from './KalibrasyonSihirbazi.jsx'
 import KartSagligi from './KartSagligi.jsx'
 import './KurulumEkrani.css'
 
-// Kalabalık (Faz 5.4): 97 kişide ~500 çift duyulur; tablo her tikte (0,5 sn) baştan çizilince
-// ucuz cihazda kare düşer ve yüzlerce değişen satır zaten okunamaz → 2 sn'de bir tazelenir.
-const KALABALIK_CIFT = 100
-const TABLO_TAZELEME_MS = 2000
-// Grafik her zaman 2 sn'de bir tazelenir: yarım saniyede değişen çizgiler okunmuyor (Şevval, 2026-10).
-// Eşik çizgisi kaydırıcıyla anında hareket eder (taslakEsik ayrı gelir).
-const GRAFIK_TAZELEME_MS = 2000
+// Grafik ve çift tablosu dakikada bir birlikte tazelenir (Şevval kararı, 2026-10: hızlı değişen ekran okunmuyor).
+// Kaydırıcı, eşik çizgisi ve "şu an N çift eşiğin üstünde" sayısı anında kalır (kalibrasyon geri bildirimi).
+// Beklemek istemeyen "Şimdi güncelle"ye basar.
+const TAZELEME_MS = 60000
 
 export default function KurulumEkrani() {
   const { durum, baglandi, hata, baglanti } = usePano({ grafik: true }) // sinyal grafiği yalnız burada
@@ -33,10 +31,10 @@ export default function KurulumEkrani() {
   const apiRef = useRef(null)
   if (apiRef.current === null) apiRef.current = new KurulumApi()
   const { kartlar } = useKartlar(apiRef.current)
-  const kalabalik = (durum?.signals.length ?? 0) > KALABALIK_CIFT
-  const tablo = useSeyrek(durum && { signals: durum.signals, people: durum.people }, TABLO_TAZELEME_MS, kalabalik)
-  const grafik = useSeyrek(durum && { history: durum.history, people: durum.people, signals: durum.signals },
-    GRAFIK_TAZELEME_MS, true)
+  const [yenile, setYenile] = useState(0)
+  const { deger: anlik, zaman: tazelendi } = useSeyrekDurum(
+    durum && { history: durum.history, people: durum.people, signals: durum.signals }, TAZELEME_MS, true, yenile,
+  )
   // Eşik + grafik paneli tam ekrana açılabilir (kalibrasyonda laptop ya da salon ekranı).
   const sinyalRef = useRef(null)
   const [tamEkran, setTamEkran] = useState(false)
@@ -67,6 +65,12 @@ export default function KurulumEkrani() {
       <section className="kurulum-kutu kurulum-sinyal" ref={sinyalRef} aria-labelledby="k-grafik" data-test="kutu-grafik">
         <div className="kurulum-sinyal-bas">
           <h2 id="k-grafik" className="kurulum-baslik">Eşik ve canlı sinyal (son {durum.chartSeconds} sn)</h2>
+          <p className="kurulum-tazeleme" data-test="kurulum-tazeleme">
+            Son güncelleme: {onceYazisi((Date.now() - tazelendi) / 1000)} · dakikada bir
+          </p>
+          <button type="button" className="kartver-geri grafik-dugme" onClick={() => setYenile((n) => n + 1)} data-test="kurulum-simdi">
+            Şimdi güncelle
+          </button>
           {document.fullscreenEnabled && (
             <button type="button" className="kartver-geri grafik-dugme" onClick={tamEkranDegistir} data-test="grafik-tam-ekran">
               {tamEkran ? 'Tam ekrandan çık' : 'Tam ekran'}
@@ -77,16 +81,16 @@ export default function KurulumEkrani() {
           <EsikAyari esik={durum.threshold} signals={durum.signals} onGonder={(v) => baglanti.esikGonder(v)} onTaslak={setTaslakEsik} />
         </div>
         <PerspektifSecici signals={durum.signals} people={durum.people} secili={perspektif} onSec={setPerspektif} />
-        <SinyalGrafigi history={grafik.history} people={grafik.people} signals={grafik.signals} esik={taslakEsik ?? durum.threshold}
+        <SinyalGrafigi history={anlik.history} people={anlik.people} signals={anlik.signals} esik={taslakEsik ?? durum.threshold}
           pencere={durum.chartSeconds} kisiId={perspektif} tamEkran={tamEkran} />
       </section>
 
       <div className="kurulum-govde">
         <div className="kurulum-ana">
           <section className="kurulum-kutu" aria-labelledby="k-ciftler" data-test="kutu-ciftler">
-            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{ciftSayisi(durum.signals, perspektif)}</span></h2>
-            {kalabalik && <p className="kurulum-not" data-test="tablo-seyrek">Kalabalık: tablo {TABLO_TAZELEME_MS / 1000} sn'de bir tazelenir. Bir kişiye odaklanmak için adına tıklayın.</p>}
-            <CiftTablosu signals={tablo.signals} people={tablo.people} kisiId={perspektif} onKisiSec={setPerspektif} />
+            <h2 id="k-ciftler" className="kurulum-baslik">Çiftler <span className="kartsec-sayi">{ciftSayisi(anlik.signals, perspektif)}</span></h2>
+            <p className="kurulum-not" data-test="tablo-seyrek">Tablo grafikle birlikte dakikada bir güncellenir. Bir kişiye odaklanmak için adına tıklayın.</p>
+            <CiftTablosu signals={anlik.signals} people={anlik.people} kisiId={perspektif} onKisiSec={setPerspektif} />
           </section>
         </div>
         <div className="kurulum-yan">

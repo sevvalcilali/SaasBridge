@@ -146,3 +146,37 @@ export function yatirimciMatrisi(r, kisiler) {
       || raporAdi(p).localeCompare(raporAdi(q), 'tr'))
   return { satirlar, sutunlar: r.girisimciler.map((g) => g.kisi), hucre, enCok }
 }
+
+// Kişiye özel rapor (yatırımcıya / girişimciye verilecek tek sayfa): yalnız o kişinin kendi görüşmeleri.
+// karsi: yatırımcı için girişimciler (girişimci için yatırımcılar), toplam süreye göre; diger: aynı rol ve misafirler;
+// kacirilan: etkinliğe gelmiş (kart almış) ama hiç yan yana gelinmemiş karşı rol kişileri.
+// Anlaşma işareti sunucunun "deal" bildirimlerinden (alerts[].kisiler; yoksa işaret yok).
+const geldi = (k) => Boolean(k.atananKart) || Boolean(k.ayrildi)
+export function kisiRaporu(kisiId, kisiler, oturumlar, simdi, { saat = null, elapsed = 0, alerts = [] } = {}) {
+  const kisi = kisiler.find((k) => k.kisiId === kisiId) ?? kimlikKisisi(kisiId)
+  const esler = new Map() // kisiId → { kisi, toplamSn, adet, ilkSn }
+  for (const o of kisiOturumlari(kisiId, oturumlar, kisiler, simdi)) {
+    if (!o.karsi.rol) continue // kayıtsız kart: kim olduğu bilinmiyor, katılımcıya gösterilmez
+    const e = esler.get(o.karsi.kisiId) ?? { kisi: o.karsi, toplamSn: 0, adet: 0, ilkSn: o.start }
+    e.toplamSn += o.sureSn; e.adet++; e.ilkSn = Math.min(e.ilkSn, o.start)
+    esler.set(o.karsi.kisiId, e)
+  }
+  const anlasanlar = new Set(alerts
+    .filter((a) => a.kind === 'deal' && a.kisiler?.includes(kisiId))
+    .flatMap((a) => a.kisiler).filter((id) => id !== kisiId))
+  const adSirasi = (p, q) => raporAdi(p).localeCompare(raporAdi(q), 'tr')
+  const satirlar = [...esler.values()]
+    .map((e) => ({ kisi: e.kisi, toplamSn: e.toplamSn, adet: e.adet, anlasma: anlasanlar.has(e.kisi.kisiId),
+      ilkSaat: saat ? etkinlikSaati(e.ilkSn, saat, elapsed) : null }))
+    .sort((p, q) => q.toplamSn - p.toplamSn || adSirasi(p.kisi, q.kisi))
+  const karsi = satirlar.filter((x) => karsiRolMu(kisi, x.kisi))
+  const diger = satirlar.filter((x) => !karsiRolMu(kisi, x.kisi))
+  const kacirilan = kisiler
+    .filter((k) => KARSI[kisi.rol] === k.rol && geldi(k) && !esler.has(k.kisiId))
+    .sort(adSirasi)
+  const topla = (d) => d.reduce((t, x) => t + x.toplamSn, 0)
+  return {
+    kisi, karsi, diger, kacirilan,
+    ozet: { karsiSayisi: karsi.length, karsiSn: topla(karsi), toplamSn: topla(satirlar), anlasma: karsi.filter((x) => x.anlasma).length },
+  }
+}
