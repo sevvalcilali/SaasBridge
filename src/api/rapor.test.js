@@ -1,7 +1,7 @@
 // Rapor: kişi/çift toplamları, girişimci → yatırımcı, en uzunlar, ayrılanlar, saat.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi, kisiRaporu } from './rapor.js'
+import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi, kisiRaporu, ilgiEslesir } from './rapor.js'
 
 const K = [
   { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', atananKart: '10', ayrildi: false },
@@ -114,4 +114,24 @@ test('kisiRaporu girişimci için: karşı rol yatırımcılar, misafir "diğer"
 test('kisiRaporu: kayıtsız kart ("kart:N") katılımcıya gösterilmez', () => {
   const r = kisiRaporu('k4', K, O, SIMDI, {})
   assert.deepEqual(r.diger.map((x) => x.kisi.kisiId), ['k3'])
+})
+
+test('ilgiEslesir: yatırımcının ilgi alanları (virgüllü) girişimin sektörünü içeriyor mu; büyük-küçük ve Türkçe harf farkı yok', () => {
+  assert.equal(ilgiEslesir('Sağlık, Enerji', 'sağlık'), true)
+  assert.equal(ilgiEslesir('SAĞLIK;Enerji', 'Enerji'), true)
+  assert.equal(ilgiEslesir('Fintek', 'Sağlık'), false)
+  assert.equal(ilgiEslesir('', 'Sağlık'), false)
+  assert.equal(ilgiEslesir('Sağlık', ''), false)
+})
+
+test('kisiRaporu kaçırılanlar: yatırımcının ilgi alanındaki girişimler önde ve işaretli', () => {
+  const kisiler = [
+    { ...K[0], sektor: 'Sağlık, Enerji' },
+    ...K.slice(1),
+    { kisiId: 'k7', ad: 'Gül Ay', rol: 'founder', kurum: 'Ağaç', sektor: 'Tarım', atananKart: '20', ayrildi: false },
+    { kisiId: 'k8', ad: 'Ali Su', rol: 'founder', kurum: 'Zirve', sektor: 'Sağlık', atananKart: '21', ayrildi: false },
+  ]
+  const r = kisiRaporu('k1', kisiler, O, SIMDI, {})
+  assert.deepEqual(r.kacirilan.map((k) => k.kisiId), ['k8', 'k7'], 'ad sırası Ağaç < Zirve olsa da ilgi alanındaki önde')
+  assert.deepEqual([...r.ilgiAlaninda], ['k8'])
 })

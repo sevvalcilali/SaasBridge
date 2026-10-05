@@ -25,7 +25,8 @@ test('GET /api/people: başlangıç kadrosu, her katılımcı bir karta atanmı�
   const kisiler = await getj(`${B}/api/people`)
   assert.equal(kisiler.length, 25)
   for (const k of kisiler) {
-    assert.deepEqual(Object.keys(k).sort(), ['ad', 'atananKart', 'ayrildi', 'kisiId', 'kurum', 'not', 'renk', 'rol', 'yildiz'])
+    assert.deepEqual(Object.keys(k).sort(), ['ad', 'asama', 'atananKart', 'ayrildi', 'eposta', 'kisiId', 'kurum', 'not',
+      'paylasim', 'renk', 'rol', 'sektor', 'tanitim', 'web', 'yildiz'])
     assert.ok(['investor', 'founder', 'guest'].includes(k.rol))
     assert.match(k.renk, /^#[0-9a-f]{6}$/i)
     assert.ok(k.atananKart, 'başlangıçta kart atanmış olmalı')
@@ -112,4 +113,17 @@ test('POST /api/assign: olmayan kişi → 404 ve ok:false', async () => {
   const r = await post(`${B}/api/assign`, { kisiId: 'yok', kart: '50' })
   assert.equal(r.status, 404)
   assert.equal((await r.json()).ok, false)
+})
+
+
+test('profil (rapor 2. adım): eklenir, düzenlenir, CSV ile gelir; izin varsayılanı hayır', async () => {
+  const yeni = await (await post(`${B}/api/people`, { ad: 'Can', rol: 'founder', sektor: 'Sağlık', asama: 'mvp', eposta: 'can@nova.com' })).json()
+  assert.deepEqual([yeni.sektor, yeni.asama, yeni.eposta, yeni.paylasim], ['Sağlık', 'mvp', 'can@nova.com', false])
+  const r = await fetch(`${B}/api/people/${yeni.kisiId}`, { method: 'PATCH', body: JSON.stringify({ paylasim: true, rol: 'investor' }) })
+  const guncel = await r.json()
+  assert.deepEqual([guncel.paylasim, guncel.asama], [true, ''], 'girişimci değilse aşama düşer')
+  const csv = 'ad;soyad;rol;kurum;sektör;aşama;e-posta;izin\nEce;Tan;Girişimci;Mavi;Enerji;Büyüme;ece@mavi.com;Evet\n'
+  await fetch(`${B}/api/people/import`, { method: 'POST', body: csv })
+  const ece = (await getj(`${B}/api/people`)).find((k) => k.ad === 'Ece Tan')
+  assert.deepEqual([ece.sektor, ece.asama, ece.eposta, ece.paylasim], ['Enerji', 'buyume', 'ece@mavi.com', true])
 })

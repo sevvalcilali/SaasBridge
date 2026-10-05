@@ -43,9 +43,10 @@ const O = [{ a: 'k1', b: 'k2', start: 60, end: 660 }, { a: 'k2', b: 'kart:14', s
 test('katilimcilarCsv: her kayıtlı kişi bir satır, Türkçe ve tırnaklı alan geri okunur', () => {
   const r = oku(katilimcilarCsv(raporHesapla(K, O, 1000)))
   assert.equal(r.length, 1 + K.length)
-  assert.deepEqual(r[0], ['Ad', 'Rol', 'Kurum', 'Yıldız', 'Kart', 'Toplam (dk)', 'Görüşme', 'Görüştüğü kişi', 'Karşı rolden kişi'])
+  assert.deepEqual(r[0], ['Ad', 'Rol', 'Kurum', 'Yıldız', 'Kart', 'Toplam (dk)', 'Görüşme', 'Görüştüğü kişi', 'Karşı rolden kişi',
+    'Sektör / ilgi alanı', 'Aşama', 'E-posta', 'Paylaşım izni'])
   const cem = r.find((x) => x[0] === 'Cem Öz')
-  assert.deepEqual(cem, ['Cem Öz', 'Girişimci', 'Veri; Köprüsü', '', 'ayrıldı', '15,0', '2', '2', '1'])
+  assert.deepEqual(cem, ['Cem Öz', 'Girişimci', 'Veri; Köprüsü', '', 'ayrıldı', '15,0', '2', '2', '1', '', '', '', 'hayır'])
 })
 
 test('gorusmelerCsv: başlangıca göre; saat; sürüyor; kayıtsız kart', () => {

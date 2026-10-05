@@ -152,6 +152,12 @@ export function yatirimciMatrisi(r, kisiler) {
 // kacirilan: etkinliğe gelmiş (kart almış) ama hiç yan yana gelinmemiş karşı rol kişileri.
 // Anlaşma işareti sunucunun "deal" bildirimlerinden (alerts[].kisiler; yoksa işaret yok).
 const geldi = (k) => Boolean(k.atananKart) || Boolean(k.ayrildi)
+// Yatırımcının ilgi alanları (virgül ya da noktalı virgülle) girişimin sektörünü içeriyor mu (harf farkı gözetmeden).
+const katla = (s) => (s ?? '').trim().toLocaleLowerCase('tr')
+export function ilgiEslesir(ilgiAlanlari, sektor) {
+  const hedef = katla(sektor)
+  return Boolean(hedef) && (ilgiAlanlari ?? '').split(/[,;]/).some((alan) => katla(alan) === hedef)
+}
 export function kisiRaporu(kisiId, kisiler, oturumlar, simdi, { saat = null, elapsed = 0, alerts = [] } = {}) {
   const kisi = kisiler.find((k) => k.kisiId === kisiId) ?? kimlikKisisi(kisiId)
   const esler = new Map() // kisiId → { kisi, toplamSn, adet, ilkSn }
@@ -171,12 +177,15 @@ export function kisiRaporu(kisiId, kisiler, oturumlar, simdi, { saat = null, ela
     .sort((p, q) => q.toplamSn - p.toplamSn || adSirasi(p.kisi, q.kisi))
   const karsi = satirlar.filter((x) => karsiRolMu(kisi, x.kisi))
   const diger = satirlar.filter((x) => !karsiRolMu(kisi, x.kisi))
+  // Yatırımcı için: ilgi alanındaki girişimler önde (organizatör aracılığıyla ulaşması en değerli olanlar).
+  const ilgili = (k) => kisi.rol === 'investor' && ilgiEslesir(kisi.sektor, k.sektor)
   const kacirilan = kisiler
     .filter((k) => KARSI[kisi.rol] === k.rol && geldi(k) && !esler.has(k.kisiId))
-    .sort(adSirasi)
+    .sort((p, q) => Number(ilgili(q)) - Number(ilgili(p)) || adSirasi(p, q))
+  const ilgiAlaninda = new Set(kacirilan.filter(ilgili).map((k) => k.kisiId))
   const topla = (d) => d.reduce((t, x) => t + x.toplamSn, 0)
   return {
-    kisi, karsi, diger, kacirilan,
+    kisi, karsi, diger, kacirilan, ilgiAlaninda,
     ozet: { karsiSayisi: karsi.length, karsiSn: topla(karsi), toplamSn: topla(satirlar), anlasma: karsi.filter((x) => x.anlasma).length },
   }
 }

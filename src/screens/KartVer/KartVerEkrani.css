@@ -339,3 +339,9 @@
   .kisisec-oge { gap: var(--aralik-2); }
   .kisisec-duzenle { min-width: 72px; padding-left: var(--aralik-2); padding-right: var(--aralik-2); }
 }
+
+/* Kişi formu: rapor bilgileri (isteğe bağlı) */
+.kisiform-rapor { border: 1px solid var(--cizgi); border-radius: var(--kose); padding: var(--aralik-3); margin: 0; display: flex; flex-direction: column; gap: var(--aralik-2); }
+.kisiform-rapor legend { padding: 0 var(--aralik-1); }
+.kisiform-izin { display: flex; gap: var(--aralik-2); align-items: flex-start; font-size: var(--punto-kucuk); color: var(--metin-2); }
+.kisiform-izin input { width: 20px; height: 20px; margin: 0; flex: none; }

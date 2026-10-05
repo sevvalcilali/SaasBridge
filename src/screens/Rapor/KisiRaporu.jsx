@@ -13,6 +13,23 @@ const KARSI = {
     kacir: 'Kaçırdığınız yatırımcılar', hic: 'hiçbir yatırımcıyla' },
 }
 const ROL = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
+const ASAMA = { fikir: 'Fikir', mvp: 'MVP', gelir: 'Gelir', buyume: 'Büyüme' }
+
+// Karşı tarafın profili: girişimde sektör · aşama · tanıtım; yatırımcıda ilgi alanları. İletişim (web, e-posta)
+// yalnız o kişi paylaşım izni verdiyse (rapor 2. adım, KVKK).
+function Profil({ kisi }) {
+  const bilgi = kisi.rol === 'founder'
+    ? [kisi.sektor, ASAMA[kisi.asama], kisi.tanitim].filter(Boolean).join(' · ')
+    : kisi.sektor ? `İlgi alanı: ${kisi.sektor}` : ''
+  const iletisim = kisi.paylasim ? [kisi.web, kisi.eposta].filter(Boolean).join(' · ') : ''
+  if (!bilgi && !iletisim) return null
+  return (
+    <span className="kr-profil" data-test="kr-profil">
+      {bilgi && <span>{bilgi}</span>}
+      {iletisim && <span className="kr-iletisim" data-test="kr-iletisim">{iletisim}</span>}
+    </span>
+  )
+}
 
 function Ad({ kisi }) {
   return (
@@ -24,7 +41,7 @@ function Ad({ kisi }) {
 }
 
 export default function KisiRaporu({ r, etkinlik }) {
-  const { kisi, karsi, diger, kacirilan, ozet } = r
+  const { kisi, karsi, diger, kacirilan, ilgiAlaninda = new Set(), ozet } = r
   const k = KARSI[kisi.rol]
   const enUzun = karsi[0]
   return (
@@ -59,7 +76,10 @@ export default function KisiRaporu({ r, etkinlik }) {
                 <tbody>
                   {karsi.map((x) => (
                     <tr key={x.kisi.kisiId} className={x.anlasma ? 'kr-one-cikan' : ''}>
-                      <td><Ad kisi={x.kisi} />{x.anlasma && <span className="kr-yildiz" title="Uzun ve verimli görüşme"> ★ öne çıkan</span>}</td>
+                      <td>
+                        <Ad kisi={x.kisi} />{x.anlasma && <span className="kr-yildiz" title="Uzun ve verimli görüşme"> ★ öne çıkan</span>}
+                        <Profil kisi={x.kisi} />
+                      </td>
                       <td className="sag sayi">{dk(x.toplamSn)}</td>
                       <td className="sag sayi">{x.adet}</td>
                       <td className="sag sayi">{x.ilkSaat ?? '—'}</td>
@@ -84,9 +104,17 @@ export default function KisiRaporu({ r, etkinlik }) {
       {k && kacirilan.length > 0 && (
         <section className="rp-bolum" data-test="kisi-raporu-kacirilan">
           <h2>{k.kacir} <span className="rp-sayi">{kacirilan.length}</span></h2>
-          <p className="rp-aciklama">Etkinlikteydiler ama yan yana gelmediniz. Organizatör aracılığıyla ulaşabilirsiniz.</p>
-          <ul className="kr-liste">
-            {kacirilan.map((x) => <li key={x.kisiId}><Ad kisi={x} /></li>)}
+          <p className="rp-aciklama">
+            Etkinlikteydiler ama yan yana gelmediniz. Organizatör aracılığıyla ulaşabilirsiniz.
+            {ilgiAlaninda.size > 0 && ' İlgi alanınızdakiler başta.'}
+          </p>
+          <ul className="kr-kacirilan">
+            {kacirilan.map((x) => (
+              <li key={x.kisiId} className={ilgiAlaninda.has(x.kisiId) ? 'kr-ilgili' : ''}>
+                <Ad kisi={x} />{ilgiAlaninda.has(x.kisiId) && <span className="kr-ilgi-isaret"> · ilgi alanınızda</span>}
+                <Profil kisi={x} />
+              </li>
+            ))}
           </ul>
         </section>
       )}

@@ -141,3 +141,12 @@ test('kayipKartlar: atanmış ve ≥60 sn duyulmayan, en uzun susan üstte', () 
   const l = kayipKartlar(MASA, kisiler)
   assert.deepEqual(l.map((x) => [x.kart, x.kisi.ad]), [['15', 'B'], ['16', 'C']])
 })
+
+test('duzenlemeFarki profil: yalnız değişen profil alanları; aşama yalnız girişimcide; eski kayıtta alan yoksa boş sayılır', () => {
+  const eski = { kisiId: 'k2', ad: 'Cem', rol: 'founder', kurum: 'Nova', yildiz: 0, not: '' } // sürüm 1 kaydı: profil yok
+  const form = { ad: 'Cem', rol: 'founder', kurum: 'Nova', yildiz: 0, not: '',
+    sektor: ' Sağlık ', asama: 'mvp', tanitim: '', web: '', eposta: 'can@nova.com', paylasim: true }
+  assert.deepEqual(duzenlemeFarki(eski, form), { sektor: 'Sağlık', asama: 'mvp', eposta: 'can@nova.com', paylasim: true })
+  const yatirimci = { ...eski, rol: 'investor', asama: '', sektor: 'Sağlık', paylasim: false }
+  assert.deepEqual(duzenlemeFarki(yatirimci, { ...form, rol: 'investor', sektor: 'Sağlık', eposta: '', paylasim: false }), {})
+})
