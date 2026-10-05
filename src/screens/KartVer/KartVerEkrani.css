@@ -326,8 +326,6 @@
   padding: var(--aralik-2) var(--aralik-3);
   background: var(--zemin); border: 1px solid var(--cizgi); border-radius: var(--kose);
 }
-.stok-pil { font-size: var(--punto-kucuk); color: var(--metin-2); font-variant-numeric: tabular-nums; }
-.stok-pil--dusuk { color: var(--uyari); font-weight: 700; }
 
 /* Panodan "Kişi ata" ile gelindi: bilgi şeridi (başarı değil) */
 .kartver-hedef { background: var(--vurgu-zemin); border-color: var(--vurgu); }

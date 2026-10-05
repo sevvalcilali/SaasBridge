@@ -1,7 +1,7 @@
 // "Boştaki kartlar" şeridi (brief §6.4): atanmamış ama açık kartlar — masadaki
 // yedekler, stok takibi. Numaraya göre sabit sıralı; yalnız görüntüler.
+// Pil yüzdesi masada gösterilmez (Şevval kararı, 2026-10); kart sağlığı Kurulum'da.
 import { bostakiKartlar } from '../../api/masaYardim.js'
-import { DUSUK_PIL } from '../../api/kartSagligi.js'
 
 export default function BostakiKartlar({ kartlar }) {
   if (!kartlar) return null
@@ -19,9 +19,6 @@ export default function BostakiKartlar({ kartlar }) {
             <li key={k.kart} className="stok-kart" data-test="bostaki-kart">
               <span className="kartsec-acik" aria-hidden="true" />
               <span className="kartsec-no">Kart {k.kart}</span>
-              <span className={`stok-pil ${k.pil < DUSUK_PIL ? 'stok-pil--dusuk' : ''}`}>
-                {k.pil < DUSUK_PIL ? '⚠ ' : ''}pil %{k.pil}
-              </span>
             </li>
           ))}
         </ul>

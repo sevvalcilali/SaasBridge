@@ -1,5 +1,5 @@
 // Adım 3: kontrol + onay (brief §6.2 adım 3–4).
-// Kontrol: kart açık mı, son duyulma, pil, ZATEN BAŞKASINA atanmış mı.
+// Kontrol: kart açık mı, son duyulma, ZATEN BAŞKASINA atanmış mı (pil yüzdesi masada gösterilmez).
 // Onay: kişinin rengiyle "Ad → Kart N" özeti; onaylanınca atanır ve ekran sıfırlanır.
 import { useEffect, useState } from 'react'
 import { onceYazisi, bulunmaEki } from '../../api/format.js'
@@ -47,7 +47,6 @@ export default function KontrolOnayAdim({ api, seciliKisi, seciliKart, katilimci
         <dl className="kontrol-bilgi" data-test="kontrol-bilgi">
           <div><dt>Durum</dt><dd>{kart && kart.seenAgo <= 8 ? 'Açık' : 'Duyulmuyor'}</dd></div>
           <div><dt>Son duyulma</dt><dd>{kart ? onceYazisi(kart.seenAgo) : '—'}</dd></div>
-          <div><dt>Pil</dt><dd className="sayi">{kart ? `%${kart.pil}` : '—'}</dd></div>
         </dl>
       )}
 
