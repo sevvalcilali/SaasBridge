@@ -4,7 +4,7 @@
 
 .gruplar-alan {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
   gap: var(--aralik-4) var(--aralik-3);
   justify-items: center;
   align-items: start;
@@ -16,41 +16,54 @@
 .grup-etiket { font-size: var(--punto-kucuk); color: var(--metin-2); font-weight: 600; }
 .grup--karma .grup-etiket { color: var(--birlikte); }
 
-.grup-daire {
-  --cap: 10.5rem;
-  width: var(--cap);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 2px solid var(--cizgi-koyu);
-  background: var(--yuzey-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--aralik-2);
-  transition: width var(--gecis), border-color var(--gecis);
+/* Sahne: siluetler yarım çember (kenardakiler biraz önde), altta zemin gölgesi; karma grupta yeşil zemin. */
+.grup-sahne {
+  --fig: 58px;
+  position: relative;
+  padding: var(--aralik-2) var(--aralik-2) var(--aralik-3);
+  border-radius: var(--kose);
+  background: radial-gradient(ellipse 52% 26% at 50% 78%, var(--yuzey-2) 0 70%, transparent 72%);
 }
-.grup--n3 .grup-daire { --cap: 11.5rem; }
-.grup--n4 .grup-daire { --cap: 12.5rem; }
-.grup--n5 .grup-daire { --cap: 13rem; }
-.grup--karma .grup-daire { border: 3px solid var(--birlikte); background: var(--birlikte-zemin); }
-.gruplar:not(.gruplar--sunum) .grup-daire { cursor: pointer; }
+.grup--karma .grup-sahne { background: radial-gradient(ellipse 52% 26% at 50% 78%, var(--birlikte-zemin) 0 70%, transparent 72%); }
+.gruplar:not(.gruplar--sunum) .grup-sahne { cursor: pointer; }
+.grup--n3 .grup-sahne { --fig: 54px; }
+.grup--n4 .grup-sahne { --fig: 50px; }
+.grup--n5 .grup-sahne { --fig: 46px; }
+/* 4 ve daha kalabalık grup iki hücre genişliğinde (yan gruba taşmasın); tek sütunlu dar ekranda değil. */
+.gruplar:not(.gruplar--sunum) .grup--n4, .gruplar:not(.gruplar--sunum) .grup--n5 { grid-column: span 2; }
+@media (max-width: 600px) {
+  .gruplar:not(.gruplar--sunum) .grup--n4, .gruplar:not(.gruplar--sunum) .grup--n5 { grid-column: auto; }
+  .grup-sahne { --fig: 44px; }
+}
 
-.grup-uyeler { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: stretch; gap: 2px; min-width: 0; max-width: 100%; }
-.grup-uye, .bosta-kisi {
-  display: inline-flex; align-items: center; gap: var(--aralik-1);
-  font: inherit; font-size: var(--punto-kucuk); color: var(--metin);
-  background: none; border: 1px solid transparent; border-radius: var(--kose-tam);
-  padding: 1px var(--aralik-2); min-width: 0; max-width: 100%;
+.grup-figurler { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
+.figur-kap, .figur { display: flex; }
+.figur {
+  flex-direction: column; align-items: center; gap: 1px;
+  width: calc(var(--fig) + 10px);
+  transform: translateY(var(--one, 0px));
+  font: inherit; color: var(--metin); background: none; border: 1px solid transparent; border-radius: var(--kose); padding: 2px 0;
 }
-button.grup-uye, button.bosta-kisi { cursor: pointer; }
-button.grup-uye:hover, button.bosta-kisi:hover { border-color: var(--cizgi-koyu); background: var(--yuzey); }
-.grup-uye--secili { border-color: var(--vurgu); background: var(--yuzey); }
-.grup-uye--vurgulu { border-color: var(--vurgu); background: var(--vurgu-zemin); }
+button.figur { cursor: pointer; }
+button.figur:hover, .figur--secili { border-color: var(--vurgu); background: var(--yuzey); }
+.figur--vurgulu { border-color: var(--vurgu); background: var(--vurgu-zemin); }
+.siluet { width: var(--fig); height: calc(var(--fig) * 1.66); display: block; transition: color var(--gecis); }
+.figur-ad {
+  font-size: 11px; font-weight: 600; line-height: 1.15; text-align: center; max-width: 100%;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.figur-sure .grup-renk { display: inline-block; width: 7px; height: 7px; margin-right: 3px; vertical-align: 1px; } /* kişinin kendi rengi */
+.figur-sure { font-size: 11px; font-weight: 700; }
 .grup-renk { width: 10px; height: 10px; flex: none; border-radius: var(--kose-tam); }
-/* Ad kesilmesin: dairede en çok iki satır (uzun şirket adı), şeritte tek satır. */
 .grup-ad { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.grup-uye .grup-ad { white-space: normal; text-align: left; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.grup-fazla { text-align: center; color: var(--metin-2); font-size: var(--punto-kucuk); font-weight: 600; }
+.grup-uye--vurgulu { border-color: var(--vurgu); background: var(--vurgu-zemin); }
+.grup-fazla { align-self: center; color: var(--metin-2); font-size: var(--punto-kucuk); font-weight: 700; padding: 0 var(--aralik-1); }
+
+/* Süre renk açıklaması */
+.sure-anahtari { margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--aralik-1) var(--aralik-3); font-size: var(--punto-kucuk); color: var(--metin-2); }
+.sure-anahtari-bas { font-weight: 700; }
+.sure-anahtari-oge { display: inline-flex; align-items: center; gap: var(--aralik-1); }
+.sure-anahtari-renk { width: 12px; height: 12px; border-radius: 3px; }
 
 /* Bildirime ya da gruba tıklayınca: ilgili gruplar kalır, diğerleri solar (3 sn, PanoEkrani). */
 .gruplar[data-vurgu] .grup:not(.grup--vurgulu):not(.grup--bos) { opacity: 0.3; }
@@ -62,22 +75,27 @@ button.grup-uye:hover, button.bosta-kisi:hover { border-color: var(--cizgi-koyu)
 .bosta-baslik { margin: 0 0 var(--aralik-2); font-size: var(--punto-kucuk); text-transform: uppercase; letter-spacing: 0.04em; color: var(--metin-2); }
 .bosta-gorunmeyen { color: var(--metin-soluk); }
 .bosta-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--aralik-1) var(--aralik-2); }
-.bosta-kisi { border-color: var(--cizgi); background: var(--yuzey); }
+.bosta-kisi {
+  display: inline-flex; align-items: center; gap: var(--aralik-1); font: inherit; font-size: var(--punto-kucuk);
+  color: var(--metin); border: 1px solid var(--cizgi); border-radius: var(--kose-tam); background: var(--yuzey);
+  padding: 1px var(--aralik-2); cursor: pointer;
+}
+.bosta-kisi:hover { border-color: var(--cizgi-koyu); }
 .bosta-kisi--yalniz { border-color: var(--uyari); background: var(--uyari-zemin); }
 .bosta-yalniz { color: var(--uyari); font-weight: 600; }
 
 /* Sunum modu (salon ekranı): 2–3 metreden okunur; tıklanmaz. */
 .gruplar--sunum { flex: 1; min-height: 0; }
-.gruplar--sunum .gruplar-alan { grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: var(--aralik-5); }
-.gruplar--sunum .grup-daire { --cap: 12rem; }
-.gruplar--sunum .grup--n3 .grup-daire { --cap: 14rem; }
-.gruplar--sunum .grup--n4 .grup-daire { --cap: 15.5rem; }
-.gruplar--sunum .grup--n5 .grup-daire { --cap: 16.5rem; }
-.gruplar--sunum .grup-uye, .gruplar--sunum .grup-etiket { font-size: var(--punto-orta); }
-.gruplar--sunum .bosta-baslik { font-size: var(--punto-orta); }
+.gruplar--sunum .gruplar-alan { grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: var(--aralik-5); }
+.gruplar--sunum .grup-sahne { --fig: 92px; }
+.gruplar--sunum .grup--n3 .grup-sahne { --fig: 86px; }
+.gruplar--sunum .grup--n4 .grup-sahne { --fig: 78px; }
+.gruplar--sunum .grup--n5 .grup-sahne { --fig: 72px; }
+.gruplar--sunum .figur-ad, .gruplar--sunum .figur-sure { font-size: var(--punto-kucuk); }
+.gruplar--sunum .grup-etiket, .gruplar--sunum .bosta-baslik, .gruplar--sunum .sure-anahtari { font-size: var(--punto-orta); }
 
 @media (prefers-reduced-motion: reduce) {
-  .grup, .grup-daire { transition: none; }
+  .grup, .siluet { transition: none; }
 }
 
 /* Konum notu (daireler ve ego görünümü ortak): yerler salondaki yeri göstermez. */

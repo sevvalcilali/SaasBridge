@@ -42,6 +42,13 @@
   --pasif: #6d675e;            /* görünmüyor/boşta gri */
   --pasif-zemin: #eeeae1;
 
+  /* --- Görüşme süresi (Pano siluetleri; Şevval kararı 2026-10). Kırmızı/turuncu "uyarı" olduğu için
+     uzun görüşme mor ve altın. Her zaman yazılı süre + açıklamayla birlikte. --- */
+  --sure-1: #2b2622;           /* 1–5 dk: siyah (kalem) */
+  --sure-5: #2f62b8;           /* 5–10 dk: mavi */
+  --sure-10: #7442c0;          /* 10–20 dk: mor */
+  --sure-20: #9a6c00;          /* 20 dk+: altın */
+
   /* --- Kişi paleti (Faz 5: dataviz doğrulayıcısıyla yeniden adımlandı; sıra sunucu paletiyle eş)
          Açık yüzeyde: her renk ≥3:1; normal görüşte tüm çiftler OKLab ΔE ≥15;
          renk körlüğünde (protan/deutan) sıra komşuları ≥8. kontrast.test.js denetler. --- */
@@ -115,6 +122,11 @@
     --ciddi-zemin: #3f1c1a;
     --pasif: #a69c8f;
     --pasif-zemin: #2d2925;
+
+    --sure-1: #ece4d8;         /* koyu zeminde "siyah" kalem açık ton */
+    --sure-5: #6ea2f2;
+    --sure-10: #b38cf2;
+    --sure-20: #e0b64a;
 
     /* Kişi paleti koyu yüzeyde: her renk ≥3:1; normal görüşte tüm çiftler ΔE ≥15;
        renk körlüğünde sıra komşuları ≥8. */

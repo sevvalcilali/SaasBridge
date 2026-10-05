@@ -1,30 +1,39 @@
-// Canlı gruplar ("adacıklar"): şu an yan yana olanlar tek bir dairede; 2 kişilik küçük, 5 kişilik büyük.
-// Yatırımcı ile girişimcinin buluştuğu grup yeşil çerçeveli (etkinliğin amacı). Grupta olmayanlar alttaki
+// Canlı gruplar ("adacıklar"): şu an yan yana olanlar karakalem insan siluetleri olarak bir arada (Şevval, 2026-10);
+// siluetin rengi kişinin o anki görüşmesinin süresi. Yatırımcı ile girişimcinin buluştuğu grubun zemini yeşil. Grupta olmayanlar alttaki
 // "Boşta" şeridinde; yalnız kalan önemli yatırımcı orada öne çıkar. Daireler ekranda yer değiştirmez
 // (api/gruplar.js yerlestir); yerleri salondaki yeri DEĞİLDİR. Pano ve sunum modunda ortak.
 import { memo, useMemo, useRef } from 'react'
-import { bostakiler, canliGruplar, yalnizMi, yerlestir } from '../api/gruplar.js'
+import { bostakiler, canliGruplar, siluetPozu, SURE_RENKLERI, sureRengi, yalnizMi, yerlestir } from '../api/gruplar.js'
 import { kisaAd } from '../api/ad.js'
 import { sureYazisi } from '../api/format.js'
 import { RolSekli } from './KisiRozeti.jsx'
+import Siluet from './Siluet.jsx'
 import './CanliGruplar.css'
 
-const DAIREDE_EN_COK = 6 // daha kalabalık grupta ilk 5 kişi + "+N"
+const GRUPTA_EN_COK = 6 // daha kalabalık grupta ilk 5 kişi + "+N"
+const kisaSure = (dk) => sureYazisi(dk).replace(/ \d+ sn$/, '')
 
-function Uye({ k, vurgulu, secili, isimsiz, onSec }) {
+// Bir kişi: süre renginde karakalem siluet, altında adı (kişinin kendi rengi küçük noktada) ve süresi.
+// Grubun ortasına dönük durur; kenardakiler biraz öne (yarım çember).
+function Figur({ k, i, n, vurgulu, secili, isimsiz, onSec }) {
+  const renk = sureRengi(k.live).degisken
+  const orta = (n - 1) / 2
   const icerik = (
     <>
-      <span className="grup-renk" style={{ background: k.color }} aria-hidden="true" />
-      <RolSekli rol={k.role} />
-      {!isimsiz && <span className="grup-ad">{kisaAd(k)}</span>}
+      <Siluet renk={renk} poz={siluetPozu(k.id)} rol={k.role} ayna={i > orta} />
+      {!isimsiz && <span className="figur-ad">{kisaAd(k)}</span>}
+      <span className="figur-sure sayi" style={{ color: renk }}>
+        <span className="grup-renk" style={{ background: k.color }} aria-hidden="true" />{kisaSure(k.live ?? 0)}
+      </span>
     </>
   )
-  const sinif = `grup-uye ${vurgulu ? 'grup-uye--vurgulu' : ''} ${secili ? 'grup-uye--secili' : ''}`
-  if (!onSec) return <li className={sinif}>{icerik}</li>
+  const sinif = `figur ${vurgulu ? 'figur--vurgulu' : ''} ${secili ? 'figur--secili' : ''}`
+  const stil = { '--one': `${Math.abs(i - orta) * 5}px` }
+  if (!onSec) return <li className={sinif} style={stil}>{icerik}</li>
   return (
-    <li>
-      <button type="button" className={sinif} title={kisaAd(k)} data-test="grup-uye" data-id={k.id}
-        onClick={(e) => { e.stopPropagation(); onSec(k.id) }}>
+    <li style={stil} className="figur-kap">
+      <button type="button" className={sinif} title={`${kisaAd(k)} · ${kisaSure(k.live ?? 0)}`}
+        data-test="grup-uye" data-id={k.id} onClick={(e) => { e.stopPropagation(); onSec(k.id) }}>
         {icerik}
       </button>
     </li>
@@ -33,19 +42,19 @@ function Uye({ k, vurgulu, secili, isimsiz, onSec }) {
 
 const Grup = memo(function Grup({ g, vurguSet, seciliId, isimsiz, onKisiSec, onGrupSec }) {
   const n = g.uyeler.length
-  const gorunen = n > DAIREDE_EN_COK ? g.uyeler.slice(0, DAIREDE_EN_COK - 1) : g.uyeler
+  const gorunen = n > GRUPTA_EN_COK ? g.uyeler.slice(0, GRUPTA_EN_COK - 1) : g.uyeler
   const vurgulu = g.uyeler.some((u) => vurguSet.has(u.id))
-  const sure = sureYazisi(g.dakika).replace(/ \d+ sn$/, '')
-  const etiket = `${n} kişi · ${sure}`
+  const etiket = `${n} kişi · ${kisaSure(g.dakika)}`
   return (
     <div className={`grup grup--n${Math.min(n, 5)} ${g.karma ? 'grup--karma' : ''} ${vurgulu ? 'grup--vurgulu' : ''}`}
       role="listitem" data-test="grup" data-karma={g.karma || undefined}
       aria-label={`${etiket}${g.karma ? ', yatırımcı ile girişimci' : ''}`}>
       <div className="grup-etiket sayi">{etiket}</div>
-      <div className="grup-daire" onClick={onGrupSec ? () => onGrupSec(g.uyeler.map((u) => u.id)) : undefined}>
-        <ul className="grup-uyeler">
-          {gorunen.map((u) => (
-            <Uye key={u.id} k={u} vurgulu={vurguSet.has(u.id)} secili={seciliId === u.id} isimsiz={isimsiz} onSec={onKisiSec} />
+      <div className="grup-sahne" onClick={onGrupSec ? () => onGrupSec(g.uyeler.map((u) => u.id)) : undefined}>
+        <ul className="grup-figurler">
+          {gorunen.map((u, i) => (
+            <Figur key={u.id} k={u} i={i} n={gorunen.length} vurgulu={vurguSet.has(u.id)} secili={seciliId === u.id}
+              isimsiz={isimsiz} onSec={onKisiSec} />
           ))}
           {n > gorunen.length && <li className="grup-fazla sayi">+{n - gorunen.length}</li>}
         </ul>
@@ -53,6 +62,20 @@ const Grup = memo(function Grup({ g, vurguSet, seciliId, isimsiz, onKisiSec, onG
     </div>
   )
 })
+
+// Süre renklerinin açıklaması: renk tek başına bilgi değildir.
+function SureAnahtari() {
+  return (
+    <p className="sure-anahtari" data-test="sure-anahtari">
+      <span className="sure-anahtari-bas">Süre:</span>
+      {SURE_RENKLERI.map((r) => (
+        <span key={r.ad} className="sure-anahtari-oge">
+          <span className="sure-anahtari-renk" style={{ background: r.degisken }} aria-hidden="true" />{r.etiket}
+        </span>
+      ))}
+    </p>
+  )
+}
 
 export default function CanliGruplar({
   people, live = [], vurgulanan = [], seciliId, onKisiSec, onGrupSec, sunum = false, isimsiz = false,
@@ -111,7 +134,9 @@ export default function CanliGruplar({
         )}
       </section>
 
-      <p className="ag-not">Dairelerin yeri salondaki yeri göstermez; yalnız şu an kimlerin birlikte olduğunu gösterir.</p>
+      {gruplar.length > 0 && <SureAnahtari />}
+
+      <p className="ag-not">Grupların yeri salondaki yeri göstermez; yalnız şu an kimlerin birlikte olduğunu gösterir.</p>
     </div>
   )
 }

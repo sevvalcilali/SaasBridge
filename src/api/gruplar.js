@@ -97,3 +97,17 @@ export function yerlestir(yerler, gruplar) {
   })
   return { yerler: yeni, atama }
 }
+
+// Siluet rengi = o kişinin şu anki görüşmesinin süresi (people[].live, dakika). Renk yalnız sınır geçilince
+// değişir (sakin); her zaman yazılı süre ve açıklamayla birlikte kullanılır (renk tek başına bilgi değildir).
+// Mor ve altın: kırmızı / turuncu arayüzde "uyarı" demek, uzun görüşme ise iyi bir şey (Şevval kararı 2026-10).
+export const SURE_RENKLERI = [
+  { ad: 'siyah', enAz: 0, etiket: '1–5 dk', degisken: 'var(--sure-1)' },
+  { ad: 'mavi', enAz: 5, etiket: '5–10 dk', degisken: 'var(--sure-5)' },
+  { ad: 'mor', enAz: 10, etiket: '10–20 dk', degisken: 'var(--sure-10)' },
+  { ad: 'altin', enAz: 20, etiket: '20 dk+', degisken: 'var(--sure-20)' },
+]
+export const sureRengi = (dakika) => SURE_RENKLERI.findLast((r) => (dakika ?? 0) >= r.enAz)
+
+// Siluetin duruşu kişiye göre sabit: her tikte aynı figür (zıplamasın), kalabalıkta tekdüze durmasın.
+export const siluetPozu = (id) => [...String(id)].reduce((t, c) => t + c.charCodeAt(0), 0) % 3
