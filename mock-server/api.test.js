@@ -127,3 +127,36 @@ test('profil (rapor 2. adım): eklenir, düzenlenir, CSV ile gelir; izin varsay�
   const ece = (await getj(`${B}/api/people`)).find((k) => k.ad === 'Ece Tan')
   assert.deepEqual([ece.sektor, ece.asama, ece.eposta, ece.paylasim], ['Enerji', 'buyume', 'ece@mavi.com', true])
 })
+
+// ---------- Uyarı kuralları (port 8129, 60 kat hız): gerçek sunucunun /api/rules sözleşmesiyle aynı ----------
+
+test('kurallar: eklenir, doğrulanır, kapatılır, silinir; tetiklenince kural uyarısı akışa düşer', async () => {
+  const R = 'http://localhost:8129'
+  baslat(['--port=8129', '--kisi=25', '--tohum=7', '--hizlandir=60'])
+  await hazir(8129)
+  const kisiler = await getj(`${R}/api/people`)
+  const hatali = await post(`${R}/api/rules`, { kim: { kisiler: ['k999'] }, kiminle: { rol: 'herkes' } })
+  assert.equal(hatali.status, 400)
+  assert.deepEqual(await hatali.json(), { ok: false, hata: 'kim: bilinmeyen kişi k999' })
+
+  const grup = await (await post(`${R}/api/rules`, { kim: { rol: 'investor', enAzYildiz: 4 }, kiminle: { rol: 'founder' }, dakika: 5 })).json()
+  assert.equal(grup.ad, '★4+ yatırımcılar ile girişimciler · 5 dk')
+  const kapali = await (await fetch(`${R}/api/rules/${grup.kuralId}`, { method: 'PATCH', body: JSON.stringify({ acik: false }) })).json()
+  assert.equal(kapali.acik, false)
+  const ilk = kisiler[0]
+  const ozel = await (await post(`${R}/api/rules`, { kim: { kisiler: [ilk.kisiId] }, kiminle: { rol: 'herkes' } })).json()
+  assert.equal(ozel.ad, `${ilk.rol === 'founder' && ilk.kurum ? ilk.kurum : ilk.ad} ile herkes · yan yana`)
+  assert.equal((await fetch(`${R}/api/rules/${ozel.kuralId}`, { method: 'DELETE' })).status, 200)
+  assert.equal((await fetch(`${R}/api/rules/r99`, { method: 'DELETE' })).status, 404)
+
+  await post(`${R}/api/rules`, { ad: 'Herkes yan yana', kim: { rol: 'herkes' }, kiminle: { rol: 'herkes' }, dakika: 0 })
+  let uyari
+  for (let i = 0; i < 150 && !uyari; i++) {
+    uyari = (await getj(`${R}/state`)).alerts.find((b) => b.kind === 'kural')
+    await new Promise((c) => setTimeout(c, 100))
+  }
+  assert.ok(uyari, 'kural uyarısı gelmedi')
+  assert.deepEqual([uyari.title, uyari.severity, uyari.kural, uyari.people.length], ['Herkes yan yana', 'kural', 'r3', 2])
+  assert.match(uyari.detail, / ile .* yan yana geldi\.$/)
+  assert.deepEqual((await getj(`${R}/api/rules`)).map((k) => k.kuralId), ['r1', 'r3'])
+})
