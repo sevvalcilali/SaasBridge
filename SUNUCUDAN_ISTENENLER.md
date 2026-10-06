@@ -22,7 +22,7 @@
 Kişi (katılımcı) kalıcı bir kayıttır; kart fiziksel cihazdır. Bir kişiye bir
 anda en fazla bir kart atanır. **Süreler ve "kim kimle ne kadar" kenarları kişiye
 yazılır, karta değil:**
-- Kart değişince (pil bitti, yeni kart) kişinin süreleri yeni kartta **birleşir**.
+- Kart değişince (bozuldu, yeni kart) kişinin süreleri yeni kartta **birleşir**.
 - İade edilen kart başka birine verilirse eski sahibin süreleri **devredilmez**.
 - Kartı iade edilen (ayrılan) kişinin süreleri **silinmez**; yeni kart alırsa geri gelir,
   rapor (Faz 4) bunları kullanır.
@@ -110,7 +110,7 @@ her atama/iade/değişimin `{zaman, kisiId, kart, islem}` kaydı tutulmalı. Ön
 ## 3. Kartlar — `GET /api/cards`
 
 ```json
-[{"kart": "14", "rssiAlici": -71.4, "seenAgo": 0.6, "atanan": "k12", "pil": 82}]
+[{"kart": "14", "rssiAlici": -71.4, "seenAgo": 0.6, "atanan": "k12"}]
 ```
 
 | Alan | Birim / anlamı | Arayüz nerede kullanır |
@@ -118,7 +118,6 @@ her atama/iade/değişimin `{zaman, kisiId, kart, islem}` kaydı tutulmalı. Ön
 | `rssiAlici` | dBm, alıcının kartı duyduğu güç | "Yaklaştır ve tanı": tek kart > −55 → bulundu, iki+ → "birini uzaklaştırın" |
 | `seenAgo` | **saniye** | ≤8 sn "açık"; atanmış kartta ≥60 sn → **"Kartı kontrol et"** (brief `lost` ile aynı ölçüt) |
 | `atanan` | `kisiId` ya da `null` | "zaten atanmış" uyarısı; `null` + açık → **boştaki kartlar** şeridi |
-| `pil` | % (kart paketindeki `batt`) | Kontrol adımı; boştaki kartta %20 altı ⚠ |
 
 - Liste, alıcının duyduğu **tüm** kartları içermeli: atanmışlar, masadaki yedekler
   (atanmamış), iade edilip masaya dönenler. Arayüz 1–3 sn'de bir yoklar.
@@ -148,11 +147,11 @@ Kurulum ekranı bugünkü sözleşmeyle çalışıyor; yalnız aşağıdakilerin
 | `/state.signals[]` (`a, b, ab, ba, value, n, above, together`) | Çift tablosu. `value` = **son 10 sn ortancası** olmalı: kalibrasyon "10 sn tut → o anki `value`" ile ölçüyor |
 | `/state.history` (`"a-b": [[saniyeÖnce, dBm], …]`, en eski başta) + `chartSeconds` | Canlı grafik. Anahtar `"küçükNo-büyükNo"`. Yalnız Kurulum ister: diğer ekranlar `/state?grafik=0` ve `/events?grafik=0` ile bağlanır, `history` boş `{}` gelir (parametre yoksa tam durum) |
 | `POST /control {"cmd":"threshold","value":-68}` | Kaydırıcı (bırakınca ~250 ms sonra tek istek) ve kalibrasyon onayı. 2xx dışı yanıt hata sayılır, ekran eski değere döner |
-| `GET /api/cards` (`seenAgo`, `pil`, `atanan`) | Kart sağlığı: ≥60 sn "duyulmuyor", >30 sn "görünmüyor", pil <%20 "pil düşük" |
+| `GET /api/cards` (`seenAgo`, `atanan`) | Kart sağlığı: ≥60 sn "duyulmuyor", >30 sn "görünmüyor" |
 
 - **"Başlıyor… / bitiyor…" için §9-7'deki `pending` alanı gerekmiyor:** `above` ile `together`
   farkından türetiliyor (above ∧ ¬together = başlıyor, ¬above ∧ together = bitiyor).
-- **Paket hızı istenmiyor** (Şevval kararı): kart sağlığı son duyulma + pil ile yetiniyor.
+- **Paket hızı ve pil istenmiyor** (Şevval kararları; pil 07.10.2026 — alıcıdan gerçek pil bilgisi yok): kart sağlığı yalnız son duyulma ile.
 - `POST /api/demo/tut {a, b, mod}` **yalnız mock'ta** (kalibrasyonu donanımsız denemek için);
   gerçek sunucuda gerekmez.
 

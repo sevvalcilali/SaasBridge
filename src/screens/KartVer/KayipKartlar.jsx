@@ -1,20 +1,20 @@
 // Kayıp kart (brief §6.3): kişinin kartı 60 sn'dir duyulmuyor → "Kartı kontrol et".
-// Görevli kişiyi bulunca "Pil değiştirildi" ya da "Kart değiştirildi" seçer.
+// Görevli kişiyi bulunca "Kart kontrol edildi" (aynı kart, sinyal beklenir) ya da "Kart değiştirildi" seçer.
 // `KayipUyarilari` üstteki uyarı şeridi, `KartKontrol` seçilen kişinin paneli.
 import { onceYazisi } from '../../api/format.js'
 
-export function KayipUyarilari({ kayiplar, pilDegisti, onKontrol }) {
+export function KayipUyarilari({ kayiplar, kontrolEdildi, onKontrol }) {
   if (!kayiplar.length) return null
-  const bekleyen = kayiplar.filter((k) => !pilDegisti.has(k.kart)).length
+  const bekleyen = kayiplar.filter((k) => !kontrolEdildi.has(k.kart)).length
   // Her satırın "son duyulma" metni değiştikçe yeniden okunmasın: yalnız sayı duyurulur.
   return (
     <>
     <p className="gorunmez" role="status">{bekleyen ? `${bekleyen} kart kontrol bekliyor` : ''}</p>
     <ul className="kayip-liste" aria-label="Kartı kontrol edilecek kişiler" data-test="kayip-uyarilari">
       {kayiplar.map((k) => (
-        pilDegisti.has(k.kart) ? (
+        kontrolEdildi.has(k.kart) ? (
           <li key={k.kart} className="kayip kayip--bekleniyor">
-            <span>↻ <strong>{k.kisi.ad}</strong> · Kart {k.kart}: pil değiştirildi, sinyal bekleniyor.</span>
+            <span>↻ <strong>{k.kisi.ad}</strong> · Kart {k.kart}: kontrol edildi, sinyal bekleniyor.</span>
           </li>
         ) : (
           <li key={k.kart} className="kayip" data-test="kayip-uyari">
@@ -30,7 +30,7 @@ export function KayipUyarilari({ kayiplar, pilDegisti, onKontrol }) {
   )
 }
 
-export function KartKontrol({ kayip, onPilDegisti, onKartDegisti, onKapat }) {
+export function KartKontrol({ kayip, onKontrolEdildi, onKartDegisti, onKapat }) {
   const { kisi, kart, seenAgo } = kayip
   return (
     <div className="kontrol" data-test="kart-kontrol">
@@ -40,11 +40,11 @@ export function KartKontrol({ kayip, onPilDegisti, onKartDegisti, onKapat }) {
         <span className="onay-metin"><strong>{kisi.ad}</strong> · <strong>Kart {kart}</strong></span>
       </div>
       <p className="kontrol-not">
-        Kart {onceYazisi(seenAgo)} duyuldu. Kişiyi bulun, kartına bakın: pili mi bitti, kart mı bozuk?
+        Kart {onceYazisi(seenAgo)} duyuldu. Kişiyi bulun, kartına bakın: kart üstünde mi, açık mı, bozuk mu?
       </p>
       <div className="kayip-secenek">
-        <button type="button" className="kisisec-yeni" data-test="pil-degisti" onClick={() => onPilDegisti(kayip)}>
-          Pil değiştirildi
+        <button type="button" className="kisisec-yeni" data-test="kontrol-edildi" onClick={() => onKontrolEdildi(kayip)}>
+          Kart kontrol edildi
           <span className="kayip-aciklama">Aynı kart; sinyal gelince uyarı kalkar.</span>
         </button>
         <button type="button" className="kisisec-yeni" data-test="kart-degisti" onClick={() => onKartDegisti(kayip)}>

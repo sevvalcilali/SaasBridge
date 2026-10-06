@@ -30,10 +30,10 @@ test('formGecerli: ad zorunlu, rol geçerli olmalı', () => {
 })
 
 const KARTLAR = [
-  { kart: '10', rssiAlici: -75, seenAgo: 0.5, atanan: 'k1', pil: 90 },
-  { kart: '11', rssiAlici: -50, seenAgo: 1.0, atanan: null, pil: 80 },
-  { kart: '12', rssiAlici: -80, seenAgo: 40, atanan: null, pil: 60 },  // bayat (duyulmuyor)
-  { kart: '113', rssiAlici: -70, seenAgo: 0.2, atanan: null, pil: 70 },
+  { kart: '10', rssiAlici: -75, seenAgo: 0.5, atanan: 'k1' },
+  { kart: '11', rssiAlici: -50, seenAgo: 1.0, atanan: null },
+  { kart: '12', rssiAlici: -80, seenAgo: 40, atanan: null },  // bayat (duyulmuyor)
+  { kart: '113', rssiAlici: -70, seenAgo: 0.2, atanan: null },
 ]
 
 test('acikKartlar: yalnız yakın zamanda duyulanlar, güce göre azalan', () => {
@@ -54,7 +54,7 @@ test('baskinKart: tek güçlü kart → o bulunur', () => {
 })
 
 test('baskinKart: iki güçlü kart → çoklu (birini uzaklaştır)', () => {
-  const iki = [...KARTLAR, { kart: '20', rssiAlici: -45, seenAgo: 0.3, atanan: null, pil: 80 }]
+  const iki = [...KARTLAR, { kart: '20', rssiAlici: -45, seenAgo: 0.3, atanan: null }]
   assert.deepEqual(baskinKart(iki), { kart: null, coklu: true })
 })
 
@@ -123,13 +123,13 @@ test('kisiDurumu: kartı kayıpsa "Kartı kontrol et"', () => {
 })
 
 const MASA = [
-  { kart: '40', atanan: null, seenAgo: 0.3, pil: 90 },
-  { kart: '7', atanan: null, seenAgo: 1.2, pil: 80 },
-  { kart: '9', atanan: null, seenAgo: 30, pil: 70 },     // duyulmuyor: stok sayılmaz
-  { kart: '12', atanan: 'k1', seenAgo: 0.5, pil: 60 },   // atanmış
-  { kart: '15', atanan: 'k2', seenAgo: 75, pil: 5 },     // kayıp
-  { kart: '16', atanan: 'k3', seenAgo: KAYIP_SN, pil: 50 },
-  { kart: '17', atanan: 'yok', seenAgo: 90, pil: 50 },   // kaydı olmayan atanmış
+  { kart: '40', atanan: null, seenAgo: 0.3 },
+  { kart: '7', atanan: null, seenAgo: 1.2 },
+  { kart: '9', atanan: null, seenAgo: 30 },     // duyulmuyor: stok sayılmaz
+  { kart: '12', atanan: 'k1', seenAgo: 0.5 },   // atanmış
+  { kart: '15', atanan: 'k2', seenAgo: 75 },     // kayıp
+  { kart: '16', atanan: 'k3', seenAgo: KAYIP_SN },
+  { kart: '17', atanan: 'yok', seenAgo: 90 },   // kaydı olmayan atanmış
 ]
 
 test('bostakiKartlar: açık ve atanmamış, numaraya göre', () => {

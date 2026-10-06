@@ -16,6 +16,4 @@ export class RaporApi {
   // Anlık görüntü için tek seferlik durum (başlık, saat, geçen süre, anlaşma sayısı); canlı akış dinlenmez.
   durumGetir() { return jsonIstek(this.adres, '/state?grafik=0') } // grafik verisi raporda gerekmez
 
-  // Kart bilgisi (pil, son duyulma) — kişi ayrıntı paneli.
-  kartlariGetir() { return jsonIstek(this.adres, '/api/cards') }
 }

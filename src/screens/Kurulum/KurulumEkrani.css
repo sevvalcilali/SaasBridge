@@ -196,8 +196,6 @@
 .saglik-sorun { display: block; font-weight: 700; white-space: nowrap; }
 .saglik-sorun--kayip { color: var(--ciddi); }
 .saglik-sorun--sessiz { color: var(--metin-2); }
-.saglik-sorun--pil { color: var(--uyari); }
-.saglik-pil--dusuk { color: var(--uyari); font-weight: 700; }
 
 /* Dokunmatik (≤1024): tablodaki ad düğmeleri ≥36 px (görünüm aynı, vuruş alanı büyür); seçiciler ≥40 px */
 @media (max-width: 1024px) {
