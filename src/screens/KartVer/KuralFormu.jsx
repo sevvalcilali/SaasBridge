@@ -22,7 +22,7 @@ function SecimSecici({ baslik, deger, onDegis, katilimcilar, test }) {
       <div className="tema-secici" role="group" aria-label={`${baslik}: seçim türü`}>
         {[['grup', 'Bir grup'], ['kisiler', 'Belirli kişiler']].map(([tur, etiket]) => (
           <button key={tur} type="button" className="tema-secici-dugme" aria-pressed={deger.tur === tur}
-            onClick={() => onDegis({ ...deger, tur })} data-test={`${test}-${tur}`}>{etiket}</button>
+            onClick={() => onDegis({ ...deger, tur })} data-test={`${test}-tur-${tur}`}>{etiket}</button>
         ))}
       </div>
       {deger.tur === 'grup' ? (
