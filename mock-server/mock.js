@@ -25,7 +25,7 @@ const ANLASMA_SN = arg.anlasmaSn || null
 
 const TIK_MS = 500                 // gerçek zaman; yayın da bu kadans (2 Hz)
 const DT = (TIK_MS / 1000) * HIZ   // benzetim saniyesi / tik
-const GIRIS_SN = 5                 // brief §2: giriş gecikmesi
+const GIRIS_SN = 60                // giriş: eşik üstünde kesintisiz 1 dk (karar 05.10.2026; gerçek sunucuyla aynı)
 const CIKIS_SN = 15                // brief §2: çıkış gecikmesi
 const GRAFIK_SN = 90
 const ETKINLIK_DK = 180            // event.progress için varsayılan süre
@@ -126,7 +126,7 @@ let oturumlar = []                  // görüşme kayıtları (§9-6): { a, b, s
 let anlasmalar = new Set()          // anlaşma çıkmış çiftler — KİŞİ kimliğiyle (kenarAnahtari), karta değil
 let bitenGorusme = 0
 let esik = -72
-let yalnizSn = new Map()            // yatırımcı KİMLİĞİ → kesintisiz yalnız sn (kart başkasına geçince devredilmez)
+let yalnizSn = new Map()            // kişi KİMLİĞİ → kesintisiz boşta sn (kart başkasına geçince devredilmez)
 let atanmamisGeldi = false
 let aliciKopuk = false              // alıcı şu an kopuk mu (tik kararı; durum bunu okur)
 let sonAliciSn = 0                  // alıcıdan son satırın geldiği benzetim saniyesi
@@ -150,9 +150,10 @@ const kimlik = (e) => e.kisiId ?? `kart:${e.id}`
 const kenarAnahtari = (x, y) => (x < y ? `${x}|${y}` : `${y}|${x}`)
 
 // Görüşme kaydı (§9-6): birlikte başlayınca açılır, bitince kapanır. start/end etkinlik
-// saniyesi. Başladığı tik de süreye sayıldığı için (kenar süresi gibi) start = simSn - DT.
-function oturumAc(c) {
-  c.oturum = { a: kimlik(kisiBul(c.a)), b: kimlik(kisiBul(c.b)), start: simSn - DT, end: null }
+// saniyesi. Kayıt eşiğin aşıldığı ana geri tarihlidir (start = simSn - bekleme): bekleme dakikası kenar
+// süresine de eklendiği için kayıtlar toplamı edges[].min ile tutarlı kalır.
+function oturumAc(c, beklemeSn) {
+  c.oturum = { a: kimlik(kisiBul(c.a)), b: kimlik(kisiBul(c.b)), start: simSn - beklemeSn, end: null }
   oturumlar.push(c.oturum)
 }
 function oturumKapat(c) {
@@ -504,13 +505,15 @@ function tik() {
     }
     c.olcumler = c.olcumler.filter((o) => simSn - o.t <= GRAFIK_SN + 5)
 
-    // giriş/çıkış gecikmesi (brief §2): 5 sn üstte → başlar, 15 sn altta → biter
+    // giriş/çıkış gecikmesi: 1 dk üstte → başlar, 15 sn altta → biter. Başladığı tikte bekleme dakikasının
+    // tamamı süreye eklenir, sonra her tik DT (gerçek sunucu cekirdek/cift.py ile aynı).
     const son = c.olcumler.at(-1)
     const ustunde = son && son.value >= esik
     if (ustunde) { c.ustundeSn += DT; c.altindaSn = 0 } else { c.altindaSn += DT; c.ustundeSn = 0 }
+    let ekSn = DT
     if (!c.together && ustunde && c.ustundeSn >= GIRIS_SN) {
-      c.together = true; c.birlikteSn = 0
-      oturumAc(c)
+      c.together = true; c.birlikteSn = 0; ekSn = c.ustundeSn
+      oturumAc(c, c.ustundeSn)
       const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
       if (anlasmalar.has(kenarAnahtari(kimlik(ka), kimlik(kb)))) {
         bildir('repeat', 'deal', 'Yeniden bir arada',
@@ -518,12 +521,12 @@ function tik() {
       }
     }
     if (c.together) {
-      c.birlikteSn += DT
+      c.birlikteSn += ekSn
       const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
       const kk = kenarAnahtari(kimlik(ka), kimlik(kb))
-      kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + DT / 60)
-      ka.min += DT / 60; kb.min += DT / 60
-      if (karsiRol(ka, kb)) { ka.invMin += DT / 60; kb.invMin += DT / 60 }
+      kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + ekSn / 60)
+      ka.min += ekSn / 60; kb.min += ekSn / 60
+      if (karsiRol(ka, kb)) { ka.invMin += ekSn / 60; kb.invMin += ekSn / 60 }
       if (!c.anlasmaVerildi && c.birlikteSn >= anlasmaSuresiSn(c)) {
         c.anlasmaVerildi = true
         anlasmalar.add(kk) // kişi çifti: kart iade edilip başkasına verilince devredilmez
@@ -545,7 +548,9 @@ function tik() {
 
   // --- kişi durumları ve bildirim kuralları ---
   for (const k of kisiler) {
-    const birlikteMi = [...k.esler].some((esId) => ciftler.get(anahtar(k.id, esId))?.together)
+    // Çıkış gecikmesindeki (fiziksel ayrılmış, henüz bitmemiş) görüşmeler de "birlikte" — panodaki durumla aynı.
+    let birlikteMi = false
+    for (const [, c] of ciftler) if (c.together && (c.a === k.id || c.b === k.id)) { birlikteMi = true; break }
 
     // kayıp kart bildirimi (60 sn duyulmadı → ciddi)
     if (k.seenAgo >= 60 && !k.kayipBildirildi) {
@@ -554,21 +559,20 @@ function tik() {
         `${gorunenAd(k)} (kart ${k.id}) 1 dk'dır duyulmuyor.`, [k.id])
     }
 
-    // yalnız kalan önemli yatırımcı (≥★★★, 6 dk)
-    if (k.role === 'investor' && k.tier >= 3) {
-      const kim = kimlik(k)
-      const yalniz = (yalnizSn.get(kim) ?? 0)
-      if (!birlikteMi && k.seenAgo < 30) {
-        yalnizSn.set(kim, yalniz + DT)
-        if (yalniz + DT >= 360 && !k.yalnizBildirildi) {
-          k.yalnizBildirildi = true
-          bildir('idle_investor', 'warn', 'Önemli yatırımcı yalnız',
-            `${k.name} (${'★'.repeat(k.tier)}) 6 dk'dır kimseyle görüşmüyor.`, [k.id])
-        }
-      } else {
-        yalnizSn.set(kim, 0)
-        k.yalnizBildirildi = false
+    // Kesintisiz boşta süre herkes için sayılır (people[].idleSinceS, §9); görüşünce ya da görünmez olunca sıfır.
+    // Bildirim yalnız önemli yatırımcı (≥★★★) 6 dk yalnız kalınca.
+    const kim = kimlik(k)
+    if (!birlikteMi && k.seenAgo < 30) {
+      const yalniz = (yalnizSn.get(kim) ?? 0) + DT
+      yalnizSn.set(kim, yalniz)
+      if (k.role === 'investor' && k.tier >= 3 && yalniz >= 360 && !k.yalnizBildirildi) {
+        k.yalnizBildirildi = true
+        bildir('idle_investor', 'warn', 'Önemli yatırımcı yalnız',
+          `${k.name} (${'★'.repeat(k.tier)}) 6 dk'dır kimseyle görüşmüyor.`, [k.id])
       }
+    } else {
+      yalnizSn.set(kim, 0)
+      k.yalnizBildirildi = false
     }
   }
 }
@@ -662,6 +666,7 @@ function durumUret() {
       invMin: Math.round(k.invMin * 100) / 100,
       invPeers: karsiKisiler.size,
       seenAgo: Math.round(k.seenAgo * 10) / 10,
+      idleSinceS: Math.round((yalnizSn.get(kimlik(k)) ?? 0) * 10) / 10,
     }
   })
 

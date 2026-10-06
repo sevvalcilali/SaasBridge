@@ -175,8 +175,9 @@ panodaki kartların çiftleri var.
 | `a`, `b` | **Kişi kimliği** (`kisiId`), kart değil — kart değişse de aynı kişi. Kişiye atanmamış kart için `"kart:N"`; o karta sonradan kişi atanırsa kayıtları o kişiye geçer |
 | `start`, `end` | **Etkinlik saniyesi** (`/state.elapsed` ile aynı ölçek). Sürmekte olan görüşmede `end: null` |
 
-- Kayıt, çift "birlikte" olunca açılır, birlikte bitince kapanır (5 sn giriş / 15 sn çıkış
-  gecikmeleri dahil, `/state` ile aynı karar). Kart iade edilince ya da değişince açık kayıt kapanır.
+- Kayıt, çift "birlikte" olunca açılır, birlikte bitince kapanır (1 dk giriş / 15 sn çıkış
+  gecikmeleri dahil, `/state` ile aynı karar). Giriş dakikası görüşmeye sayılır: kayıt eşiğin aşıldığı ana geri
+  tarihlidir ve başladığı tikte o dakika `edges`/`min`'e eklenir (karar 05.10.2026). Kart iade edilince ya da değişince açık kayıt kapanır.
 - **Kayıtlar silinmez:** kartı iade edilen (ayrılan) kişinin kayıtları raporda kalır. Yalnız
   `POST /control reset` temizler.
 - Çift başına kayıt süreleri toplamı `/state.edges[].min` ile tutarlı olmalı (mock'ta testle kilitli;
@@ -234,7 +235,11 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
   "görüşme kayıtları alınamadı" der; rapor "rapor verisi alınamadı" der. Pano, `/state` + `/events` ile
   her durumda çalışır.
 
-## 9. "Yalnız kaldı" için istenen alan (C turu, 02.10.2026)
+## 9. "Yalnız kaldı" için istenen alan (C turu, 02.10.2026) — ✅ geldi
+
+> **Durum (06.10.2026):** Gerçek sunucu gönderiyor (`yakinlik/cekirdek/durum.py`); mock da aynı kuralla gönderiyor.
+> Herkes için sayılır: kişi birlikteyken ya da görünmezken (`seenAgo` ≥ 30) `0`, 0,1 sn'ye yuvarlı. Kullanan yerler:
+> Pano kişi satırı ("boşta · 4 dk'dır") ve canlı gruplardaki "yalnız · X dk" etiketi. Aşağıdaki metin isteğin aslıdır.
 
 Pano'da **"Yalnız kaldı"** filtresi var: şu an boşta olan yatırımcılar. "Ne kadardır yalnız" bilgisi `/state`'te
 yok; sunucu `idle_investor` bildirimini 6 dk'da üretiyor ama süreyi vermiyor. İstek (isteğe bağlı, küçük):

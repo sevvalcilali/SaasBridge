@@ -2,7 +2,7 @@
 // yıldız + durum (ikon+renk+yazı) + toplam süre + karşı rol sayısı. Kimlik renk+şekil+ad ile;
 // durum renk+ikon+yazı üçlüsüyle verilir (renk körlüğü — brief §10).
 import { memo } from 'react'
-import { durumCumlesi, atanmamisKartMi, karsiRolYazisi } from '../../api/durum.js'
+import { durumCumlesi, atanmamisKartMi, karsiRolYazisi, bostaDakika } from '../../api/durum.js'
 import { sureYazisi } from '../../api/format.js'
 
 const ROL_ADI = { investor: 'Yatırımcı', founder: 'Girişimci', guest: 'Misafir' }
@@ -91,7 +91,7 @@ function esit(a, b) {
     k.id === m.id && k.status === m.status && k.withName === m.withName &&
     k.name === m.name && k.org === m.org && k.color === m.color &&
     k.stars === m.stars && k.min === m.min && k.live === m.live && k.seenAgo === m.seenAgo &&
-    k.invPeers === m.invPeers
+    k.invPeers === m.invPeers && bostaDakika(k) === bostaDakika(m) // idleSinceS her tik artar; satır dakikada bir
   )
 }
 

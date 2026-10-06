@@ -45,10 +45,10 @@ async function bekleKi(port, kosul, sureMs = 8000, aralikMs = 40) {
 
 after(() => { for (const c of acikSunucular) c.kill() })
 
-// ---------- 1) ŞEMA KİLİDİ (port 8102, normal hız) ----------
+// ---------- 1) ŞEMA KİLİDİ (port 8102; 10× hız: giriş 1 dk olunca ilk canlı çift ~6 sn'de) ----------
 
 test('şema: durum nesnesi brief §5.1 ile alan alan birebir', async () => {
-  sunucuBaslat(['--port=8102', '--kisi=25', '--tohum=7'])
+  sunucuBaslat(['--port=8102', '--kisi=25', '--tohum=7', '--hizlandir=10'])
   await hazirBekle(8102)
   const s = await durum(8102)
 
@@ -60,7 +60,7 @@ test('şema: durum nesnesi brief §5.1 ile alan alan birebir', async () => {
   assert.equal(s.people.length, 25)
   for (const k of s.people) {
     assert.deepEqual(Object.keys(k).sort(), [
-      'color', 'id', 'invMin', 'invPeers', 'live', 'min', 'name', 'org',
+      'color', 'id', 'idleSinceS', 'invMin', 'invPeers', 'live', 'min', 'name', 'org',
       'role', 'seenAgo', 'stars', 'status', 'tier', 'withName',
     ])
     assert.equal(typeof k.id, 'string')

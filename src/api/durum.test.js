@@ -34,6 +34,12 @@ test('durumCumlesi: birden fazla kişiyle birlikte', () => {
 
 test('durumCumlesi: boşta', () => {
   assert.equal(durumCumlesi({ status: 'idle' }), 'boşta')
+  assert.equal(durumCumlesi({ status: 'idle', idleSinceS: 59.5 }), 'boşta')
+})
+
+test('durumCumlesi: boşta süresi idleSinceS ile, tam dakika', () => {
+  assert.equal(durumCumlesi({ status: 'idle', idleSinceS: 250 }), "boşta · 4 dk'dır")
+  assert.equal(durumCumlesi({ status: 'idle', idleSinceS: 3960 }), "boşta · 1 sa 6 dk'dır")
 })
 
 test('durumCumlesi: görünmüyor → seenAgo ile', () => {

@@ -103,7 +103,7 @@ test('/state şeması Faz 1 ile bozulmadan uyumlu (25 kişi, alanlar aynı)', as
   // atama oynamalarından sonra da geçerli alan kümesi
   for (const p of state.people) {
     assert.deepEqual(Object.keys(p).sort(), [
-      'color', 'id', 'invMin', 'invPeers', 'live', 'min', 'name', 'org',
+      'color', 'id', 'idleSinceS', 'invMin', 'invPeers', 'live', 'min', 'name', 'org',
       'role', 'seenAgo', 'stars', 'status', 'tier', 'withName',
     ])
   }

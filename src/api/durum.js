@@ -17,12 +17,17 @@ export const veriCanli = (durum, baglandi) => Boolean(baglandi) && aliciBagli(du
 // Girişimcide kurum adı kişi adından önce gösterilir (brief §3). Kural tek yerde: api/ad.js.
 export const gorunenAd = tamAd
 
-// Satırdaki durum cümlesi (brief §7): "X ile · süre" / "boşta" / "görünmüyor · …".
+// Satırdaki durum cümlesi (brief §7): "X ile · süre" / "boşta · 4 dk'dır" / "görünmüyor · …".
+// Boşta süresi sunucunun idleSinceS'inden (§9), dakika dakika; 1 dk'dan kısa ya da alan yoksa yalnız "boşta".
 export function durumCumlesi(kisi) {
   if (kisi.status === 'talking') return `${kisi.withName} ile · ${sureYazisi(kisi.live)}`
   if (kisi.status === 'away') return `görünmüyor · ${onceYazisi(kisi.seenAgo)}`
-  return 'boşta'
+  const bostaDk = bostaDakika(kisi)
+  return bostaDk ? `boşta · ${sureYazisi(bostaDk)}'dır` : 'boşta'
 }
+
+// Kesintisiz boşta tam dakika (satır yalnız dakika değişince yeniden çizilsin diye ayrı).
+export const bostaDakika = (kisi) => Math.floor((kisi.idleSinceS ?? 0) / 60)
 
 // Satırda "kaç karşı rol kişisiyle görüştüğü" (brief §7.2): yatırımcı için girişimci sayısı,
 // girişimci için yatırımcı sayısı. Misafirin karşı rolü yok → null (gösterilmez).
