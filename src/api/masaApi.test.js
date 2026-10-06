@@ -38,11 +38,10 @@ test('kişi ekle/getir/ata/kart/iade tam akışı', async () => {
   assert.equal((await api.kisileriGetir()).find((k) => k.kisiId === yeni.kisiId).atananKart, null)
 })
 
-test('yaklastir: kart öne çıkar', async () => {
-  await api.yaklastir('88')
-  const kartlar = await api.kartlariGetir()
-  const yakin = kartlar.find((k) => k.kart === '88')
-  assert.ok(yakin && yakin.rssiAlici > -55)
+test('kart numarayla verilir: "yaklaştır" ucu ve istemci yöntemi yok (Şevval kararı 07.10.2026)', async () => {
+  assert.equal(typeof api.yaklastir, 'undefined')
+  const yanit = await fetch(`http://localhost:8114/api/yaklastir`, { method: 'POST', body: JSON.stringify({ kart: '88' }) })
+  assert.equal(yanit.status, 404)
 })
 
 test('kisiGuncelle: bilgi değişir; kisiSil: kayıttan düşer', async () => {

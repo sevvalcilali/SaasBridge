@@ -1,5 +1,5 @@
-// §9-3 "yaklaştır ve tanı": GET /api/cards alıcının her kartı duyduğu gücü verir.
-// Bir kart alıcıya yaklaştırılınca (POST /api/yaklastir) belirgin öne çıkar.
+// GET /api/cards: alıcının duyduğu kartlar (masadaki yedekler dahil), son duyulma ve atanan kişi.
+// Kart numarayla verilir; "yaklaştır ve tanı" ve POST /api/yaklastir yok (Şevval kararı 07.10.2026).
 import { test, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
@@ -35,22 +35,4 @@ test('atanan: başlangıç kadrosunun kartları bir kişiye atanmış', async ()
   const kartlar = await getj(`${B}/api/cards`)
   const atanmis = kartlar.filter((k) => k.atanan)
   assert.ok(atanmis.length >= 25, 'atanmış kart yok')
-})
-
-test('POST /api/yaklastir: yaklaştırılan kart belirgin en güçlü olur', async () => {
-  await post(`${B}/api/yaklastir`, { kart: '88' })  // yeni, atanmamış kart yaklaştırıldı
-  const kartlar = await getj(`${B}/api/cards`)
-  const yakin = kartlar.find((k) => k.kart === '88')
-  assert.ok(yakin, 'yaklaştırılan kart /api/cards\'ta görünmeli')
-  assert.equal(yakin.atanan, null)
-  const digerEnGuclu = Math.max(...kartlar.filter((k) => k.kart !== '88').map((k) => k.rssiAlici))
-  assert.ok(yakin.rssiAlici > -55, `yakın kart güçlü olmalı (${yakin.rssiAlici})`)
-  assert.ok(yakin.rssiAlici - digerEnGuclu > 10, 'yakın kart diğerlerinden belirgin güçlü olmalı')
-})
-
-test('POST /api/yaklastir: iki kart yakınsa ikisi de güçlü (çift-kart)', async () => {
-  await post(`${B}/api/yaklastir`, { kart: '90', kart2: '91' })
-  const kartlar = await getj(`${B}/api/cards`)
-  const guclu = kartlar.filter((k) => k.rssiAlici > -55).map((k) => k.kart)
-  assert.ok(guclu.includes('90') && guclu.includes('91'), `iki kart da güçlü olmalı: ${guclu}`)
 })

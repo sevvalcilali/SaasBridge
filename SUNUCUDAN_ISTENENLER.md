@@ -115,14 +115,13 @@ her atama/iade/değişimin `{zaman, kisiId, kart, islem}` kaydı tutulmalı. Ön
 
 | Alan | Birim / anlamı | Arayüz nerede kullanır |
 |---|---|---|
-| `rssiAlici` | dBm, alıcının kartı duyduğu güç | "Yaklaştır ve tanı": tek kart > −55 → bulundu, iki+ → "birini uzaklaştırın" |
+| `rssiAlici` | dBm, alıcının kartı duyduğu güç | Arayüz şu an kullanmıyor (kart numarayla verilir; "yaklaştır ve tanı" kalktı, 07.10.2026) |
 | `seenAgo` | **saniye** | ≤8 sn "açık"; atanmış kartta ≥60 sn → **"Kartı kontrol et"** (brief `lost` ile aynı ölçüt) |
 | `atanan` | `kisiId` ya da `null` | "zaten atanmış" uyarısı; `null` + açık → **boştaki kartlar** şeridi |
 
 - Liste, alıcının duyduğu **tüm** kartları içermeli: atanmışlar, masadaki yedekler
   (atanmamış), iade edilip masaya dönenler. Arayüz 1–3 sn'de bir yoklar.
-- `POST /api/yaklastir` **yalnız mock'ta** var (donanım olmadan yaklaştırmayı taklit
-  eden demo düğmesi). Gerçek sunucuda gerekmez.
+- Kart masada **numarayla** verilir (kartın üstündeki etiket); "yaklaştır ve tanı" ve mock'taki `POST /api/yaklastir` kalktı (Şevval kararı 07.10.2026).
 
 ## 4. Açık sorular (Muhittin)
 
@@ -222,9 +221,9 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
 
 ## 8. Uçtan uca tarama sonrası netleşenler (30.09.2026)
 
-- **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini ("kartı yaklaştır",
+- **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini (kalibrasyonda
   "çifti tut") yalnız bu uç varsa gösterir; mock'ta var, gerçek sunucuda yoksa düğmeler gizlenir.
-  `/api/yaklastir` ve `/api/demo/tut` de yalnız mock'a ait.
+  `/api/demo/tut` de yalnız mock'a ait.
 - **Kart numaraları:** `/api/assign` ve `/api/unassign` gövdesindeki `kart` 1–99 arası, baştaki sıfırsız
   dize ("7"). Arayüz "007"yi "7"ye çevirir, 0 ve 100+ numaraları göndermez. Sunucu geçersiz numaraya
   400, bilinmeyen karta 404 dönebilir; arayüz bunu hata olarak gösterir.

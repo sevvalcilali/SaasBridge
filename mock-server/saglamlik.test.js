@@ -1,5 +1,5 @@
 // Tarama düzeltmeleri — mock sağlamlığı: hatalı istek süreci düşürmez, alan tipleri ve
-// kart no (1–99) doğrulanır, sıfırlama atanmış Kart 14'ü ve "yaklaştır" artığını bozmaz.
+// kart no (1–99) doğrulanır, sıfırlama atanmış Kart 14'ü bozmaz.
 import { test, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
@@ -46,16 +46,13 @@ test('hatalı gövdeler 4xx döner, süreç ayakta kalır; kart no doğrulanır'
   assert.equal(cikti, null, 'süreç ayakta')
 })
 
-test('sıfırlama: atanmış Kart 14 kişisinde kalır; yaklaştır artığı temizlenir', async () => {
+test('sıfırlama: atanmış Kart 14 kişisinde kalır', async () => {
   const k = await (await post(`${B}/api/people`, { ad: 'On Dört', rol: 'guest' })).json()
   assert.equal((await post(`${B}/api/assign`, { kisiId: k.kisiId, kart: '14' })).status, 200)
-  await post(`${B}/api/yaklastir`, { kart: '50' })
   await post(`${B}/control`, { cmd: 'reset' })
   await bekle(1200)
   const s = await getj(`${B}/state`)
   const on4 = s.people.filter((p) => p.id === '14')
   assert.equal(on4.length, 1, 'Kart 14 tek kez ve panoda')
   assert.equal(on4[0].name, 'On Dört', 'Kart 14 hâlâ atanan kişinin')
-  const kart50 = (await getj(`${B}/api/cards`)).find((c) => (c.kart ?? c.id) === '50')
-  assert.ok(!kart50 || kart50.rssiAlici == null || kart50.rssiAlici < -60, `kart 50 sıfırlamadan sonra yakın kalmamalı: ${JSON.stringify(kart50)}`)
 })

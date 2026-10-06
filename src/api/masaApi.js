@@ -33,10 +33,9 @@ export class MasaApi {
   kuralGuncelle(kuralId, alanlar) { return this.#iste(`/api/rules/${encodeURIComponent(kuralId)}`, 'PATCH', alanlar) }
   kuralSil(kuralId) { return this.#iste(`/api/rules/${encodeURIComponent(kuralId)}`, 'DELETE', {}) }
 
-  // --- kartlar / yaklaştır ve tanı ---
+  // --- kartlar (kart numarayla verilir; "yaklaştır ve tanı" yok, 07.10.2026) ---
   // Dinleyici cihazlar (100+) kişi kartı değildir: boştaki/önerilen kartlarda görünmez.
   async kartlariGetir() { return (await this.#iste('/api/cards')).filter((k) => kisiKartiMi(k.kart)) }
-  yaklastir(kart, kart2) { return this.#iste('/api/yaklastir', 'POST', { kart, kart2 }) }
   // Demo düğmeleri yalnız mock'ta (GET /api/demo var) gösterilir; gerçek sunucuda yok.
   demoVarMi() { return demoVarMi(this.adres) }
 }

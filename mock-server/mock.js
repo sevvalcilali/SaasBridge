@@ -367,16 +367,11 @@ function csvIceAktar(metin) {
   return { eklenen, atlanan }
 }
 
-// "Yaklaştır ve tanı": alıcıya yaklaştırılmış kartlar → kartNo → bitiş simSn.
-let yakinKartlar = new Map()
-
 // Deterministik jitter (istek işleyicide rnd() kullanmayız; tohum bozulmasın).
 const jitter = (kart) => ((Number(kart) * 13 + Math.floor(simSn)) % 7) - 3
 
-// Alıcının bir kartı duyduğu güç: yaklaştırılmışsa çok güçlü, normalde zayıf.
+// Alıcının bir kartı duyduğu güç (masadan zayıf; arayüz artık kullanmıyor, sözleşmede kalır).
 function rssiAlici(kart) {
-  const bitis = yakinKartlar.get(kart)
-  if (bitis != null && bitis >= simSn) return Math.round((-42 + jitter(kart)) * 10) / 10
   return Math.round((-72 - (Number(kart) % 15) + jitter(kart)) * 10) / 10
 }
 const kartDto = (kart, e) => ({
@@ -386,15 +381,11 @@ const kartDto = (kart, e) => ({
   atanan: kartKat(kart)?.kisiId ?? null,
 })
 
-// Alıcının duyduğu kartlar: aktif simülasyon kartları + yaklaştırılmış yeni kartlar.
+// Alıcının duyduğu kartlar: aktif simülasyon kartları + masadaki yedek kartlar.
 function kartlariListele() {
   const harita = new Map()
   for (const k of kisiler) harita.set(k.id, kartDto(k.id, k))
   for (const kart of masadakiKartlar) if (!harita.has(kart)) harita.set(kart, kartDto(kart, null))
-  for (const [kart, bitis] of yakinKartlar) {
-    if (bitis < simSn) { yakinKartlar.delete(kart); continue }
-    if (!harita.has(kart)) harita.set(kart, kartDto(kart, null))
-  }
   return [...harita.values()]
 }
 
@@ -768,7 +759,6 @@ function sifirla() {
   bitenGorusme = 0
   yalnizSn = new Map()
   kayipKisi = null
-  yakinKartlar = new Map() // "yaklaştır" bitişleri mutlak simSn; simSn 0'a dönünce eskisi kalmasın
   // kartı olmayanların (ayrılan / kart değiştiren) biriken süreleri de sıfırlanır
   for (const kat of katilimcilar) { kat.min = 0; kat.invMin = 0 }
   // Kart 14 senaryosu yeniden oynar — ama kart bir kişiye verildiyse o kişinin kartıdır, düşürülmez.
@@ -837,7 +827,7 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'GET' && yol === '/api/cards') { json(yanit, 200, kartlariListele()); return true }
 
-  // YALNIZ MOCK — arayüz demo düğmelerini (yaklaştır, çifti tut) yalnız bu uç varsa gösterir.
+  // YALNIZ MOCK — arayüz demo düğmelerini (kalibrasyonda çifti tut) yalnız bu uç varsa gösterir.
   // Gerçek sunucu bu ucu SAĞLAMAMALI (404) → üretimde demo düğmesi görünmez.
   if (istek.method === 'GET' && yol === '/api/demo') { json(yanit, 200, { ok: true, mock: true }); return true }
 
@@ -857,15 +847,6 @@ async function apiYonlendir(istek, yanit) {
       ciftler.set(key, c)
     }
     if (c) c.zorla = g.mod ?? null
-    json(yanit, 200, { ok: true }); return true
-  }
-
-  if (istek.method === 'POST' && yol === '/api/yaklastir') {
-    const g = await govdeOku(istek) || {}
-    // Kart elde tutulur: pencere hızlandırmada da en az ~3 tik sürsün (ekran 1 sn'de yoklar)
-    const sure = Math.max(8, DT * 6)
-    if (g.kart != null) yakinKartlar.set(String(g.kart), simSn + sure)
-    if (g.kart2 != null) yakinKartlar.set(String(g.kart2), simSn + sure)
     json(yanit, 200, { ok: true }); return true
   }
 
