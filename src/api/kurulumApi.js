@@ -8,7 +8,7 @@ export class KurulumApi {
     this.adres = adresTemizle(adres)
   }
 
-  // Kart sağlığı (3.7): alıcının duyduğu tüm kartlar — son duyulma, pil, atanan.
+  // Kart sağlığı (3.7): alıcının duyduğu tüm kartlar — son duyulma, atanan.
   async kartlariGetir() { return (await jsonIstek(this.adres, '/api/cards')).filter((k) => kisiKartiMi(k.kart)) }
   demoVarMi() { return demoVarMi(this.adres) }
 

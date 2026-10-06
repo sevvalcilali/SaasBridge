@@ -38,7 +38,7 @@ export default function KartVerEkrani() {
   const [geriAliniyor, setGeriAliniyor] = useState(false)
   const [bilgi, setBilgi] = useState(null)       // kısa sonuç mesajı (iade / geri al)
   const [kontrol, setKontrol] = useState(null)   // "Kartı kontrol et" paneli açık kayıp
-  const [pilDegisti, setPilDegisti] = useState(() => new Set()) // kart no: sinyal bekleniyor
+  const [kontrolEdildi, setKontrolEdildi] = useState(() => new Set()) // kart no: kontrol edildi, sinyal bekleniyor
   // Panodaki "Kişi ata"dan gelindiyse kart baştan bellidir: kişi seçilince doğrudan onaya.
   const [hedefKart, setHedefKart] = useState(() => rotaKart(window.location.hash))
   // Kişi ayrıntı panelinden kısayol (brief §7): ?degistir=N / ?iade=N — kişiler yüklenince uygulanır.
@@ -57,11 +57,11 @@ export default function KartVerEkrani() {
   )
   const kayipKisiIdler = useMemo(() => new Set(kayiplar.map((k) => k.kisi.kisiId)), [kayiplar])
 
-  // Sinyali geri gelen kartın "pil değiştirildi" işareti düşer (tekrar susarsa yeniden uyarır).
+  // Sinyali geri gelen kartın "kontrol edildi" işareti düşer (tekrar susarsa yeniden uyarır).
   const kayipAnahtar = kayiplar.map((k) => k.kart).join(',')
   useEffect(() => {
     const hala = new Set(kayipAnahtar ? kayipAnahtar.split(',') : [])
-    setPilDegisti((onceki) => {
+    setKontrolEdildi((onceki) => {
       const kalan = [...onceki].filter((k) => hala.has(k))
       return kalan.length === onceki.size ? onceki : new Set(kalan)
     })
@@ -175,10 +175,10 @@ export default function KartVerEkrani() {
     sihirbaziSifirla()
   }
 
-  function pilDegistirildi({ kisi, kart }) {
-    setPilDegisti((onceki) => new Set(onceki).add(kart))
+  function kartKontrolEdildi({ kisi, kart }) {
+    setKontrolEdildi((onceki) => new Set(onceki).add(kart))
     setKontrol(null)
-    setBilgi(`↻ Kart ${kart} (${kisi.ad}): pil değiştirildi. Sinyal gelince uyarı kendiliğinden kalkar.`)
+    setBilgi(`↻ Kart ${kart} (${kisi.ad}): kontrol edildi. Sinyal gelince uyarı kendiliğinden kalkar.`)
   }
 
   // Kart değiştirildi → sihirbaz bu kişiyle Adım 2'den açılır (kart değişimi, 2.11).
@@ -239,7 +239,7 @@ export default function KartVerEkrani() {
 
       {bilgi && <p className="kartver-bilgi" role="status" data-test="bilgi">{bilgi}</p>}
 
-      <KayipUyarilari kayiplar={kayiplar} pilDegisti={pilDegisti} onKontrol={setKontrol} />
+      <KayipUyarilari kayiplar={kayiplar} kontrolEdildi={kontrolEdildi} onKontrol={setKontrol} />
 
       {hedefKart && mod === 'ver' && (
         <div className="kartver-verildi kartver-sonatama kartver-hedef" role="status" data-test="hedef-kart">
@@ -261,7 +261,7 @@ export default function KartVerEkrani() {
 
       <section className="kartver-govde" data-test="kartver-govde">
         {kontrol && mod !== 'uyari' && (
-          <KartKontrol kayip={kontrol} onPilDegisti={pilDegistirildi} onKartDegisti={kartDegistirildi}
+          <KartKontrol kayip={kontrol} onKontrolEdildi={kartKontrolEdildi} onKartDegisti={kartDegistirildi}
             onKapat={() => setKontrol(null)} />
         )}
         {mod === 'uyari' && <KuralPaneli api={api} katilimcilar={katilimcilar} />}

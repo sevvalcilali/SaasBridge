@@ -1,6 +1,6 @@
-// Kart sağlığı tablosu (brief §8): her kart için en son duyulma, pil, "sorunlu"
-// etiketi, atanmışsa kişi. Sorunlular üstte. Sorun renk + ikon + yazı ile verilir.
-import { kartSagligi, sorunluSayisi, DUSUK_PIL } from '../../api/kartSagligi.js'
+// Kart sağlığı tablosu (brief §8): her kart için en son duyulma, "sorunlu" etiketi, atanmışsa kişi. Sorunlular üstte.
+// Sorun renk + ikon + yazı ile verilir. Pil gösterilmez (07.10.2026).
+import { kartSagligi, sorunluSayisi } from '../../api/kartSagligi.js'
 import { onceYazisi } from '../../api/format.js'
 import KisiRozeti from '../../components/KisiRozeti.jsx'
 
@@ -22,7 +22,6 @@ export default function KartSagligi({ kartlar, people }) {
               <th scope="col">Durum</th>
               <th scope="col">Kişi</th>
               <th scope="col" className="sag">Duyulma</th>
-              <th scope="col" className="sag">Pil</th>
             </tr>
           </thead>
           <tbody>
@@ -39,7 +38,6 @@ export default function KartSagligi({ kartlar, people }) {
                   {r.kisi ? <KisiRozeti kisi={r.kisi} kartNo={false} /> : <span className="saglik-bos">{r.atanmis ? 'atanmış' : 'boşta'}</span>}
                 </td>
                 <td className="sag saglik-zaman">{onceYazisi(r.seenAgo)}</td>
-                <td className={`sag sayi ${r.pil < DUSUK_PIL ? 'saglik-pil--dusuk' : ''}`}>%{r.pil}</td>
               </tr>
             ))}
           </tbody>

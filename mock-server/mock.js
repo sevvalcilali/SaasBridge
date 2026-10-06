@@ -379,18 +379,11 @@ function rssiAlici(kart) {
   if (bitis != null && bitis >= simSn) return Math.round((-42 + jitter(kart)) * 10) / 10
   return Math.round((-72 - (Number(kart) % 15) + jitter(kart)) * 10) / 10
 }
-// Pil (mock): deterministik, kart numarasına ve geçen süreye göre yavaş düşer.
-// Demo: 23'ün katı kartların pili zayıf (kart sağlığı / boştaki kartlarda "pil düşük" görünsün).
-const pilSeviyesi = (kart) => Number(kart) % 23 === 0
-  ? Math.max(5, Math.round(16 - simSn / 600))
-  : Math.max(5, Math.round(100 - ((Number(kart) * 7) % 40) - simSn / 180))
-
 const kartDto = (kart, e) => ({
   kart,
   rssiAlici: rssiAlici(kart),
   seenAgo: e ? Math.round(e.seenAgo * 10) / 10 : 0.1,
   atanan: kartKat(kart)?.kisiId ?? null,
-  pil: pilSeviyesi(kart),
 })
 
 // Alıcının duyduğu kartlar: aktif simülasyon kartları + yaklaştırılmış yeni kartlar.

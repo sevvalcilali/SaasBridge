@@ -24,9 +24,8 @@ test('GET /api/cards: şema ve normalde hiçbir kart baskın değil', async () =
   const kartlar = await getj(`${B}/api/cards`)
   assert.ok(kartlar.length >= 25)
   for (const k of kartlar) {
-    assert.deepEqual(Object.keys(k).sort(), ['atanan', 'kart', 'pil', 'rssiAlici', 'seenAgo'])
+    assert.deepEqual(Object.keys(k).sort(), ['atanan', 'kart', 'rssiAlici', 'seenAgo']) // pil yok (07.10.2026)
     assert.equal(typeof k.rssiAlici, 'number')
-    assert.ok(k.pil >= 0 && k.pil <= 100)
   }
   const enGuclu = Math.max(...kartlar.map((k) => k.rssiAlici))
   assert.ok(enGuclu <= -60, `normalde yakın kart olmamalı (en güçlü ${enGuclu})`)
