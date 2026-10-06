@@ -38,7 +38,8 @@ güncel kart numarasıdır. Sunucu kişi bazlı tuttuğu kenarları o anki kartl
 ```json
 {
   "kisiId": "k12", "ad": "Ayşe Demir", "rol": "investor", "kurum": "Atlas Ventures",
-  "yildiz": 4, "not": "", "renk": "#3987e5", "atananKart": "14", "ayrildi": false
+  "yildiz": 4, "not": "", "renk": "#3987e5", "atananKart": "14", "ayrildi": false,
+  "sektor": "Sağlık, Enerji", "asama": "", "tanitim": "", "web": "", "eposta": "ayse@atlas.vc", "paylasim": true
 }
 ```
 
@@ -47,11 +48,15 @@ güncel kart numarasıdır. Sunucu kişi bazlı tuttuğu kenarları o anki kartl
 | `kisiId` | Kalıcı kimlik (kart değişse de aynı) |
 | `atananKart` | Şu anki kart ya da `null` |
 | `ayrildi` | Kart iadesi yapıldı mı. `atananKart: null` + `ayrildi: false` = **"kart bekliyor"**; `ayrildi: true` = **"ayrıldı"** |
+| `sektor` | Girişimcide sektörü; yatırımcıda ilgi alanları (virgüllü). Kişiye özel rapor (2026-10) |
+| `asama` | `fikir` \| `mvp` \| `gelir` \| `buyume` ya da boş; yalnız girişimcide (rol değişince boşalır) |
+| `tanitim`, `web`, `eposta` | Metin (en çok 200 karakter) |
+| `paylasim` | İletişim (web, e-posta) başka katılımcıların raporunda görünebilir mi. **Varsayılan `false`**; yalnız açıkça evet denirse `true` |
 
-### `POST /api/people` `{ad, rol, kurum?, yildiz?, not?}` → `Kisi`
+### `POST /api/people` `{ad, rol, kurum?, yildiz?, not?, sektor?, asama?, tanitim?, web?, eposta?, paylasim?}` → `Kisi`
 Kartsız oluşur (`atananKart: null`, `ayrildi: false`), renk o anda atanır. `ad` boşsa 400.
 
-### `PATCH /api/people/{kisiId}` `{ad?, rol?, kurum?, yildiz?, not?}` → `Kisi`
+### `PATCH /api/people/{kisiId}` `{ad?, rol?, kurum?, yildiz?, not?, sektor?, asama?, tanitim?, web?, eposta?, paylasim?}` → `Kisi`
 - Yalnız gönderilen alanlar değişir. **`renk` ve `kisiId` değiştirilemez** (gönderilirse yok sayılır).
 - Geçersiz `rol` ve boş `ad` yok sayılır; `yildiz` 0–5'e kırpılır, rol yatırımcı değilse 0.
 - Kişinin kartı varsa `/state`'teki adı/rolü/yıldızı hemen güncellenir.
@@ -63,7 +68,8 @@ Kartı varsa önce iade edilir. (Arayüz şu an kullanmıyor; kayıt defteri bü
 ### `POST /api/people/import` (gövde: ham CSV, `Content-Type: text/csv; charset=utf-8`)
 → `{"eklenen": 18, "atlanan": [{"satir": 6, "sebep": "rol anlaşılamadı: \"Konuşmacı\""}]}`
 
-- Sütunlar: **ad, soyad, rol, kurum, yıldız** (brief §6.2). Kişinin `ad` alanı = "ad soyad".
+- Sütunlar: **ad, soyad, rol, kurum, yıldız** (brief §6.2); isteğe bağlı **sektör** (ilgi alanı), **aşama** (Fikir /
+  MVP / Gelir / Büyüme), **tanıtım**, **web**, **e-posta**, **izin** (evet / hayır). Kişinin `ad` alanı = "ad soyad".
 - İlk satır başlıksa (ad/soyad/rol/kurum/yıldız; Türkçe harfli ya da harfsiz) sütunlar
   ada göre eşlenir, değilse bu sırayla okunur.
 - Ayraç `;` (Türkçe Excel), `,` ya da sekme — ilk satırdan anlaşılır. Tırnaklı alan

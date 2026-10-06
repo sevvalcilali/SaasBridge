@@ -25,16 +25,26 @@ export function formGecerli(form) {
 }
 
 // Kişi düzenleme (brief §6): yalnız değişen alanlar gönderilir; renk hiç
-// gönderilmez (değişmez). Yatırımcı değilse yıldız 0'dır.
-export function duzenlemeFarki(kisi, form) {
-  const yeni = {
-    ad: form.ad.trim(),
-    rol: form.rol,
-    kurum: form.kurum.trim(),
+// gönderilmez (değişmez). Yatırımcı değilse yıldız 0'dır, girişimci değilse aşama boş.
+// Profil (rapor 2. adım): sektör, aşama, tanıtım, web, e-posta, paylaşım izni; eski kayıtta alan yoksa boş / hayır.
+export const PROFIL_METINLERI = ['sektor', 'tanitim', 'web', 'eposta']
+export function kisiGonderimi(form) {
+  return {
+    ...form,
     yildiz: form.rol === 'investor' ? form.yildiz : 0,
-    not: form.not,
+    asama: form.rol === 'founder' ? (form.asama ?? '') : '',
+    ...Object.fromEntries(PROFIL_METINLERI.map((alan) => [alan, (form[alan] ?? '').trim()])),
+    paylasim: Boolean(form.paylasim),
   }
-  return Object.fromEntries(Object.entries(yeni).filter(([alan, deger]) => deger !== (kisi[alan] ?? '')))
+}
+export function duzenlemeFarki(kisi, form) {
+  const g = kisiGonderimi(form)
+  const yeni = {
+    ad: form.ad.trim(), rol: g.rol, kurum: form.kurum.trim(), yildiz: g.yildiz, not: form.not,
+    asama: g.asama, ...Object.fromEntries(PROFIL_METINLERI.map((alan) => [alan, g[alan]])), paylasim: g.paylasim,
+  }
+  return Object.fromEntries(Object.entries(yeni)
+    .filter(([alan, deger]) => deger !== (kisi[alan] ?? (typeof deger === 'boolean' ? false : ''))))
 }
 
 // "Şu an açık" kartlar: yakın zamanda duyulanlar (brief §6.2 "yeşil nokta = açık"),

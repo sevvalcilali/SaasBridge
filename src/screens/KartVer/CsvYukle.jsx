@@ -32,8 +32,10 @@ export default function CsvYukle({ api, onYuklendi, onKapat }) {
       <p className="kontrol-not">
         Sütunlar: <strong>ad, soyad, rol, kurum, yıldız</strong>. Rol: Yatırımcı / Girişimci / Misafir.
         İlk satır başlık olabilir; ayraç <code>;</code> ya da <code>,</code>.
+        Rapor için isteğe bağlı: <strong>sektör</strong> (yatırımcıda ilgi alanları), <strong>aşama</strong> (Fikir /
+        MVP / Gelir / Büyüme), <strong>tanıtım, web, e-posta, izin</strong> (evet ise iletişim raporda paylaşılır).
       </p>
-      <pre className="csv-ornek" aria-label="Örnek">{'ad;soyad;rol;kurum;yıldız\nAyşe;Demir;Yatırımcı;Atlas Ventures;4\nCem;Erdem;Girişimci;Nova Robotik;'}</pre>
+      <pre className="csv-ornek" aria-label="Örnek">{'ad;soyad;rol;kurum;yıldız;sektör;aşama;tanıtım;web;e-posta;izin\nAyşe;Demir;Yatırımcı;Atlas Ventures;4;Sağlık, Enerji;;;;ayse@atlas.vc;evet\nCem;Erdem;Girişimci;Nova Robotik;;Robotik;MVP;Depo robotları;nova.ai;cem@nova.ai;evet'}</pre>
 
       <label className={`kisisec-ekle csv-sec ${durum === 'gonderiliyor' ? 'csv-sec--mesgul' : ''}`}>
         {durum === 'gonderiliyor' ? 'Yükleniyor…' : '⇪ CSV dosyası seç'}

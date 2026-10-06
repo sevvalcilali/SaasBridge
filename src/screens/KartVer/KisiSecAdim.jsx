@@ -8,7 +8,7 @@ import { katilimciAra, duzenlemeFarki, kisiDurumu, kartBekleyenler } from '../..
 import KisiFormu from './KisiFormu.jsx'
 import CsvYukle from './CsvYukle.jsx'
 
-const BOS_FORM = { ad: '', rol: 'founder', kurum: '', yildiz: 0, not: '' }
+const BOS_FORM = { ad: '', rol: 'founder', kurum: '', yildiz: 0, not: '', sektor: '', asama: '', tanitim: '', web: '', eposta: '', paylasim: false }
 
 export default function KisiSecAdim({ api, katilimcilar, kayipKisiIdler, onYenile, onKisiSec, onDuzenlendi }) {
   const [arama, setArama] = useState('')
@@ -75,9 +75,13 @@ export default function KisiSecAdim({ api, katilimcilar, kayipKisiIdler, onYenil
   }
 
   if (form?.kisi) {
-    const { ad, rol, kurum, yildiz, not } = form.kisi
+    const k = form.kisi
+    // Eski (sürüm 1) kayıtta profil alanı yoksa boş başlar.
+    const baslangic = { ...BOS_FORM, ad: k.ad, rol: k.rol, kurum: k.kurum, yildiz: k.yildiz, not: k.not,
+      sektor: k.sektor ?? '', asama: k.asama ?? '', tanitim: k.tanitim ?? '', web: k.web ?? '', eposta: k.eposta ?? '',
+      paylasim: Boolean(k.paylasim) }
     return (
-      <KisiFormu baslangic={{ ad, rol, kurum, yildiz, not }} renk={form.kisi.renk} kaydetEtiket="Kaydet"
+      <KisiFormu baslangic={baslangic} renk={form.kisi.renk} kaydetEtiket="Kaydet"
         gonderiliyor={gonderiliyor} hata={hata} onKaydet={kisiKaydet} onIptal={() => setForm(null)} />
     )
   }

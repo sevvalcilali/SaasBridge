@@ -103,6 +103,7 @@ kisiler.forEach((k) => {
     kisiId: 'k' + (++kisiIdSayaci),
     ad: k.name, rol: k.role, kurum: k.org, yildiz: k.tier,
     not: '', renk: k.color, atananKart: k.id, ayrildi: false, min: 0, invMin: 0,
+    sektor: '', asama: '', tanitim: '', web: '', eposta: '', paylasim: false,
   }
   k.kisiId = kat.kisiId
   katilimcilar.push(kat)
@@ -168,7 +169,18 @@ const yeniRenk = () => PALET[(renkSayaci++) % PALET.length]
 const katDto = (k) => ({
   kisiId: k.kisiId, ad: k.ad, rol: k.rol, kurum: k.kurum,
   yildiz: k.yildiz, not: k.not, renk: k.renk, atananKart: k.atananKart, ayrildi: k.ayrildi,
+  sektor: k.sektor, asama: k.asama, tanitim: k.tanitim, web: k.web, eposta: k.eposta, paylasim: k.paylasim,
 })
+
+// Profil (kişiye özel rapor 2. adım; gerçek sunucuyla aynı): metinler 200 karakter, aşama yalnız girişimcide,
+// paylaşım izni yalnız açıkça "evet" (true / 1) denirse.
+const ASAMALAR = ['fikir', 'mvp', 'gelir', 'buyume']
+const PROFIL_METINLERI = ['sektor', 'tanitim', 'web', 'eposta']
+const EVET = new Set(['evet', 'e', 'yes', 'y', 'true', '1', 'var', 'izinli', 'x'])
+const profilMetni = (v) => metinAlan(v).trim().slice(0, 200)
+const asamaAl = (rol, v) => (rol === 'founder' && ASAMALAR.includes(v) ? v : '')
+const evetMi = (v) => (typeof v === 'boolean' ? v : typeof v === 'number' ? v === 1
+  : typeof v === 'string' && EVET.has(v.trim().toLocaleLowerCase('tr')))
 
 // Gövdeden gelen metin alanı: dize değilse (sayı, nesne…) yok sayılır — tip hatası sunucuyu düşürmesin.
 const metinAlan = (v) => (typeof v === 'string' ? v : '')
@@ -180,7 +192,8 @@ function kartNo(v) {
   return n >= 1 && n <= 99 ? String(n) : null
 }
 
-function kisiEkle({ ad, rol, kurum, yildiz, not }) {
+function kisiEkle({ ad, rol, kurum, yildiz, not, asama, paylasim, ...profil }) {
+  rol = ['investor', 'founder', 'guest'].includes(rol) ? rol : 'guest'
   const kat = {
     kisiId: 'k' + (++kisiIdSayaci),
     ad: metinAlan(ad).trim() || 'İsimsiz',
@@ -188,6 +201,8 @@ function kisiEkle({ ad, rol, kurum, yildiz, not }) {
     kurum: metinAlan(kurum),
     yildiz: rol === 'investor' ? Math.max(0, Math.min(5, yildiz | 0)) : 0,
     not: metinAlan(not), renk: yeniRenk(), atananKart: null, ayrildi: false, min: 0, invMin: 0,
+    asama: asamaAl(rol, asama), paylasim: evetMi(paylasim),
+    ...Object.fromEntries(PROFIL_METINLERI.map((alan) => [alan, profilMetni(profil[alan])])),
   }
   katilimcilar.push(kat)
   return kat
@@ -286,7 +301,15 @@ const ROL_ADLARI = {
   girişimci: 'founder', girisimci: 'founder', founder: 'founder',
   misafir: 'guest', guest: 'guest',
 }
-const SUTUN_ADLARI = { ad: 'ad', isim: 'ad', soyad: 'soyad', soyadı: 'soyad', rol: 'rol', kurum: 'kurum', şirket: 'kurum', yıldız: 'yildiz', yildiz: 'yildiz' }
+const SUTUN_ADLARI = {
+  ad: 'ad', isim: 'ad', soyad: 'soyad', soyadı: 'soyad', rol: 'rol', kurum: 'kurum', şirket: 'kurum', yıldız: 'yildiz', yildiz: 'yildiz',
+  sektör: 'sektor', sektor: 'sektor', sektörler: 'sektor', 'ilgi alanı': 'sektor', 'ilgi alanları': 'sektor',
+  aşama: 'asama', asama: 'asama', tanıtım: 'tanitim', tanitim: 'tanitim', açıklama: 'tanitim',
+  web: 'web', 'web sitesi': 'web', website: 'web', site: 'web',
+  'e-posta': 'eposta', eposta: 'eposta', email: 'eposta', 'e-mail': 'eposta', mail: 'eposta',
+  izin: 'paylasim', paylaşım: 'paylasim', 'paylaşım izni': 'paylasim', 'iletişim izni': 'paylasim',
+}
+const ASAMA_ADLARI = { fikir: 'fikir', idea: 'fikir', mvp: 'mvp', gelir: 'gelir', revenue: 'gelir', büyüme: 'buyume', buyume: 'buyume', growth: 'buyume' }
 
 function csvSatirlari(metin) {
   metin = metin.replace(/^\uFEFF/, '')
@@ -313,7 +336,7 @@ function csvSatirlari(metin) {
 
 function csvIceAktar(metin) {
   const satirlar = csvSatirlari(metin)
-  let sutunlar = ['ad', 'soyad', 'rol', 'kurum', 'yildiz']
+  let sutunlar = ['ad', 'soyad', 'rol', 'kurum', 'yildiz', 'sektor', 'asama', 'tanitim', 'web', 'eposta', 'paylasim']
   let bas = 0
   if (satirlar.length && SUTUN_ADLARI[trKucuk(satirlar[0][0])]) {
     sutunlar = satirlar[0].map((b) => SUTUN_ADLARI[trKucuk(b)] ?? null)
@@ -336,7 +359,8 @@ function csvIceAktar(metin) {
     const anahtarK = `${trKucuk(ad)}|${trKucuk(kurum)}`
     if (mevcut.has(anahtarK)) { atlanan.push({ satir, sebep: `${ad} zaten kayıtlı` }); continue }
     mevcut.add(anahtarK)
-    kisiEkle({ ad, rol, kurum, yildiz: Number(v.yildiz) || 0 })
+    kisiEkle({ ad, rol, kurum, yildiz: Number(v.yildiz) || 0, sektor: v.sektor, asama: ASAMA_ADLARI[trKucuk(v.asama)],
+      tanitim: v.tanitim, web: v.web, eposta: v.eposta, paylasim: v.paylasim ?? '' })
     eklenen++
   }
   return { eklenen, atlanan }
@@ -798,8 +822,11 @@ async function apiYonlendir(istek, yanit) {
       if (typeof g.ad === 'string' && g.ad.trim()) kat.ad = g.ad.trim()
       if (['investor', 'founder', 'guest'].includes(g.rol)) kat.rol = g.rol
       for (const alan of ['kurum', 'not']) if (typeof g[alan] === 'string') kat[alan] = g[alan]
+      for (const alan of PROFIL_METINLERI) if (typeof g[alan] === 'string') kat[alan] = profilMetni(g[alan])
+      if (g.paylasim !== undefined) kat.paylasim = evetMi(g.paylasim)
       if (g.yildiz !== undefined) kat.yildiz = g.yildiz | 0
       kat.yildiz = kat.rol === 'investor' ? Math.max(0, Math.min(5, kat.yildiz)) : 0
+      kat.asama = asamaAl(kat.rol, g.asama !== undefined ? g.asama : kat.asama)
       const e = kat.atananKart && kisiBul(kat.atananKart)
       if (e) kimlikYaz(e, kat)
       json(yanit, 200, katDto(kat)); return true

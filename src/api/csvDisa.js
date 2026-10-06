@@ -15,13 +15,17 @@ export const csvMetni = (basliklar, satirlar) =>
 // Dakika, tek ondalık, Türkçe virgül: 1540 sn → "25,7"
 export const dakikaCsv = (sn) => (Math.round((sn / 60) * 10) / 10).toFixed(1).replace('.', ',')
 
+const ASAMA = { fikir: 'Fikir', mvp: 'MVP', gelir: 'Gelir', buyume: 'Büyüme' }
+
 export function katilimcilarCsv(rapor) {
   return csvMetni(
-    ['Ad', 'Rol', 'Kurum', 'Yıldız', 'Kart', 'Toplam (dk)', 'Görüşme', 'Görüştüğü kişi', 'Karşı rolden kişi'],
+    ['Ad', 'Rol', 'Kurum', 'Yıldız', 'Kart', 'Toplam (dk)', 'Görüşme', 'Görüştüğü kişi', 'Karşı rolden kişi',
+      'Sektör / ilgi alanı', 'Aşama', 'E-posta', 'Paylaşım izni'],
     rapor.kisiSatirlari.map((r) => [
       r.kisi.ad, ROL[r.kisi.rol] ?? '', r.kisi.kurum ?? '', r.kisi.yildiz || '',
       kisiDurumYazisi(r.kisi), dakikaCsv(r.toplamSn), r.gorusmeSayisi, r.kisiSayisi,
       r.kisi.rol === 'investor' || r.kisi.rol === 'founder' ? r.karsiRolSayisi : '',
+      r.kisi.sektor ?? '', ASAMA[r.kisi.asama] ?? '', r.kisi.eposta ?? '', r.kisi.paylasim ? 'evet' : 'hayır',
     ]),
   )
 }
