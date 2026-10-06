@@ -103,6 +103,20 @@ export function raporHesapla(kisiler, oturumlar, simdi, { enUzunAdet = 10 } = {}
 
   const ulasan = girisimciler.filter((g) => g.yatirimcilar.length > 0).length
 
+  // Yatırımcı tarafı (girişimcilerin aynası): görüştüğü girişimciler süreye göre; en çok girişimciyle görüşen üstte.
+  const yatirimcilar = [...harita.values()]
+    .filter((k) => k.rol === 'investor')
+    .map((k) => {
+      const t = kisiTop.get(k.kisiId) ?? bos
+      const gs = [...t.karsiEsler.entries()]
+        .map(([id, sn]) => ({ kisi: harita.get(id), toplamSn: sn }))
+        .sort((p, q) => q.toplamSn - p.toplamSn)
+      return { kisi: k, girisimciler: gs, girisimciSn: gs.reduce((s, g) => s + g.toplamSn, 0) }
+    })
+    .sort((p, q) => q.girisimciler.length - p.girisimciler.length || q.girisimciSn - p.girisimciSn
+      || raporAdi(p.kisi).localeCompare(raporAdi(q.kisi), 'tr'))
+  const toplamSureSn = oturumlar.reduce((t, o) => t + oturumSuresiSn(o, simdi), 0)
+
   return {
     ozet: {
       gorusme: oturumlar.length,
@@ -110,11 +124,15 @@ export function raporHesapla(kisiler, oturumlar, simdi, { enUzunAdet = 10 } = {}
       karmaSn,
       ulasan,
       girisimci: girisimciler.length,
+      yatirimci: yatirimcilar.length,
+      misafir: kisiler.filter((k) => k.rol === 'guest').length,
       kisi: kisiler.length,
       ayrilan: kisiler.filter((k) => k.ayrildi && !k.atananKart).length,
+      ortalamaSn: oturumlar.length ? Math.round(toplamSureSn / oturumlar.length) : 0,
     },
     kisiSatirlari,
     girisimciler,
+    yatirimcilar,
     ciftler: [...ciftTop.values()].sort((p, q) => q.toplamSn - p.toplamSn),
     enUzun: enUzunAday.sort((p, q) => q.sureSn - p.sureSn).slice(0, enUzunAdet),
   }
@@ -187,5 +205,74 @@ export function kisiRaporu(kisiId, kisiler, oturumlar, simdi, { saat = null, ela
   return {
     kisi, karsi, diger, kacirilan, ilgiAlaninda,
     ozet: { karsiSayisi: karsi.length, karsiSn: topla(karsi), toplamSn: topla(satirlar), anlasma: karsi.filter((x) => x.anlasma).length },
+  }
+}
+
+// --- Organizatör raporu ekleri (Şevval 07.10.2026: "en işimize yarayan" rapor) ---
+
+// Gün içi yoğunluk: etkinlik dilimlere bölünür, her dilimde süren (dilimle örtüşen) görüşme sayılır.
+// Dilim boyu aralığa göre (≤1 sa: 5 dk, ≤3 sa: 10 dk, ≤6 sa: 15 dk, üstü 30 dk). saat/elapsed verilirse
+// dilim sınırları saatin katlarına hizalanır (14:10, 14:20 …); okuması kolay olsun.
+export function gunIciYogunluk(oturumlar, simdi, { saat = null, elapsed = 0 } = {}) {
+  const { bas, son } = cizelgeAraligi(oturumlar, simdi)
+  const aralik = son - bas
+  const dilimSn = aralik <= 3600 ? 300 : aralik <= 3 * 3600 ? 600 : aralik <= 6 * 3600 ? 900 : 1800
+  if (!oturumlar.length) return { dilimSn, dilimler: [], enYogun: null }
+  let ilk = bas
+  if (saat) {
+    const [h, m, sn] = saat.split(':').map(Number)
+    const fark = h * 3600 + m * 60 + (sn || 0) - elapsed // etkinlik 0. saniyesinin gün içi saniyesi
+    ilk = Math.floor((bas + fark) / dilimSn) * dilimSn - fark
+  }
+  const dilimler = []
+  for (let b = ilk; b < simdi || dilimler.length === 0; b += dilimSn) {
+    const d = { bas: b, son: b + dilimSn, adet: 0 }
+    // Tam şimdi başlamış (sıfır süreli) görüşme de en az 1 sn yer kaplar; yoksa hiçbir dilime düşmez.
+    for (const o of oturumlar) if (o.start < d.son && Math.max(o.end ?? simdi, o.start + 1) > d.bas) d.adet++
+    dilimler.push(d)
+  }
+  const enYogun = dilimler.reduce((en, d) => (d.adet > en.adet ? d : en), dilimler[0])
+  return { dilimSn, dilimler, enYogun: enYogun.adet ? { ...enYogun } : null }
+}
+
+// En güçlü yatırımcı–girişimci eşleşmeleri (takip edilecek çiftler): toplam süreye göre, ilk n.
+// Anlaşma işareti sunucunun "deal" bildirimlerinden.
+export function gucluEslesmeler(r, alerts = [], n = 8) {
+  const anlasma = new Set(alerts.filter((a) => a.kind === 'deal' && a.kisiler?.length >= 2)
+    .map((a) => [...a.kisiler].sort().join('|')))
+  return r.ciftler
+    .filter((c) => karsiRolMu(c.a, c.b))
+    .slice(0, n)
+    .map((c) => {
+      const [yatirimci, girisimci] = c.a.rol === 'investor' ? [c.a, c.b] : [c.b, c.a]
+      return { yatirimci, girisimci, toplamSn: c.toplamSn, adet: c.adet,
+        anlasma: anlasma.has([c.a.kisiId, c.b.kisiId].sort().join('|')) }
+    })
+}
+
+// Önerilen tanıştırmalar: yatırımcının ilgi alanı girişimin sektörünü tutuyor, ikisi de etkinliğe gelmiş,
+// ama gün boyu hiç yan yana gelmemişler. Önemli (yıldızlı) yatırımcı önde.
+export function onerilenTanistirmalar(kisiler, oturumlar) {
+  const gorustu = new Set(oturumlar.map((o) => [o.a, o.b].sort().join('|')))
+  const gelen = kisiler.filter(geldi)
+  const sonuc = []
+  for (const y of gelen.filter((k) => k.rol === 'investor')) {
+    for (const g of gelen.filter((k) => k.rol === 'founder')) {
+      if (ilgiEslesir(y.sektor, g.sektor) && !gorustu.has([y.kisiId, g.kisiId].sort().join('|'))) {
+        sonuc.push({ yatirimci: y, girisimci: g, sektor: g.sektor.trim() })
+      }
+    }
+  }
+  return sonuc.sort((p, q) => (q.yatirimci.yildiz ?? 0) - (p.yatirimci.yildiz ?? 0)
+    || raporAdi(p.yatirimci).localeCompare(raporAdi(q.yatirimci), 'tr')
+    || raporAdi(p.girisimci).localeCompare(raporAdi(q.girisimci), 'tr'))
+}
+
+// Takip listesi: etkinliğe gelmiş ama karşı rolle hiç görüşmemiş girişimciler ve yatırımcılar
+// (organizatörün etkinlik sonrası tanıştırması gerekenler). Kart almayanlar gelmemiş sayılır.
+export function takipListesi(r) {
+  return {
+    girisimciler: r.girisimciler.filter((g) => !g.yatirimcilar.length && geldi(g.kisi)).map((g) => g.kisi),
+    yatirimcilar: r.yatirimcilar.filter((y) => !y.girisimciler.length && geldi(y.kisi)).map((y) => y.kisi),
   }
 }
