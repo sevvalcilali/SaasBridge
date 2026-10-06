@@ -45,7 +45,7 @@
   /* --- Görüşme süresi (Pano siluetleri): ısınan ölçek, Şevval kararı 2026-10-06. Her zaman yazılı süre +
      açıklamayla birlikte; açılır uyarılar kendi çerçevesiyle gelir (bu renklerle karışmaz). --- */
   --sure-1: #7a7369;           /* 1–5 dk: gri */
-  --sure-5: #b38600;           /* 5–10 dk: sarı (krem zeminde okunsun diye koyu hardal) */
+  --sure-5: #2a7fd0;           /* 5–10 dk: mavi (Şevval 06.10.2026: gri-mavi-turuncu-kırmızı) */
   --sure-10: #d2621a;          /* 10–20 dk: turuncu */
   --sure-20: #c42d28;          /* 20 dk+: kırmızı */
 
@@ -128,7 +128,7 @@
     --pasif-zemin: #2d2925;
 
     --sure-1: #b3aa9d;
-    --sure-5: #ecc54a;
+    --sure-5: #5fa4e6;
     --sure-10: #f38d45;
     --sure-20: #f2675f;
     --kural: #7fa8ea;
