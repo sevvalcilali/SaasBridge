@@ -34,14 +34,19 @@
   font-weight: 600;
 }
 
-/* Gövde: sol (kişi) esner, orta (ağ) esner, sağ (bildirim) sabit-ish */
+/* Gövde (Şevval 2026-10-06, "ekran üçe bölünmesin"): üstte baştan başa salon (orta), altında sol (kişi) ve
+   sağ (bildirim) yan yana. */
 .pano-govde {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(320px, 1.4fr) minmax(280px, 1.6fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(320px, 1.4fr) minmax(280px, 1fr);
+  grid-template-areas: 'orta orta' 'sol sag';
   gap: var(--aralik-4);
   min-height: 0;
 }
+.pano-sol { grid-area: sol; }
+.pano-sag { grid-area: sag; }
+.pano-orta { grid-area: orta; }
 
 .pano-sol, .pano-orta, .pano-sag {
   background: var(--yuzey);
@@ -89,15 +94,9 @@
 }
 .pano-sekme--secili { background: var(--vurgu); border-color: var(--vurgu); color: var(--metin-ters); }
 
-/* Geniş tablet (901–1100): ağ alta, sol+sağ üstte yan yana */
+/* Geniş tablet (901–1100): aynı düzen, sütunlar daralabilir */
 @media (max-width: 1100px) {
-  .pano-govde {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    grid-template-areas: 'sol sag' 'orta orta';
-  }
-  .pano-sol { grid-area: sol; }
-  .pano-sag { grid-area: sag; }
-  .pano-orta { grid-area: orta; }
+  .pano-govde { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
 }
 
 /* Tablet (≤900): tek sütun yığın — bildirimler üstte (yatay), liste, ağ altta */

@@ -110,6 +110,14 @@ export const SURE_RENKLERI = [
 ]
 export const sureRengi = (dakika) => SURE_RENKLERI.findLast((r) => (dakika ?? 0) >= r.enAz)
 
+// Salon görünümü (Şevval 2026-10-06): grup yan yana sıra değil küme. Arka sıra + ön sıra: 2 kişi yan yana, 3 üçgen,
+// 5'te arkada 2 önde 3 (ön sıra geniş: kucaklaşan küme). Üyeler verilirse [arka, ön] dizileri; verilmezse sayılar.
+export function grupSiralari(n, uyeler) {
+  const arka = n <= 2 ? 0 : Math.floor(n / 2)
+  if (!uyeler) return [arka, n - arka]
+  return [uyeler.slice(0, arka), uyeler.slice(arka)]
+}
+
 // Siluetin duruşu kişiye göre sabit: her tikte aynı figür (zıplamasın), kalabalıkta tekdüze durmasın.
 const ozet = (id) => [...String(id)].reduce((t, c) => t * 31 + c.charCodeAt(0), 7) >>> 0
 export const siluetPozu = (id) => ozet(id) % 3

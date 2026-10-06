@@ -2,7 +2,7 @@
 // (A–B ve B–C birlikte → A, B, C tek grup); daireler ekranda yer değiştirmez.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { canliGruplar, bostakiler, yerlestir, yalnizMi, sureRengi, SURE_RENKLERI, siluetPozu, siluetGecikmesi } from './gruplar.js'
+import { canliGruplar, bostakiler, yerlestir, yalnizMi, sureRengi, SURE_RENKLERI, siluetPozu, siluetGecikmesi, grupSiralari } from './gruplar.js'
 
 const k = (id, role, ek = {}) => ({ id, role, name: `K${id}`, org: '', color: '#111', status: 'idle', live: 0, tier: 0, idleSinceS: 0, ...ek })
 const KISILER = [
@@ -83,4 +83,14 @@ test('siluetGecikmesi: kişiye göre sabit, figürler aynı anda sallanmasın di
   assert.equal(siluetGecikmesi('14'), siluetGecikmesi('14'))
   assert.ok(g.every((x) => x <= 0 && x > -6))
   assert.ok(new Set(g).size >= 5)
+})
+
+// Salon görünümü (Şevval 2026-10-06): grup yan yana sıra değil küme; arka sıra + ön sıra.
+test('grupSiralari: 2 kişi yan yana; 3 üçgen; 4 ikişer; 5 arkada 2 önde 3; 6 üçer', () => {
+  assert.deepEqual([2, 3, 4, 5, 6].map((n) => grupSiralari(n)), [[0, 2], [1, 2], [2, 2], [2, 3], [3, 3]])
+})
+
+test('grupSiralari: üyeleri sıralara böler, arka sıra listenin başından', () => {
+  const uyeler = ['a', 'b', 'c', 'd', 'e']
+  assert.deepEqual(grupSiralari(uyeler.length, uyeler), [['a', 'b'], ['c', 'd', 'e']])
 })
