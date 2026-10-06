@@ -221,7 +221,7 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
 
 ## 8. Uçtan uca tarama sonrası netleşenler (30.09.2026)
 
-- **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini ("kartı yaklaştır",
+- **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini (kalibrasyonda
   "çifti tut") yalnız bu uç varsa gösterir; mock'ta var, gerçek sunucuda yoksa düğmeler gizlenir.
   `/api/demo/tut` de yalnız mock'a ait.
 - **Kart numaraları:** `/api/assign` ve `/api/unassign` gövdesindeki `kart` 1–99 arası, baştaki sıfırsız
