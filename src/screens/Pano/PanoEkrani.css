@@ -124,5 +124,14 @@
   .pano-sekme { min-height: 44px; }
 }
 
-/* Orta bölge görünüm seçici (Şimdi / Gün boyu) */
-.pano-ag-secici { align-self: flex-start; margin-bottom: var(--aralik-3); }
+/* Orta bölge üst satırı: görünüm seçici (Şimdi / Gün boyu) + Büyük görünüm */
+.pano-ag-ust { display: flex; align-items: center; justify-content: space-between; gap: var(--aralik-3); flex-wrap: wrap; margin-bottom: var(--aralik-3); }
+.pano-buyut { min-height: 36px; font-size: var(--punto-kucuk); font-weight: 700; }
+.pano-buyut[aria-pressed='true'] { background: var(--vurgu-zemin); }
+
+/* Büyük görünüm: yalnız orta bölge, tam genişlik (kişiler ve bildirimler katlanır) */
+.pano--buyuk .pano-govde { grid-template-columns: minmax(0, 1fr); grid-template-areas: none; }
+.pano--buyuk .pano-sol, .pano--buyuk .pano-sag { display: none; }
+.pano--buyuk .pano-orta { grid-area: auto; align-self: stretch; }
+/* Telefonda bölümler zaten sekmeli: düğme gereksiz */
+@media (max-width: 600px) { .pano-buyut { display: none; } }

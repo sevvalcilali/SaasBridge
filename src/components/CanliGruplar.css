@@ -94,8 +94,28 @@ button.figur:hover, .figur--secili { border-color: var(--vurgu); background: var
 .gruplar--sunum .figur-ad, .gruplar--sunum .figur-sure { font-size: var(--punto-kucuk); }
 .gruplar--sunum .grup-etiket, .gruplar--sunum .bosta-baslik, .gruplar--sunum .sure-anahtari { font-size: var(--punto-orta); }
 
+/* Pano "Büyük görünüm": figürler sunum boyutunda, tıklanabilir. */
+.gruplar--buyuk .gruplar-alan { grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr)); gap: var(--aralik-5); }
+.gruplar--buyuk .grup-sahne { --fig: 92px; }
+.gruplar--buyuk .grup--n3 .grup-sahne { --fig: 86px; }
+.gruplar--buyuk .grup--n4 .grup-sahne { --fig: 78px; }
+.gruplar--buyuk .grup--n5 .grup-sahne { --fig: 72px; }
+.gruplar--buyuk .grup--n4, .gruplar--buyuk .grup--n5 { grid-column: auto; }
+.gruplar--buyuk .figur-ad, .gruplar--buyuk .figur-sure { font-size: var(--punto-kucuk); }
+.gruplar--buyuk .grup-etiket, .gruplar--buyuk .sure-anahtari { font-size: var(--punto-orta); }
+
+/* Sakin hareket (Şevval isteği 2026-10-06): figürler ayaklarının üstünde hafifçe salınır (her biri farklı anda),
+   konuşan el sallanır, yeni grup yumuşakça belirir. Yavaş ve küçük: göz yormaz, veriyi okumayı bozmaz. */
+.siluet { transform-origin: 50% 96%; animation: siluet-salin 5.5s ease-in-out infinite; animation-delay: var(--gecikme, 0s); }
+@keyframes siluet-salin { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
+.siluet-el { transform-box: view-box; transform-origin: 42px 37px; animation: siluet-el 2.6s ease-in-out infinite; animation-delay: var(--gecikme, 0s); }
+@keyframes siluet-el { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-12deg); } }
+.grup:not(.grup--bos) { animation: grup-gir 0.7s ease-out both; }
+@keyframes grup-gir { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   .grup, .siluet { transition: none; }
+  .siluet, .siluet-el, .grup:not(.grup--bos) { animation: none; }
 }
 
 /* Konum notu (daireler ve ego görünümü ortak): yerler salondaki yeri göstermez. */

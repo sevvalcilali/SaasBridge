@@ -100,14 +100,18 @@ export function yerlestir(yerler, gruplar) {
 
 // Siluet rengi = o kişinin şu anki görüşmesinin süresi (people[].live, dakika). Renk yalnız sınır geçilince
 // değişir (sakin); her zaman yazılı süre ve açıklamayla birlikte kullanılır (renk tek başına bilgi değildir).
-// Mor ve altın: kırmızı / turuncu arayüzde "uyarı" demek, uzun görüşme ise iyi bir şey (Şevval kararı 2026-10).
+// Isınan ölçek gri → sarı → turuncu → kırmızı (Şevval kararı 2026-10-06). Açılır uyarılar bu renklerle
+// karışmasın diye kendi çerçevesi ve simgesiyle gelir.
 export const SURE_RENKLERI = [
-  { ad: 'siyah', enAz: 0, etiket: '1–5 dk', degisken: 'var(--sure-1)' },
-  { ad: 'mavi', enAz: 5, etiket: '5–10 dk', degisken: 'var(--sure-5)' },
-  { ad: 'mor', enAz: 10, etiket: '10–20 dk', degisken: 'var(--sure-10)' },
-  { ad: 'altin', enAz: 20, etiket: '20 dk+', degisken: 'var(--sure-20)' },
+  { ad: 'gri', enAz: 0, etiket: '1–5 dk', degisken: 'var(--sure-1)' },
+  { ad: 'sari', enAz: 5, etiket: '5–10 dk', degisken: 'var(--sure-5)' },
+  { ad: 'turuncu', enAz: 10, etiket: '10–20 dk', degisken: 'var(--sure-10)' },
+  { ad: 'kirmizi', enAz: 20, etiket: '20 dk+', degisken: 'var(--sure-20)' },
 ]
 export const sureRengi = (dakika) => SURE_RENKLERI.findLast((r) => (dakika ?? 0) >= r.enAz)
 
 // Siluetin duruşu kişiye göre sabit: her tikte aynı figür (zıplamasın), kalabalıkta tekdüze durmasın.
-export const siluetPozu = (id) => [...String(id)].reduce((t, c) => t + c.charCodeAt(0), 0) % 3
+const ozet = (id) => [...String(id)].reduce((t, c) => t * 31 + c.charCodeAt(0), 7) >>> 0
+export const siluetPozu = (id) => ozet(id) % 3
+// Hafif sallanma (CSS) her figürde farklı anda başlasın: figürler hep birlikte salınmasın (sakin, doğal).
+export const siluetGecikmesi = (id) => -((ozet(id) % 12) / 2)
