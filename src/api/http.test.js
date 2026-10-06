@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import http from 'node:http'
-import { demoVarMi } from './http.js'
+import { demoVarMi, jsonIstek } from './http.js'
 
 async function sunucu(kod) {
   const s = http.createServer((i, y) => { y.writeHead(i.url === '/api/demo' ? kod : 404); y.end('{}') })
@@ -34,4 +34,13 @@ test('jsonIstek: gövdesiz başarı (204 / boş 200) hata değildir; JSON gövde
   assert.deepEqual(await jsonIstek(a, '/json'), { ok: true })
   await assert.rejects(jsonIstek(a, '/hata', 'POST', {}))
   s.close()
+})
+
+test('jsonIstek: hata yanıtındaki sunucu metni hataya eklenir (form gösterir)', async () => {
+  const sunucu = http.createServer((_, y) => { y.writeHead(400, { 'Content-Type': 'application/json' }); y.end('{"ok":false,"hata":"kim: en az bir kişi seçin"}') })
+  await new Promise((c) => sunucu.listen(0, c))
+  try {
+    await assert.rejects(jsonIstek(`http://localhost:${sunucu.address().port}`, '/api/rules', 'POST', {}),
+      (e) => e.hata === 'kim: en az bir kişi seçin' && e.durum === 400)
+  } finally { sunucu.close() }
 })

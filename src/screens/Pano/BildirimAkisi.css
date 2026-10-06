@@ -48,6 +48,8 @@
 .bildirim--warn .bildirim-ikon { color: var(--uyari); }
 .bildirim--serious { border-left-color: var(--ciddi); background: var(--ciddi-zemin); }
 .bildirim--serious .bildirim-ikon { color: var(--ciddi); }
+.bildirim--kural { border-left-color: var(--kural); background: var(--kural-zemin); }
+.bildirim--kural .bildirim-ikon { color: var(--kural); }
 
 .bildirim-ikon { display: flex; align-items: center; padding-top: 1px; }
 

@@ -34,5 +34,12 @@ test('ciddi bildirim 20 olumlu bildirimin altına itilse de "Ciddi" süzgeciyle 
   const akis = [...Array.from({ length: 22 }, (_, i) => ({ anahtar: `d${i}`, severity: 'deal' })), { anahtar: 'kayip', severity: 'serious', kind: 'lost' }]
   assert.ok(!gorunenBildirimler(akis).liste.some((b) => b.anahtar === 'kayip'), 'varsayılan 20 içinde yok')
   assert.deepEqual(gorunenBildirimler(akis, { onem: 'serious' }).liste.map((b) => b.anahtar), ['kayip'])
-  assert.deepEqual(ONEM_SUZGECLERI.map((s) => s.deger), ['tumu', 'serious', 'warn', 'deal'])
+  assert.deepEqual(ONEM_SUZGECLERI.map((s) => s.deger), ['tumu', 'serious', 'warn', 'deal', 'kural'])
+})
+
+test('kural uyarıları kendi süzgecinde sayılır ve süzülür', () => {
+  const alerts = [{ severity: 'kural' }, { severity: 'deal' }, { severity: 'kural' }]
+  assert.equal(onemSayilari(alerts).kural, 2)
+  assert.equal(bildirimleriSuz(alerts, 'kural').length, 2)
+  assert.ok(ONEM_SUZGECLERI.some((s) => s.deger === 'kural' && s.etiket === 'Kural'))
 })

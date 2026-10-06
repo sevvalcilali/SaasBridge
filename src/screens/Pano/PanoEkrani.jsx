@@ -12,6 +12,7 @@ import HataBantlari from '../../components/HataBantlari.jsx'
 import EgoGorunumu from '../../components/EgoGorunumu.jsx'
 import CanliGruplar from '../../components/CanliGruplar.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
+import UyariPenceresi from './UyariPenceresi.jsx'
 import { kartVerAdresi, KURULUM_ADRESI } from '../../api/useRota.js'
 import { veriCanli } from '../../api/durum.js'
 import './PanoEkrani.css'
@@ -90,6 +91,7 @@ export default function PanoEkrani() {
   return (
     <div className={`pano ${veriCanli(durum, baglandi) ? '' : 'pano--soluk'} ${buyuk ? 'pano--buyuk' : ''}`}>
       <HataBantlari durum={durum} baglandi={baglandi} />
+      <UyariPenceresi alerts={durum.alerts} people={durum.people} onGoster={setVurgulanan} />
       <UstSerit durum={durum} onSifirla={sifirlaIste} onEsikTikla={esikAc} />
 
       <nav className="pano-sekmeler" role="tablist" aria-label="Bölüm">
