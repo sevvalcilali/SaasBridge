@@ -223,7 +223,7 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
 
 - **`GET /api/demo` gerçek sunucuda OLMAMALI (404).** Arayüz demo düğmelerini ("kartı yaklaştır",
   "çifti tut") yalnız bu uç varsa gösterir; mock'ta var, gerçek sunucuda yoksa düğmeler gizlenir.
-  `/api/yaklastir` ve `/api/demo/tut` de yalnız mock'a ait.
+  `/api/demo/tut` de yalnız mock'a ait.
 - **Kart numaraları:** `/api/assign` ve `/api/unassign` gövdesindeki `kart` 1–99 arası, baştaki sıfırsız
   dize ("7"). Arayüz "007"yi "7"ye çevirir, 0 ve 100+ numaraları göndermez. Sunucu geçersiz numaraya
   400, bilinmeyen karta 404 dönebilir; arayüz bunu hata olarak gösterir.
