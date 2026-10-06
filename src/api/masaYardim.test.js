@@ -1,7 +1,7 @@
 // Karşılama masası saf yardımcıları — kayıtlı kişi araması + form geçerliliği.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { katilimciAra, formGecerli, acikKartlar, kartOner, baskinKart, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki, kisiDurumu, kartBekleyenler, bostakiKartlar, kayipKartlar, KAYIP_SN } from './masaYardim.js'
+import { katilimciAra, formGecerli, acikKartlar, kartOner, iadeAdaylari, geriAlinabilir, GERI_AL_DK, duzenlemeFarki, kisiDurumu, kartBekleyenler, bostakiKartlar, kayipKartlar, KAYIP_SN } from './masaYardim.js'
 
 const LISTE = [
   { kisiId: 'k1', ad: 'Ayşe Demir', kurum: 'Atlas Ventures', rol: 'investor' },
@@ -36,9 +36,9 @@ const KARTLAR = [
   { kart: '113', rssiAlici: -70, seenAgo: 0.2, atanan: null },
 ]
 
-test('acikKartlar: yalnız yakın zamanda duyulanlar, güce göre azalan', () => {
+test('acikKartlar: yalnız yakın zamanda duyulanlar, kart numarasına göre (numarayla verilir)', () => {
   const a = acikKartlar(KARTLAR)
-  assert.deepEqual(a.map((k) => k.kart), ['11', '113', '10'])   // 12 bayat, elendi
+  assert.deepEqual(a.map((k) => k.kart), ['10', '11', '113'])   // 12 bayat, elendi
 })
 
 test('kartOner: numara ön ekine göre süzer; boşta hepsi', () => {
@@ -48,19 +48,10 @@ test('kartOner: numara ön ekine göre süzer; boşta hepsi', () => {
   assert.deepEqual(kartOner(KARTLAR, '113').map((k) => k.kart), ['113'])
 })
 
-test('baskinKart: tek güçlü kart → o bulunur', () => {
-  // KARTLAR'da yalnız 11 güçlü (-50); diğerleri ≤ -70
-  assert.deepEqual(baskinKart(KARTLAR), { kart: '11', coklu: false })
-})
-
-test('baskinKart: iki güçlü kart → çoklu (birini uzaklaştır)', () => {
-  const iki = [...KARTLAR, { kart: '20', rssiAlici: -45, seenAgo: 0.3, atanan: null }]
-  assert.deepEqual(baskinKart(iki), { kart: null, coklu: true })
-})
-
-test('baskinKart: hiç güçlü yok → boş', () => {
-  const zayif = KARTLAR.map((k) => ({ ...k, rssiAlici: -78 }))
-  assert.deepEqual(baskinKart(zayif), { kart: null, coklu: false })
+test('kartOner: yazılan numaranın tam eşi en başta, gerisi sırasını korur', () => {
+  const kartlar = [{ kart: '30' }, { kart: '31' }, { kart: '3' }, { kart: '38' }]
+  assert.deepEqual(kartOner(kartlar, '3').map((k) => k.kart), ['3', '30', '31', '38'])
+  assert.deepEqual(kartOner(kartlar, '03').map((k) => k.kart), ['3'], 'baştaki sıfır atılır')
 })
 
 const KARTLI = [

@@ -47,19 +47,22 @@ export function duzenlemeFarki(kisi, form) {
     .filter(([alan, deger]) => deger !== (kisi[alan] ?? (typeof deger === 'boolean' ? false : ''))))
 }
 
-// "Şu an açık" kartlar: yakın zamanda duyulanlar (brief §6.2 "yeşil nokta = açık"),
-// güce göre azalan (yaklaştırılan/en güçlü üstte).
+// "Şu an açık" kartlar: yakın zamanda duyulanlar (brief §6.2 "yeşil nokta = açık"), kart numarasına göre
+// (kart numarayla verilir; "yaklaştır" yok, 07.10.2026).
 export function acikKartlar(kartlar, esikSn = 8) {
   return kartlar
     .filter((k) => k.seenAgo != null && k.seenAgo <= esikSn)
-    .sort((a, b) => b.rssiAlici - a.rssiAlici)
+    .sort((a, b) => Number(a.kart) - Number(b.kart))
 }
 
-// Numara ön ekine göre öneri süzme (boş girdi → hepsi).
+// Numara ön ekine göre öneri süzme (boş girdi → hepsi); yazılan numaranın tam eşi en başta.
+// Baştaki sıfırla yazılan ("03") tam numaradır (kartlar 1–99): yalnız o kart.
 export function kartOner(kartlar, girdi) {
-  const q = String(girdi ?? '').trim()
+  const ham = String(girdi ?? '').trim()
+  const q = ham.replace(/^0+(?=\d)/, '')
   if (!q) return kartlar
-  return kartlar.filter((k) => k.kart.startsWith(q))
+  const eslesen = kartlar.filter((k) => (q === ham ? k.kart.startsWith(q) : k.kart === q))
+  return [...eslesen.filter((k) => k.kart === q), ...eslesen.filter((k) => k.kart !== q)]
 }
 
 // Kart iadesi adayları: şu an kartı olan kişiler, kart numarasına göre sıralı.
@@ -94,13 +97,4 @@ export function kayipKartlar(kartlar, katilimcilar) {
     .filter((k) => k.atanan && kisi.has(k.atanan) && k.seenAgo >= KAYIP_SN)
     .map((k) => ({ kisi: kisi.get(k.atanan), kart: k.kart, seenAgo: k.seenAgo }))
     .sort((a, b) => b.seenAgo - a.seenAgo)
-}
-
-// "Yaklaştır ve tanı": alıcıya yaklaştırılan kart belirgin en güçlüdür.
-// Tek güçlü kart → bulundu; iki+ → "birini uzaklaştırın"; hiç → beklemede.
-export function baskinKart(kartlar, esik = -55) {
-  const guclu = kartlar.filter((k) => k.rssiAlici > esik)
-  if (guclu.length === 1) return { kart: guclu[0].kart, coklu: false }
-  if (guclu.length >= 2) return { kart: null, coklu: true }
-  return { kart: null, coklu: false }
 }

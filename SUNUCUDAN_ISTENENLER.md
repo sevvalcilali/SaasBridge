@@ -115,14 +115,13 @@ her atama/iade/değişimin `{zaman, kisiId, kart, islem}` kaydı tutulmalı. Ön
 
 | Alan | Birim / anlamı | Arayüz nerede kullanır |
 |---|---|---|
-| `rssiAlici` | dBm, alıcının kartı duyduğu güç | "Yaklaştır ve tanı": tek kart > −55 → bulundu, iki+ → "birini uzaklaştırın" |
+| `rssiAlici` | dBm, alıcının kartı duyduğu güç | Arayüz şu an kullanmıyor (kart numarayla verilir; "yaklaştır ve tanı" kalktı, 07.10.2026) |
 | `seenAgo` | **saniye** | ≤8 sn "açık"; atanmış kartta ≥60 sn → **"Kartı kontrol et"** (brief `lost` ile aynı ölçüt) |
 | `atanan` | `kisiId` ya da `null` | "zaten atanmış" uyarısı; `null` + açık → **boştaki kartlar** şeridi |
 
 - Liste, alıcının duyduğu **tüm** kartları içermeli: atanmışlar, masadaki yedekler
   (atanmamış), iade edilip masaya dönenler. Arayüz 1–3 sn'de bir yoklar.
-- `POST /api/yaklastir` **yalnız mock'ta** var (donanım olmadan yaklaştırmayı taklit
-  eden demo düğmesi). Gerçek sunucuda gerekmez.
+- Kart masada **numarayla** verilir (kartın üstündeki etiket); "yaklaştır ve tanı" ve mock'taki `POST /api/yaklastir` kalktı (Şevval kararı 07.10.2026).
 
 ## 4. Açık sorular (Muhittin)
 
