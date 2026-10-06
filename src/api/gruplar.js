@@ -100,11 +100,11 @@ export function yerlestir(yerler, gruplar) {
 
 // Siluet rengi = o kişinin şu anki görüşmesinin süresi (people[].live, dakika). Renk yalnız sınır geçilince
 // değişir (sakin); her zaman yazılı süre ve açıklamayla birlikte kullanılır (renk tek başına bilgi değildir).
-// Isınan ölçek gri → sarı → turuncu → kırmızı (Şevval kararı 2026-10-06). Açılır uyarılar bu renklerle
+// Ölçek gri → mavi → turuncu → kırmızı (Şevval kararı 2026-10-06). Açılır uyarılar bu renklerle
 // karışmasın diye kendi çerçevesi ve simgesiyle gelir.
 export const SURE_RENKLERI = [
   { ad: 'gri', enAz: 0, etiket: '1–5 dk', degisken: 'var(--sure-1)' },
-  { ad: 'sari', enAz: 5, etiket: '5–10 dk', degisken: 'var(--sure-5)' },
+  { ad: 'mavi', enAz: 5, etiket: '5–10 dk', degisken: 'var(--sure-5)' },
   { ad: 'turuncu', enAz: 10, etiket: '10–20 dk', degisken: 'var(--sure-10)' },
   { ad: 'kirmizi', enAz: 20, etiket: '20 dk+', degisken: 'var(--sure-20)' },
 ]

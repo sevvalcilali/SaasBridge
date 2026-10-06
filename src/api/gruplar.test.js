@@ -68,7 +68,7 @@ test('sondaki boş yerler atılır (daireler bitince alan küçülür)', () => {
 test('sureRengi: 1–5 dk gri, 5–10 sarı, 10–20 turuncu, 20+ kırmızı (Şevval kararı 2026-10-06); sınırda üst renk', () => {
   const ad = (dk) => sureRengi(dk).ad
   assert.deepEqual([ad(1), ad(4.99), ad(5), ad(9.9), ad(10), ad(19.9), ad(20), ad(95)],
-    ['gri', 'gri', 'sari', 'sari', 'turuncu', 'turuncu', 'kirmizi', 'kirmizi'])
+    ['gri', 'gri', 'mavi', 'mavi', 'turuncu', 'turuncu', 'kirmizi', 'kirmizi'])
   assert.equal(sureRengi(12).degisken, 'var(--sure-10)')
   assert.deepEqual(SURE_RENKLERI.map((r) => r.etiket), ['1–5 dk', '5–10 dk', '10–20 dk', '20 dk+'])
 })
