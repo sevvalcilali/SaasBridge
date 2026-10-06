@@ -2,7 +2,7 @@
 // (A–B ve B–C birlikte → A, B, C tek grup); daireler ekranda yer değiştirmez.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { canliGruplar, bostakiler, yerlestir, yalnizMi, sureRengi, SURE_RENKLERI, siluetPozu } from './gruplar.js'
+import { canliGruplar, bostakiler, yerlestir, yalnizMi, sureRengi, SURE_RENKLERI, siluetPozu, siluetGecikmesi } from './gruplar.js'
 
 const k = (id, role, ek = {}) => ({ id, role, name: `K${id}`, org: '', color: '#111', status: 'idle', live: 0, tier: 0, idleSinceS: 0, ...ek })
 const KISILER = [
@@ -65,10 +65,10 @@ test('sondaki boş yerler atılır (daireler bitince alan küçülür)', () => {
   assert.equal(yerler.length, 1)
 })
 
-test('sureRengi: 1–5 dk siyah, 5–10 mavi, 10–20 mor, 20+ altın (Şevval kararı); sınırda üst renk', () => {
+test('sureRengi: 1–5 dk gri, 5–10 sarı, 10–20 turuncu, 20+ kırmızı (Şevval kararı 2026-10-06); sınırda üst renk', () => {
   const ad = (dk) => sureRengi(dk).ad
   assert.deepEqual([ad(1), ad(4.99), ad(5), ad(9.9), ad(10), ad(19.9), ad(20), ad(95)],
-    ['siyah', 'siyah', 'mavi', 'mavi', 'mor', 'mor', 'altin', 'altin'])
+    ['gri', 'gri', 'sari', 'sari', 'turuncu', 'turuncu', 'kirmizi', 'kirmizi'])
   assert.equal(sureRengi(12).degisken, 'var(--sure-10)')
   assert.deepEqual(SURE_RENKLERI.map((r) => r.etiket), ['1–5 dk', '5–10 dk', '10–20 dk', '20 dk+'])
 })
@@ -76,4 +76,11 @@ test('sureRengi: 1–5 dk siyah, 5–10 mavi, 10–20 mor, 20+ altın (Şevval k
 test('siluetPozu: kişiye göre sabit (her tikte aynı duruş), üç duruştan biri', () => {
   assert.equal(siluetPozu('14'), siluetPozu('14'))
   assert.deepEqual(new Set(['1', '2', '3', '4', '5', '6'].map(siluetPozu)), new Set([0, 1, 2]))
+})
+
+test('siluetGecikmesi: kişiye göre sabit, figürler aynı anda sallanmasın diye farklı (0 ile −6 sn arası)', () => {
+  const g = ['2', '3', '4', '5', '6', '7', '8'].map(siluetGecikmesi)
+  assert.equal(siluetGecikmesi('14'), siluetGecikmesi('14'))
+  assert.ok(g.every((x) => x <= 0 && x > -6))
+  assert.ok(new Set(g).size >= 5)
 })

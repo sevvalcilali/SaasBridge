@@ -12,6 +12,7 @@ import HataBantlari from '../../components/HataBantlari.jsx'
 import EgoGorunumu from '../../components/EgoGorunumu.jsx'
 import CanliGruplar from '../../components/CanliGruplar.jsx'
 import DetayPaneli from './DetayPaneli.jsx'
+import UyariPenceresi from './UyariPenceresi.jsx'
 import { kartVerAdresi, KURULUM_ADRESI } from '../../api/useRota.js'
 import { veriCanli } from '../../api/durum.js'
 import './PanoEkrani.css'
@@ -26,6 +27,14 @@ export default function PanoEkrani() {
   const [sekme, setSekme] = useKalici('pano.sekme', 'kisiler')
   // Orta bölge: "Şimdi" canlı gruplar (varsayılan), "Gün boyu" seçili kişinin gün boyu görüştükleri (ego).
   const [agGorunum, setAgGorunum] = useKalici('pano.agGorunum', 'simdi')
+  // "Büyük görünüm": kişi listesi ve bildirimler katlanır, figürler ekranın tamamında (Esc ile çıkılır).
+  const [buyuk, setBuyuk] = useKalici('pano.buyuk', false)
+  useEffect(() => {
+    if (!buyuk) return
+    const tus = (e) => { if (e.key === 'Escape') setBuyuk(false) }
+    window.addEventListener('keydown', tus)
+    return () => window.removeEventListener('keydown', tus)
+  }, [buyuk, setBuyuk])
 
   // Parıltı 3 sn sonra kendiliğinden söner (brief §7 tıkla-vurgula, sakin).
   useEffect(() => {
@@ -80,8 +89,9 @@ export default function PanoEkrani() {
   }
 
   return (
-    <div className={`pano ${veriCanli(durum, baglandi) ? '' : 'pano--soluk'}`}>
+    <div className={`pano ${veriCanli(durum, baglandi) ? '' : 'pano--soluk'} ${buyuk ? 'pano--buyuk' : ''}`}>
       <HataBantlari durum={durum} baglandi={baglandi} />
+      <UyariPenceresi alerts={durum.alerts} people={durum.people} onGoster={setVurgulanan} />
       <UstSerit durum={durum} onSifirla={sifirlaIste} onEsikTikla={esikAc} />
 
       <nav className="pano-sekmeler" role="tablist" aria-label="Bölüm">
@@ -110,13 +120,19 @@ export default function PanoEkrani() {
           />
         </section>
         <section className="pano-orta" data-bolge="orta" aria-label="Ağ görünümü">
-          <div className="tema-secici pano-ag-secici" role="group" aria-label="Görünüm">
-            {[['simdi', 'Şimdi'], ['gun', 'Gün boyu']].map(([deger, etiket]) => (
-              <button key={deger} type="button" className="tema-secici-dugme" data-test={`ag-${deger}`}
-                aria-pressed={agGorunum === deger} onClick={() => setAgGorunum(deger)}>
-                {etiket}
-              </button>
-            ))}
+          <div className="pano-ag-ust">
+            <div className="tema-secici pano-ag-secici" role="group" aria-label="Görünüm">
+              {[['simdi', 'Şimdi'], ['gun', 'Gün boyu']].map(([deger, etiket]) => (
+                <button key={deger} type="button" className="tema-secici-dugme" data-test={`ag-${deger}`}
+                  aria-pressed={agGorunum === deger} onClick={() => setAgGorunum(deger)}>
+                  {etiket}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="kartver-geri pano-buyut" aria-pressed={buyuk} data-test="pano-buyut"
+              onClick={() => setBuyuk((b) => !b)} title={buyuk ? 'Küçült (Esc)' : 'Figürleri büyük göster'}>
+              {buyuk ? '⤡ Küçült' : '⤢ Büyük görünüm'}
+            </button>
           </div>
           {agGorunum === 'gun' ? (
             seciliKisi
@@ -124,6 +140,7 @@ export default function PanoEkrani() {
               : <p className="ego-sec" data-test="ego-sec">Bir kişinin gün boyu kiminle ne kadar görüştüğünü görmek için soldaki listeden ya da bir daireden onu seçin. Bütün etkinliğin özeti Rapor'da.</p>
           ) : (
             <CanliGruplar
+              buyuk={buyuk}
               people={durum.people}
               live={durum.live}
               vurgulanan={vurgulanan}

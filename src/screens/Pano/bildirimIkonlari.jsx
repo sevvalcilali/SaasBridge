@@ -38,6 +38,7 @@ const IKONLAR = {
   idle_investor: Saat,
   lost: SinyalKesik,
   no_investor: Uyari,
+  kural: Zil, // organizatörün uyarı kuralı
 }
 
 export default function BildirimIkon({ kind }) {

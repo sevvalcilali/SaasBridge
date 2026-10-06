@@ -73,8 +73,8 @@ da 8002'de açar ve çakışır). Vite'ın proxy'si zaten 8002'ye gider (`vite.c
 | Duyarlı | Telefon / tablet / bilgisayar: menü, dokunma hedefleri, kaydırmalı çipler, tam ekran panel, kaydırmalı rapor tabloları | `docs/duyarli/NOT.md` |
 
 Sunucudan istenen her şey (uç listesi, veri biçimleri, Muhittin'e sorular): **`SUNUCUDAN_ISTENENLER.md`**.
-Gerçek sunucu **ayrı repoda** yazılıyor: https://github.com/sevvalcilali/saasBridgeBackend (`PLAN.md` = kurallar + Faz B
-uygulama sırası, `BACKEND_PLAN.md` = mimari/veri modeli/sözleşme/kalıcılık/test/riskler). Bu repoda sunucu kodu **yok**.
+Gerçek sunucu **ayrı repoda** yazılıyor: https://github.com/sevvalcilali/saasBridgeBackend (tek plan belgesi `PLAN.md`:
+kurallar, mimari, veri modeli, sözleşme, kalıcılık, test, Faz B sırası, riskler; açık işler §16.2). Bu repoda sunucu kodu **yok**.
 
 ### Nerede kaldık / sıradaki işler (öncelik sırasıyla)
 
@@ -772,7 +772,7 @@ SaasBridge/
 ## 4. AÇIK SORULAR / BEKLEYENLER
 
 - [ ] Gerçek sunucu ayrı repoda yazılıyor (`saasBridgeBackend`); Muhittin'in mevcut kodu gelirse oraya referans olarak
-      alınır. `saasBridgeBackend/BACKEND_PLAN.md` Bölüm 16'daki Soru 7–11 Muhittin'e iletilecek (`SUNUCUDAN_ISTENENLER.md`'ye
+      alınır. `saasBridgeBackend/PLAN.md` Bölüm 16.1'deki Soru 7–11 Muhittin'e iletilecek (`SUNUCUDAN_ISTENENLER.md`'ye
       henüz taşınmadı).
 - [ ] `pano/pano.html` ekran görüntüleri görülemedi — referans gerekirse istenecek.
 - [ ] Bildirim tıklaması dışında ek bildirim özelliği YOK (brief §5.2: ses,

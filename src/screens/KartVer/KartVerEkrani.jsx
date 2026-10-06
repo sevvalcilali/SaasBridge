@@ -13,6 +13,7 @@ import KartSecAdim from './KartSecAdim.jsx'
 import KontrolOnayAdim from './KontrolOnayAdim.jsx'
 import IadePaneli from './IadePaneli.jsx'
 import BostakiKartlar from './BostakiKartlar.jsx'
+import KuralPaneli from './KuralPaneli.jsx'
 import { KayipUyarilari, KartKontrol } from './KayipKartlar.jsx'
 import '../../components/HataBantlari.css'
 import './KartVerEkrani.css'
@@ -201,9 +202,11 @@ export default function KartVerEkrani() {
         </div>
       )}
       <header className="kartver-bas">
-        <h1>{mod === 'ver' ? 'Kart Ver' : 'Kart İadesi'}</h1>
+        <h1>{mod === 'ver' ? 'Kart Ver' : mod === 'iade' ? 'Kart İadesi' : 'Uyarı Kuralları'}</h1>
         <p className="kartver-alt">
-          {mod === 'ver' ? 'Karşılama masası — gelen kişiye kart verin' : 'Ayrılan kişiden kartı geri alın'}
+          {mod === 'ver' ? 'Karşılama masası — gelen kişiye kart verin'
+            : mod === 'iade' ? 'Ayrılan kişiden kartı geri alın'
+            : 'Bu etkinlik için: kimler yan yana gelince ya da uzun görüşünce Pano uyarsın'}
         </p>
       </header>
 
@@ -215,6 +218,10 @@ export default function KartVerEkrani() {
         <button type="button" className={`kartsec-mod-dugme ${mod === 'iade' ? 'kartsec-mod-dugme--secili' : ''}`}
           aria-pressed={mod === 'iade'} onClick={() => modDegistir('iade')} data-test="mod-iade">
           Kart iadesi
+        </button>
+        <button type="button" className={`kartsec-mod-dugme ${mod === 'uyari' ? 'kartsec-mod-dugme--secili' : ''}`}
+          aria-pressed={mod === 'uyari'} onClick={() => modDegistir('uyari')} data-test="mod-uyari">
+          Uyarılar
         </button>
       </div>
 
@@ -253,10 +260,11 @@ export default function KartVerEkrani() {
       )}
 
       <section className="kartver-govde" data-test="kartver-govde">
-        {kontrol && (
+        {kontrol && mod !== 'uyari' && (
           <KartKontrol kayip={kontrol} onPilDegisti={pilDegistirildi} onKartDegisti={kartDegistirildi}
             onKapat={() => setKontrol(null)} />
         )}
+        {mod === 'uyari' && <KuralPaneli api={api} katilimcilar={katilimcilar} />}
         {!kontrol && mod === 'iade' && (
           <IadePaneli key={iadeKart ?? 'liste'} api={api} katilimcilar={katilimcilar} baslangicKart={iadeKart} onIade={iadeAlindi} />
         )}
@@ -277,7 +285,7 @@ export default function KartVerEkrani() {
         )}
       </section>
 
-      <BostakiKartlar kartlar={kartlar} />
+      {mod !== 'uyari' && <BostakiKartlar kartlar={kartlar} />}
     </main>
   )
 }

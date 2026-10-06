@@ -25,7 +25,7 @@ const ANLASMA_SN = arg.anlasmaSn || null
 
 const TIK_MS = 500                 // gerçek zaman; yayın da bu kadans (2 Hz)
 const DT = (TIK_MS / 1000) * HIZ   // benzetim saniyesi / tik
-const GIRIS_SN = 5                 // brief §2: giriş gecikmesi
+const GIRIS_SN = 60                // giriş: eşik üstünde kesintisiz 1 dk (karar 05.10.2026; gerçek sunucuyla aynı)
 const CIKIS_SN = 15                // brief §2: çıkış gecikmesi
 const GRAFIK_SN = 90
 const ETKINLIK_DK = 180            // event.progress için varsayılan süre
@@ -126,7 +126,7 @@ let oturumlar = []                  // görüşme kayıtları (§9-6): { a, b, s
 let anlasmalar = new Set()          // anlaşma çıkmış çiftler — KİŞİ kimliğiyle (kenarAnahtari), karta değil
 let bitenGorusme = 0
 let esik = -72
-let yalnizSn = new Map()            // yatırımcı KİMLİĞİ → kesintisiz yalnız sn (kart başkasına geçince devredilmez)
+let yalnizSn = new Map()            // kişi KİMLİĞİ → kesintisiz boşta sn (kart başkasına geçince devredilmez)
 let atanmamisGeldi = false
 let aliciKopuk = false              // alıcı şu an kopuk mu (tik kararı; durum bunu okur)
 let sonAliciSn = 0                  // alıcıdan son satırın geldiği benzetim saniyesi
@@ -150,9 +150,10 @@ const kimlik = (e) => e.kisiId ?? `kart:${e.id}`
 const kenarAnahtari = (x, y) => (x < y ? `${x}|${y}` : `${y}|${x}`)
 
 // Görüşme kaydı (§9-6): birlikte başlayınca açılır, bitince kapanır. start/end etkinlik
-// saniyesi. Başladığı tik de süreye sayıldığı için (kenar süresi gibi) start = simSn - DT.
-function oturumAc(c) {
-  c.oturum = { a: kimlik(kisiBul(c.a)), b: kimlik(kisiBul(c.b)), start: simSn - DT, end: null }
+// saniyesi. Kayıt eşiğin aşıldığı ana geri tarihlidir (start = simSn - bekleme): bekleme dakikası kenar
+// süresine de eklendiği için kayıtlar toplamı edges[].min ile tutarlı kalır.
+function oturumAc(c, beklemeSn) {
+  c.oturum = { a: kimlik(kisiBul(c.a)), b: kimlik(kisiBul(c.b)), start: simSn - beklemeSn, end: null }
   oturumlar.push(c.oturum)
 }
 function oturumKapat(c) {
@@ -416,14 +417,56 @@ function anlasmaSuresiSn(cift) {
   return dk ? dk * 60 : Infinity
 }
 
-function bildir(kind, severity, title, detail, ids) {
+function bildir(kind, severity, title, detail, ids, kural = '') {
   const simdi = new Date()
   bildirimler.push({
     t: simdi.getTime() / 1000,
     clock: `${String(simdi.getHours()).padStart(2, '0')}:${String(simdi.getMinutes()).padStart(2, '0')}`,
-    kind, severity, title, detail, people: ids,
+    kind, severity, title, detail, people: ids, kural,
   })
 }
+
+// ---------- Uyarı kuralları (gerçek sunucu cekirdek/kural.py ile aynı; Şevval isteği 2026-10-06) ----------
+// "[kim] ile [kiminle] [yan yana gelince | N dk'dan uzun birlikte]" → bildirim kind/severity "kural" (panoda açılır
+// pencere). Kim / kiminle: { kisiler: [kisiId] } ya da { rol, enAzYildiz }. Kişisiz kart hiçbir kurala uymaz; bir çiftin
+// bir görüşmesinde bir kez; görüşme bitince unutulur; sıfırlamada kurallar kalır.
+let kurallar = []
+let kuralSayac = 0
+const KURAL_ROLLERI = ['investor', 'founder', 'guest', 'herkes']
+const KURAL_GRUP_ADI = { investor: 'yatırımcılar', founder: 'girişimciler', guest: 'misafirler', herkes: 'herkes' }
+const katGorunen = (k) => (k.rol === 'founder' && k.kurum ? k.kurum : k.ad)
+
+function secimCoz(d, taraf) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return `${taraf}: kişiler ya da rol seçin`
+  if ('kisiler' in d) {
+    if (!Array.isArray(d.kisiler) || !d.kisiler.length || !d.kisiler.every((k) => typeof k === 'string')) return `${taraf}: en az bir kişi seçin`
+    for (const id of d.kisiler) if (!katBul(id)) return `${taraf}: bilinmeyen kişi ${id}`
+    return { kisiler: [...new Set(d.kisiler)] }
+  }
+  if (!KURAL_ROLLERI.includes(d.rol)) return `${taraf}: rol yatırımcı, girişimci, misafir ya da herkes olmalı`
+  const y = d.enAzYildiz ?? 0
+  if (!Number.isInteger(y) || y < 0 || y > 5) return `${taraf}: en az yıldız 0–5 olmalı`
+  return { rol: d.rol, enAzYildiz: y }
+}
+const secimAdi = (s) => (s.kisiler
+  ? s.kisiler.map((id) => (katBul(id) ? katGorunen(katBul(id)) : id)).join(', ')
+  : (s.enAzYildiz && ['investor', 'herkes'].includes(s.rol) ? `★${s.enAzYildiz}+ ` : '') + KURAL_GRUP_ADI[s.rol])
+
+function kuralCoz(g, kuralId) {
+  const kim = secimCoz(g.kim, 'kim'); if (typeof kim === 'string') return kim
+  const kiminle = secimCoz(g.kiminle, 'kiminle'); if (typeof kiminle === 'string') return kiminle
+  const dakika = g.dakika ?? 0
+  if (typeof dakika !== 'number' || !Number.isFinite(dakika) || dakika < 0 || dakika > 600) return 'dakika 0–600 olmalı'
+  const acik = g.acik ?? true
+  if (typeof acik !== 'boolean') return 'acik true / false olmalı'
+  let ad = typeof g.ad === 'string' ? g.ad.trim().slice(0, 80) : ''
+  if (!ad) ad = `${secimAdi(kim)} ile ${secimAdi(kiminle)}${dakika ? ` · ${dakika} dk` : ' · yan yana'}`.slice(0, 80)
+  return { kuralId, ad, kim, kiminle, dakika, acik }
+}
+const secimeUyar = (s, e) => (s.kisiler ? s.kisiler.includes(e.kisiId)
+  : (s.rol === 'herkes' || e.role === s.rol) && (e.tier || 0) >= (s.enAzYildiz || 0))
+const kuralaUyar = (r, a, b) => Boolean(a.kisiId && b.kisiId && a.kisiId !== b.kisiId) &&
+  ((secimeUyar(r.kim, a) && secimeUyar(r.kiminle, b)) || (secimeUyar(r.kim, b) && secimeUyar(r.kiminle, a)))
 
 // ---------- benzetim adımı ----------
 function tik() {
@@ -504,13 +547,15 @@ function tik() {
     }
     c.olcumler = c.olcumler.filter((o) => simSn - o.t <= GRAFIK_SN + 5)
 
-    // giriş/çıkış gecikmesi (brief §2): 5 sn üstte → başlar, 15 sn altta → biter
+    // giriş/çıkış gecikmesi: 1 dk üstte → başlar, 15 sn altta → biter. Başladığı tikte bekleme dakikasının
+    // tamamı süreye eklenir, sonra her tik DT (gerçek sunucu cekirdek/cift.py ile aynı).
     const son = c.olcumler.at(-1)
     const ustunde = son && son.value >= esik
     if (ustunde) { c.ustundeSn += DT; c.altindaSn = 0 } else { c.altindaSn += DT; c.ustundeSn = 0 }
+    let ekSn = DT
     if (!c.together && ustunde && c.ustundeSn >= GIRIS_SN) {
-      c.together = true; c.birlikteSn = 0
-      oturumAc(c)
+      c.together = true; c.birlikteSn = 0; ekSn = c.ustundeSn
+      oturumAc(c, c.ustundeSn)
       const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
       if (anlasmalar.has(kenarAnahtari(kimlik(ka), kimlik(kb)))) {
         bildir('repeat', 'deal', 'Yeniden bir arada',
@@ -518,12 +563,12 @@ function tik() {
       }
     }
     if (c.together) {
-      c.birlikteSn += DT
+      c.birlikteSn += ekSn
       const [ka, kb] = [kisiBul(c.a), kisiBul(c.b)]
       const kk = kenarAnahtari(kimlik(ka), kimlik(kb))
-      kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + DT / 60)
-      ka.min += DT / 60; kb.min += DT / 60
-      if (karsiRol(ka, kb)) { ka.invMin += DT / 60; kb.invMin += DT / 60 }
+      kenarlar.set(kk, (kenarlar.get(kk) ?? 0) + ekSn / 60)
+      ka.min += ekSn / 60; kb.min += ekSn / 60
+      if (karsiRol(ka, kb)) { ka.invMin += ekSn / 60; kb.invMin += ekSn / 60 }
       if (!c.anlasmaVerildi && c.birlikteSn >= anlasmaSuresiSn(c)) {
         c.anlasmaVerildi = true
         anlasmalar.add(kk) // kişi çifti: kart iade edilip başkasına verilince devredilmez
@@ -533,8 +578,17 @@ function tik() {
           `${yat.name} (${'★'.repeat(yat.tier)}) ile ${gorunenAd(gir)} ${Math.round(c.birlikteSn / 60)} dakikadır birlikte.`,
           [c.a, c.b])
       }
+      c.kuralTetiklendi ??= new Set()
+      for (const r of kurallar) {
+        if (!r.acik || c.kuralTetiklendi.has(r.kuralId) || c.birlikteSn < r.dakika * 60 || !kuralaUyar(r, ka, kb)) continue
+        c.kuralTetiklendi.add(r.kuralId)
+        bildir('kural', 'kural', r.ad,
+          `${gorunenAd(ka)} ile ${gorunenAd(kb)} ${r.dakika ? `${r.dakika} dakikadır birlikte.` : 'yan yana geldi.'}`,
+          [c.a, c.b], r.kuralId)
+      }
       if (!c.fiziksel && c.altindaSn >= CIKIS_SN) {
         c.together = false
+        c.kuralTetiklendi = new Set() // yeniden buluşurlarsa kurallar yine uyarabilir
         oturumKapat(c)
         bitenGorusme++
       }
@@ -545,7 +599,9 @@ function tik() {
 
   // --- kişi durumları ve bildirim kuralları ---
   for (const k of kisiler) {
-    const birlikteMi = [...k.esler].some((esId) => ciftler.get(anahtar(k.id, esId))?.together)
+    // Çıkış gecikmesindeki (fiziksel ayrılmış, henüz bitmemiş) görüşmeler de "birlikte" — panodaki durumla aynı.
+    let birlikteMi = false
+    for (const [, c] of ciftler) if (c.together && (c.a === k.id || c.b === k.id)) { birlikteMi = true; break }
 
     // kayıp kart bildirimi (60 sn duyulmadı → ciddi)
     if (k.seenAgo >= 60 && !k.kayipBildirildi) {
@@ -554,21 +610,20 @@ function tik() {
         `${gorunenAd(k)} (kart ${k.id}) 1 dk'dır duyulmuyor.`, [k.id])
     }
 
-    // yalnız kalan önemli yatırımcı (≥★★★, 6 dk)
-    if (k.role === 'investor' && k.tier >= 3) {
-      const kim = kimlik(k)
-      const yalniz = (yalnizSn.get(kim) ?? 0)
-      if (!birlikteMi && k.seenAgo < 30) {
-        yalnizSn.set(kim, yalniz + DT)
-        if (yalniz + DT >= 360 && !k.yalnizBildirildi) {
-          k.yalnizBildirildi = true
-          bildir('idle_investor', 'warn', 'Önemli yatırımcı yalnız',
-            `${k.name} (${'★'.repeat(k.tier)}) 6 dk'dır kimseyle görüşmüyor.`, [k.id])
-        }
-      } else {
-        yalnizSn.set(kim, 0)
-        k.yalnizBildirildi = false
+    // Kesintisiz boşta süre herkes için sayılır (people[].idleSinceS, §9); görüşünce ya da görünmez olunca sıfır.
+    // Bildirim yalnız önemli yatırımcı (≥★★★) 6 dk yalnız kalınca.
+    const kim = kimlik(k)
+    if (!birlikteMi && k.seenAgo < 30) {
+      const yalniz = (yalnizSn.get(kim) ?? 0) + DT
+      yalnizSn.set(kim, yalniz)
+      if (k.role === 'investor' && k.tier >= 3 && yalniz >= 360 && !k.yalnizBildirildi) {
+        k.yalnizBildirildi = true
+        bildir('idle_investor', 'warn', 'Önemli yatırımcı yalnız',
+          `${k.name} (${'★'.repeat(k.tier)}) 6 dk'dır kimseyle görüşmüyor.`, [k.id])
       }
+    } else {
+      yalnizSn.set(kim, 0)
+      k.yalnizBildirildi = false
     }
   }
 }
@@ -662,6 +717,7 @@ function durumUret() {
       invMin: Math.round(k.invMin * 100) / 100,
       invPeers: karsiKisiler.size,
       seenAgo: Math.round(k.seenAgo * 10) / 10,
+      idleSinceS: Math.round((yalnizSn.get(kimlik(k)) ?? 0) * 10) / 10,
     }
   })
 
@@ -760,6 +816,27 @@ async function apiYonlendir(istek, yanit) {
 
   if (istek.method === 'GET' && yol === '/api/people') { json(yanit, 200, katilimcilar.map(katDto)); return true }
 
+  if (istek.method === 'GET' && yol === '/api/rules') { json(yanit, 200, kurallar); return true }
+  if (istek.method === 'POST' && yol === '/api/rules') {
+    const g = await govdeOku(istek)
+    const r = g && typeof g === 'object' ? kuralCoz(g, `r${kuralSayac + 1}`) : 'geçersiz kural'
+    if (typeof r === 'string') { json(yanit, 400, { ok: false, hata: r }); return true }
+    kuralSayac++; kurallar.push(r)
+    json(yanit, 200, r); return true
+  }
+  const kuralYolu = yol.match(/^\/api\/rules\/([^/]+)$/)
+  if (kuralYolu) {
+    const i = kurallar.findIndex((k) => k.kuralId === kuralYolu[1])
+    if (i < 0) { json(yanit, 404, { ok: false, hata: 'kural yok' }); return true }
+    if (istek.method === 'PATCH') {
+      const g = await govdeOku(istek) || {}
+      const r = kuralCoz({ ...kurallar[i], ...g }, kurallar[i].kuralId)
+      if (typeof r === 'string') { json(yanit, 400, { ok: false, hata: r }); return true }
+      kurallar[i] = r
+      json(yanit, 200, r); return true
+    }
+    if (istek.method === 'DELETE') { kurallar.splice(i, 1); json(yanit, 200, { ok: true }); return true }
+  }
   if (istek.method === 'GET' && yol === '/api/sessions') {
     const y = (v) => (v === null ? null : Math.round(v * 10) / 10)
     json(yanit, 200, oturumlar.map((o) => ({ a: o.a, b: o.b, start: y(o.start), end: y(o.end) }))); return true

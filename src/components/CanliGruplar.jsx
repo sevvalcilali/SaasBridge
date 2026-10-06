@@ -3,7 +3,7 @@
 // "Boşta" şeridinde; yalnız kalan önemli yatırımcı orada öne çıkar. Daireler ekranda yer değiştirmez
 // (api/gruplar.js yerlestir); yerleri salondaki yeri DEĞİLDİR. Pano ve sunum modunda ortak.
 import { memo, useMemo, useRef } from 'react'
-import { bostakiler, canliGruplar, siluetPozu, SURE_RENKLERI, sureRengi, yalnizMi, yerlestir } from '../api/gruplar.js'
+import { bostakiler, canliGruplar, siluetGecikmesi, siluetPozu, SURE_RENKLERI, sureRengi, yalnizMi, yerlestir } from '../api/gruplar.js'
 import { kisaAd } from '../api/ad.js'
 import { sureYazisi } from '../api/format.js'
 import { RolSekli } from './KisiRozeti.jsx'
@@ -20,7 +20,7 @@ function Figur({ k, i, n, vurgulu, secili, isimsiz, onSec }) {
   const orta = (n - 1) / 2
   const icerik = (
     <>
-      <Siluet renk={renk} poz={siluetPozu(k.id)} rol={k.role} ayna={i > orta} />
+      <Siluet renk={renk} poz={siluetPozu(k.id)} rol={k.role} ayna={i > orta} gecikme={siluetGecikmesi(k.id)} />
       {!isimsiz && <span className="figur-ad">{kisaAd(k)}</span>}
       <span className="figur-sure sayi" style={{ color: renk }}>
         <span className="grup-renk" style={{ background: k.color }} aria-hidden="true" />{kisaSure(k.live ?? 0)}
@@ -78,7 +78,7 @@ function SureAnahtari() {
 }
 
 export default function CanliGruplar({
-  people, live = [], vurgulanan = [], seciliId, onKisiSec, onGrupSec, sunum = false, isimsiz = false,
+  people, live = [], vurgulanan = [], seciliId, onKisiSec, onGrupSec, sunum = false, isimsiz = false, buyuk = false,
 }) {
   const gruplar = useMemo(() => canliGruplar(people, live), [people, live])
   const imza = gruplar.map((g) => g.anahtar).join('|')
@@ -92,7 +92,8 @@ export default function CanliGruplar({
   const tiklanir = !sunum && onKisiSec
 
   return (
-    <div className={`gruplar ${sunum ? 'gruplar--sunum' : ''}`} data-vurgu={vurgulanan.length > 0 || undefined}>
+    <div className={`gruplar ${sunum ? 'gruplar--sunum' : ''} ${buyuk ? 'gruplar--buyuk' : ''}`}
+      data-vurgu={vurgulanan.length > 0 || undefined}>
       {gruplar.length === 0
         ? <p className="gruplar-yok">Şu an birlikte olan kimse yok.</p>
         : (

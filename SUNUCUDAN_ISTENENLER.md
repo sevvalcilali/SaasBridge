@@ -175,8 +175,9 @@ panodaki kartların çiftleri var.
 | `a`, `b` | **Kişi kimliği** (`kisiId`), kart değil — kart değişse de aynı kişi. Kişiye atanmamış kart için `"kart:N"`; o karta sonradan kişi atanırsa kayıtları o kişiye geçer |
 | `start`, `end` | **Etkinlik saniyesi** (`/state.elapsed` ile aynı ölçek). Sürmekte olan görüşmede `end: null` |
 
-- Kayıt, çift "birlikte" olunca açılır, birlikte bitince kapanır (5 sn giriş / 15 sn çıkış
-  gecikmeleri dahil, `/state` ile aynı karar). Kart iade edilince ya da değişince açık kayıt kapanır.
+- Kayıt, çift "birlikte" olunca açılır, birlikte bitince kapanır (1 dk giriş / 15 sn çıkış
+  gecikmeleri dahil, `/state` ile aynı karar). Giriş dakikası görüşmeye sayılır: kayıt eşiğin aşıldığı ana geri
+  tarihlidir ve başladığı tikte o dakika `edges`/`min`'e eklenir (karar 05.10.2026). Kart iade edilince ya da değişince açık kayıt kapanır.
 - **Kayıtlar silinmez:** kartı iade edilen (ayrılan) kişinin kayıtları raporda kalır. Yalnız
   `POST /control reset` temizler.
 - Çift başına kayıt süreleri toplamı `/state.edges[].min` ile tutarlı olmalı (mock'ta testle kilitli;
@@ -234,7 +235,11 @@ birden çok kişiye)? Arayüz iki durumda da çalışıyor; mock `--kisi` 97'de 
   "görüşme kayıtları alınamadı" der; rapor "rapor verisi alınamadı" der. Pano, `/state` + `/events` ile
   her durumda çalışır.
 
-## 9. "Yalnız kaldı" için istenen alan (C turu, 02.10.2026)
+## 9. "Yalnız kaldı" için istenen alan (C turu, 02.10.2026) — ✅ geldi
+
+> **Durum (06.10.2026):** Gerçek sunucu gönderiyor (`yakinlik/cekirdek/durum.py`); mock da aynı kuralla gönderiyor.
+> Herkes için sayılır: kişi birlikteyken ya da görünmezken (`seenAgo` ≥ 30) `0`, 0,1 sn'ye yuvarlı. Kullanan yerler:
+> Pano kişi satırı ("boşta · 4 dk'dır") ve canlı gruplardaki "yalnız · X dk" etiketi. Aşağıdaki metin isteğin aslıdır.
 
 Pano'da **"Yalnız kaldı"** filtresi var: şu an boşta olan yatırımcılar. "Ne kadardır yalnız" bilgisi `/state`'te
 yok; sunucu `idle_investor` bildirimini 6 dk'da üretiyor ama süreyi vermiyor. İstek (isteğe bağlı, küçük):
@@ -245,3 +250,35 @@ yok; sunucu `idle_investor` bildirimini 6 dk'da üretiyor ama süreyi vermiyor. 
 
 Gelince satırdaki durum cümlesi "boşta · 4 dk'dır" olur ve "Yalnız kaldı" filtresi süreyle sıralanabilir.
 Arayüz bu alanı istemci tarafında saymıyor: sayfa yenilenince sıfırlanır ve yanıltır.
+
+## 10. Uyarı kuralları (06.10.2026) — ✅ gerçek sunucu ve mock
+
+Organizatör her etkinlik için kural kurar (Kart Ver → **Uyarılar**): *"[kim] ile [kiminle] [yan yana gelince | N
+dakikadan uzun birlikte kalınca]"*. Koşul sağlanınca bildirim akışına bir **kural uyarısı** düşer, Pano onu ekranın
+üstünde açılır pencere olarak gösterir (Sunum ekranında gösterilmez). Kurallar sunucuda saklanır, etkinliğe özeldir;
+"Sıfırla"da kalır.
+
+### `GET /api/rules` → `Kural[]`
+
+```json
+{ "kuralId": "r1", "ad": "★4+ yatırımcılar ile girişimciler · 5 dk",
+  "kim": { "rol": "investor", "enAzYildiz": 4 }, "kiminle": { "rol": "founder", "enAzYildiz": 0 },
+  "dakika": 5, "acik": true }
+```
+
+| Alan | Anlamı |
+|---|---|
+| `kim`, `kiminle` | `{ "kisiler": ["k3", "k7"] }` (belirli kişiler) ya da `{ "rol": investor\|founder\|guest\|herkes, "enAzYildiz": 0–5 }`. Çift iki yönden biriyle uyarsa yeter. Kimseye atanmamış kart hiçbir kurala uymaz |
+| `dakika` | `0` = yan yana gelince (sistem bir çifti 1 dk yakınlıkla "birlikte" sayar); `N` = N dakikadan uzun birlikte (0–600) |
+| `ad` | Boş gönderilirse kuraldan üretilir (ör. "Ayşe Demir ile Nova Robotik · yan yana"); en çok 80 karakter |
+| `acik` | Kapalı kural uyarmaz |
+
+### `POST /api/rules` → `Kural` · `PATCH /api/rules/{kuralId}` (yalnız gönderilen alanlar) → `Kural` · `DELETE` → `{ok: true}`
+- Geçersiz kural: 400 `{ok: false, hata}` — hata metni kullanıcıya gösterilir (ör. `"kim: en az bir kişi seçin"`,
+  `"kim: bilinmeyen kişi k99"`, `"dakika 0–600 olmalı"`). Olmayan kural: 404.
+- Kimlik sıra no'yla (`r1`, `r2` …); silinen kuralın kimliği yeniden kullanılmaz.
+
+### Kural uyarısı (`/state.alerts[]`)
+- `kind: "kural"`, `severity: "kural"`, `title` = kuralın adı, `detail` = "X ile Y 5 dakikadır birlikte." ya da "X ile Y
+  yan yana geldi.", `people` = iki kartın numarası, ek alan **`kural`** = tetikleyen `kuralId` (diğer bildirimlerde `""`).
+- Bir kural bir çiftin bir görüşmesinde **bir kez** uyarır; görüşme bitip yeniden başlarsa tekrar uyarabilir.
