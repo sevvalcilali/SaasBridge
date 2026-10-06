@@ -105,17 +105,17 @@ button.figur:hover, .figur--secili { border-color: var(--vurgu); background: var
 .gruplar--buyuk .grup-etiket, .gruplar--buyuk .sure-anahtari { font-size: var(--punto-orta); }
 
 /* Sakin hareket (Şevval isteği 2026-10-06): figürler ayaklarının üstünde hafifçe salınır (her biri farklı anda),
-   konuşan el sallanır, yeni grup yumuşakça belirir. Yavaş ve küçük: göz yormaz, veriyi okumayı bozmaz. */
-.siluet { transform-origin: 50% 96%; animation: siluet-salin 5.5s ease-in-out infinite; animation-delay: var(--gecikme, 0s); }
+   yeni grup yumuşakça belirir. Yalnız tüm figürün dönmesi: ekran kartı yapar (will-change), tarayıcı her karede
+   yeniden çizmez. SVG'nin içindeki parçayı oynatmak (eski el sallama) her karede stil + çizim istiyordu (ölçüm:
+   ana iş parçacığı %2 → %5,8, ekran çizimi ayrıca); bu yüzden kaldırıldı. */
+.siluet { transform-origin: 50% 96%; will-change: transform; animation: siluet-salin 5.5s ease-in-out infinite; animation-delay: var(--gecikme, 0s); }
 @keyframes siluet-salin { 0%, 100% { transform: rotate(-1.4deg); } 50% { transform: rotate(1.4deg); } }
-.siluet-el { transform-box: view-box; transform-origin: 42px 37px; animation: siluet-el 2.6s ease-in-out infinite; animation-delay: var(--gecikme, 0s); }
-@keyframes siluet-el { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-12deg); } }
 .grup:not(.grup--bos) { animation: grup-gir 0.7s ease-out both; }
 @keyframes grup-gir { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   .grup, .siluet { transition: none; }
-  .siluet, .siluet-el, .grup:not(.grup--bos) { animation: none; }
+  .siluet, .grup:not(.grup--bos) { animation: none; }
 }
 
 /* Konum notu (daireler ve ego görünümü ortak): yerler salondaki yeri göstermez. */

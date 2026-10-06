@@ -5,7 +5,7 @@
 const GOVDE = 'M17 36 Q30 27 43 36 L46 63 Q30 67 14 63 Z'
 const BACAKLAR = 'M23 64 L22 95 M37 64 L38 95 M22 95 L16.5 96.5 M38 95 L43.5 96.5'
 const TARAMA = 'M20 42 L26 38 M19 49 L32 41 M18 56 L38 44 M19 62 L42 50 M28 64 L44 56'
-// [sol kol, sağ kol]. Duruş 1'de sağ el kalkık: ayrı parça, konuşurken hafifçe sallanır (CSS siluet-el).
+// [sol kol, sağ kol]. Duruş 1'de sağ el kalkık (konuşuyor).
 const KOLLAR = [
   ['M18 37 Q12 49 14 61', 'M42 37 Q48 49 46 61'],
   ['M18 37 Q12 49 14 61', 'M42 37 Q53 40 55 28'],
@@ -19,7 +19,7 @@ function Cizim({ poz }) {
       <ellipse cx="30" cy="15" rx="8.6" ry="9.4" />
       <path d={GOVDE} />
       <path d={sol} />
-      <path d={sag} className={poz === 1 ? 'siluet-el' : undefined} />
+      <path d={sag} />
       <path d={BACAKLAR} />
       {poz === 2 && <path d="M10.5 48.5 L17.5 48.5 L16.5 56 L11.5 56 Z" />}
     </>
