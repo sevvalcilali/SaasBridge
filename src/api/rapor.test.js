@@ -1,7 +1,8 @@
 // Rapor: kişi/çift toplamları, girişimci → yatırımcı, en uzunlar, ayrılanlar, saat.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi, kisiRaporu, ilgiEslesir } from './rapor.js'
+import { raporHesapla, kisiOturumlari, oturumSuresiSn, etkinlikSaati, raporAdi, kisaAd, kisiDurumYazisi, cizelgeAraligi, cizelgeYuzde, yatirimciMatrisi, kisiRaporu, ilgiEslesir,
+  gunIciYogunluk, gucluEslesmeler, onerilenTanistirmalar, takipListesi } from './rapor.js'
 
 const K = [
   { kisiId: 'k1', ad: 'Ayşe Demir', rol: 'investor', kurum: 'Atlas', atananKart: '10', ayrildi: false },
@@ -26,7 +27,7 @@ test('oturumSuresiSn: sürmekte olan şimdiye kadar', () => {
 
 test('raporHesapla: özet; ayrılan kişi raporda; hiç görüşmeyen de listede', () => {
   const r = raporHesapla(K, O, SIMDI)
-  assert.deepEqual(r.ozet, { gorusme: 5, suren: 1, karmaSn: 1000, ulasan: 2, girisimci: 3, kisi: 5, ayrilan: 1 })
+  assert.deepEqual(r.ozet, { gorusme: 5, suren: 1, karmaSn: 1000, ulasan: 2, girisimci: 3, yatirimci: 1, misafir: 1, kisi: 5, ayrilan: 1, ortalamaSn: 218 })
   const cem = r.kisiSatirlari.find((x) => x.kisi.kisiId === 'k2')
   assert.equal(cem.toplamSn, 400, 'ayrılan kişinin süresi silinmez')
   assert.equal(cem.gorusmeSayisi, 2); assert.equal(cem.kisiSayisi, 1); assert.equal(cem.karsiRolSayisi, 1)
@@ -134,4 +135,65 @@ test('kisiRaporu kaçırılanlar: yatırımcının ilgi alanındaki girişimler 
   const r = kisiRaporu('k1', kisiler, O, SIMDI, {})
   assert.deepEqual(r.kacirilan.map((k) => k.kisiId), ['k8', 'k7'], 'ad sırası Ağaç < Zirve olsa da ilgi alanındaki önde')
   assert.deepEqual([...r.ilgiAlaninda], ['k8'])
+})
+
+test('raporHesapla yatırımcılar: görüştüğü girişimciler süreye göre; hiç görüşmeyen en altta', () => {
+  const kisiler = [...K, { kisiId: 'k6', ad: 'Fuat Ak', rol: 'investor', kurum: 'Fon', atananKart: '15', ayrildi: false }]
+  const r = raporHesapla(kisiler, O, SIMDI)
+  assert.deepEqual(r.yatirimcilar.map((y) => [y.kisi.kisiId, y.girisimciler.map((g) => [g.kisi.kisiId, g.toplamSn]), y.girisimciSn]),
+    [['k1', [['k3', 600], ['k2', 400]], 1000], ['k6', [], 0]])
+})
+
+test('gunIciYogunluk: dilim başına süren görüşme sayısı; en yoğun dilim; boşta boş', () => {
+  const y = gunIciYogunluk(O, SIMDI)
+  assert.equal(y.dilimSn, 300, '25 dk aralık → 5 dk dilim')
+  assert.deepEqual(y.dilimler.map((d) => [d.bas, d.son, d.adet]),
+    [[100, 400, 3], [400, 700, 0], [700, 1000, 1], [1000, 1300, 1], [1300, 1600, 1]])
+  assert.deepEqual(y.enYogun, { bas: 100, son: 400, adet: 3 })
+  assert.deepEqual(gunIciYogunluk([], 50), { dilimSn: 300, dilimler: [], enYogun: null })
+})
+
+test('gunIciYogunluk: dilimler saatin katlarına hizalanır; uzun etkinlikte dilim büyür', () => {
+  const y = gunIciYogunluk(O, SIMDI, { saat: '10:00:10', elapsed: SIMDI })
+  assert.equal(y.dilimler[0].bas, 90, 'etkinlik 0. sn = 09:33:30 → ilk görüşme (100) 09:35:10; dilim 09:35:00 başlar')
+  assert.ok(y.dilimler.at(-1).son >= SIMDI)
+  assert.equal(gunIciYogunluk([{ a: 'k1', b: 'k2', start: 0, end: 4 * 3600 }], 4 * 3600).dilimSn, 900)
+  assert.equal(gunIciYogunluk([{ a: 'k1', b: 'k2', start: 0, end: 8 * 3600 }], 8 * 3600).dilimSn, 1800)
+})
+
+test('gucluEslesmeler: yalnız yatırımcı–girişimci çiftleri, toplam süreye göre; anlaşma işareti', () => {
+  const r = raporHesapla(K, O, SIMDI)
+  const e = gucluEslesmeler(r, [{ kind: 'deal', kisiler: ['k3', 'k1'] }])
+  assert.deepEqual(e.map((x) => [x.yatirimci.kisiId, x.girisimci.kisiId, x.toplamSn, x.adet, x.anlasma]),
+    [['k1', 'k3', 600, 1, true], ['k1', 'k2', 400, 2, false]])
+  assert.equal(gucluEslesmeler(r, [], 1).length, 1)
+})
+
+test('onerilenTanistirmalar: ilgi alanı tutan ama hiç yan yana gelmemiş, ikisi de gelmiş çiftler', () => {
+  const kisiler = [
+    { ...K[0], sektor: 'Sağlık, Enerji', yildiz: 3 },
+    { ...K[1], sektor: 'Enerji' }, // görüştü
+    { ...K[2], sektor: 'Sağlık' }, // görüştü
+    K[3],
+    { ...K[4], sektor: 'Sağlık' }, // kart almadı: gelmedi
+    { kisiId: 'k8', ad: 'Ali Su', rol: 'founder', kurum: 'Zirve', sektor: 'Sağlık', atananKart: '21', ayrildi: false },
+    { kisiId: 'k9', ad: 'Can Er', rol: 'founder', kurum: 'Bulut', sektor: 'Fintek', atananKart: '22', ayrildi: false },
+  ]
+  assert.deepEqual(onerilenTanistirmalar(kisiler, O).map((x) => [x.yatirimci.kisiId, x.girisimci.kisiId, x.sektor]),
+    [['k1', 'k8', 'Sağlık']])
+})
+
+test('takipListesi: gelmiş ama karşı rolle hiç görüşmemiş girişimci ve yatırımcılar', () => {
+  const kisiler = [...K,
+    { kisiId: 'k6', ad: 'Fuat Ak', rol: 'investor', kurum: 'Fon', atananKart: '15', ayrildi: false },
+    { kisiId: 'k7', ad: 'Gül Ay', rol: 'founder', kurum: 'Mavi', atananKart: '20', ayrildi: false }]
+  const t = takipListesi(raporHesapla(kisiler, O, SIMDI))
+  assert.deepEqual(t.girisimciler.map((k) => k.kisiId), ['k7'], 'k5 kart almadı (gelmedi): listede yok')
+  assert.deepEqual(t.yatirimcilar.map((k) => k.kisiId), ['k6'])
+})
+
+test('gunIciYogunluk: tam şimdi başlayan (sıfır süreli) görüşme de sayılır', () => {
+  const y = gunIciYogunluk([{ a: 'k1', b: 'k2', start: 500, end: null }], 500)
+  assert.equal(y.dilimler.reduce((t, d) => t + d.adet, 0), 1)
+  assert.equal(y.enYogun.adet, 1)
 })
